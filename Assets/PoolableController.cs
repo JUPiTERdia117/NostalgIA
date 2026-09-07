@@ -147,7 +147,13 @@ public class PoolableController : MonoBehaviour
     /// </summary>
     void FinishAbsorption()
     {
+		
         transform.localScale = originalScale;
+		
+		if((pooller.currentCapacity) == 0 ){
+			ResetPull();
+			return;
+		} 
         pooller.PoolObject(gameObject);
     }
 

@@ -33,6 +33,11 @@ public class ObjectVacum : MonoBehaviour
     [SerializeField, Min(0f)] private float launchSpin = 2f;
     [Tooltip("Límite del giro inicial en radianes por segundo. Evita que los objetos pequeños giren demasiado rápido.")]
     [SerializeField, Min(0f)] private float maxLaunchSpin = 5f;
+	
+	[Tooltip("Cantidad de objetos que puede almacenar la aspiradora.")]	
+	[SerializeField, Min(0f)] private int objectCapacity = 1;
+	public int currentCapacity { get { return (objectCapacity - objectsToPool.Count) ; } }
+
     // Caja alineada con el mundo de cada objeto guardado: centro relativo a su posición y tamaño completo. Se captura antes de desactivarlo.
     private readonly Dictionary<GameObject, Bounds> storedBounds = new Dictionary<GameObject, Bounds>();
 
@@ -81,7 +86,8 @@ public class ObjectVacum : MonoBehaviour
 
         {
             Debug.DrawRay(transform.position, transform.TransformDirection(Vector3.forward) * hit.distance, Color.yellow);
-            Debug.Log("Did Hit");
+            //Debug.Log("Did Hit");
+			Debug.Log("ObjectsToPool Quantity: " + objectsToPool.Count);
             PoolableController poolable = hit.collider.GetComponentInParent<PoolableController>();
             if (poolable != null)
             {
@@ -91,7 +97,7 @@ public class ObjectVacum : MonoBehaviour
         else
         {
             Debug.DrawRay(transform.position, transform.TransformDirection(Vector3.forward) * 1000, Color.white);
-            Debug.Log("Did not Hit");
+            //Debug.Log("Did not Hit");
         }
 
     }
@@ -102,7 +108,7 @@ public class ObjectVacum : MonoBehaviour
     public void PoolObject(GameObject obj)
     {
         if (storedBounds.ContainsKey(obj)) return;
-
+		
         // Sincroniza los cambios de escala antes de consultar los colliders todavía activos.
         Physics.SyncTransforms();
         Bounds bounds = new Bounds(obj.transform.position, Vector3.zero);
