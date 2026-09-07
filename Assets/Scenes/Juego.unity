@@ -4384,6 +4384,7 @@ MonoBehaviour:
     m_Bits: 4294967295
   launchSpin: 2
   maxLaunchSpin: 5
+  objectCapacity: 5
 --- !u!135 &1360524633
 SphereCollider:
   m_ObjectHideFlags: 0
