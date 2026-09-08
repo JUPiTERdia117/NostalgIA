@@ -10,6 +10,8 @@ public class GrapleController : MonoBehaviour
     [SerializeField, Min(0f)] private float arrivalRadius = 1.5f;
     [Tooltip("Tiempo máximo de tracción en segundos por enganche. Al agotarse, suelta el gancho conservando el impulso.")]
     [SerializeField, Min(0.1f)] private float maxPullDuration = 3f;
+    [Tooltip("Distancia que puedes rebasar el ancla en la dirección inicial del enganche antes de soltarlo, aunque pases por un lado.")]
+    [SerializeField, Min(0.1f)] private float overshootDistance = 2f;
     [Tooltip("Gravedad durante el enganche. Cero usa el 35% de la gravedad del jugador.")]
     [SerializeField, Min(0f)] private float gravity;
     [SerializeField] private EasyPeasyFirstPersonController.FirstPersonController firstPersonController;
@@ -19,6 +21,8 @@ public class GrapleController : MonoBehaviour
     [Tooltip("Límite de velocidad hacia el ancla; conserva la velocidad lateral y el exceso de impulso previo.")]
     [SerializeField, Min(1f)] private float pullSpeed = 24f;
     [SerializeField, Min(0f)] private float airControl = 8f;
+    [Tooltip("Fracción de velocidad conservada al soltar el gancho. 0.85 conserva el 85%; se aplica una sola vez por enganche.")]
+    [SerializeField, Range(0f, 1f)] private float releaseMomentumRetention = 0.85f;
     [SerializeField, Min(0f)] private float launchLift = 4f;
     [SerializeField, Min(0.01f)] private float pullRampTime = 0.2f;
 
@@ -26,11 +30,13 @@ public class GrapleController : MonoBehaviour
     private ToolRayVisual rayVisual;
     private Collider anchorCollider;
     private Vector3 localAnchor;
+    private Vector3 approachDirection;
     private float elapsed;
     public bool IsGrappling { get; private set; }
     public Vector3 AnchorPoint => anchorCollider != null
         ? anchorCollider.transform.TransformPoint(localAnchor) : Vector3.zero;
     public float AirControl => airControl;
+    public float ReleaseMomentumRetention => Mathf.Clamp01(releaseMomentumRetention);
     private Vector3 PlayerCenter => firstPersonController.transform.TransformPoint(
         firstPersonController.characterController.center);
     private float ArrivalDistance => Mathf.Max(arrivalRadius,
@@ -71,6 +77,7 @@ public class GrapleController : MonoBehaviour
 
         anchorCollider = nearest.collider;
         localAnchor = anchorCollider.transform.InverseTransformPoint(nearest.point);
+        approachDirection = (nearest.point - PlayerCenter).normalized;
         elapsed = 0f;
         IsGrappling = true;
         firstPersonController.BeginGrappleMotion(this, launchLift);
@@ -104,7 +111,16 @@ public class GrapleController : MonoBehaviour
         Vector3 travel = PlayerCenter - previousCenter;
         float t = travel.sqrMagnitude > 0.000001f
             ? Mathf.Clamp01(Vector3.Dot(AnchorPoint - previousCenter, travel) / travel.sqrMagnitude) : 0f;
-        if (Vector3.Distance(previousCenter + travel * t, AnchorPoint) <= ArrivalDistance) Release();
+        if (Vector3.Distance(previousCenter + travel * t, AnchorPoint) <= ArrivalDistance)
+        {
+            Release();
+            return;
+        }
+
+        // Mide cuánto se rebasó el destino, incluso pasando fuera del radio de llegada.
+        // Alejarse al inicio por la inercia previa no cuenta como haberlo sobrepasado.
+        float distancePastAnchor = Vector3.Dot(PlayerCenter - AnchorPoint, approachDirection);
+        if (distancePastAnchor >= Mathf.Max(0.1f, overshootDistance)) Release();
     }
 
     public void Release()

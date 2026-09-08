@@ -10,6 +10,8 @@ namespace EasyPeasyFirstPersonController
         private bool movingGrapple;
         private float grappleAirControl;
         private float grappleBlockedTime;
+        private float grappleMomentumRetention;
+        private bool releaseMomentumPending;
 
         public void BeginGrappleMotion(GrapleController grapple, float lift)
         {
@@ -25,6 +27,8 @@ namespace EasyPeasyFirstPersonController
             if (activeGrapple != null && activeGrapple != grapple) activeGrapple.Release();
             activeGrapple = grapple;
             grappleAirControl = grapple.AirControl;
+            grappleMomentumRetention = grapple.ReleaseMomentumRetention;
+            releaseMomentumPending = true;
             grappleBlockedTime = 0f;
             grappleFlight = true;
         }
@@ -46,11 +50,14 @@ namespace EasyPeasyFirstPersonController
             {
                 bool pulling = activeGrapple != null && activeGrapple.IsGrappling;
                 if (pulling) grappleVelocity = activeGrapple.Accelerate(grappleVelocity, dt);
+                ApplyReleaseMomentum();
                 if (activeGrapple == null || !activeGrapple.IsGrappling)
                     grappleVelocity += Vector3.down * gravity * dt;
 
+                // Ignora el retroceso durante el gancho y el vuelo posterior para evitar frenar con S.
+                float forwardInput = Mathf.Max(0f, input.moveInput.y);
                 Vector3 wish = Vector3.ClampMagnitude(
-                    transform.right * input.moveInput.x + transform.forward * input.moveInput.y, 1f);
+                    transform.right * input.moveInput.x + transform.forward * forwardInput, 1f);
                 // Sin input no hay frenado aéreo. El control no puede añadir velocidad sin límite.
                 if (wish.sqrMagnitude > 0.001f)
                 {
@@ -76,6 +83,7 @@ namespace EasyPeasyFirstPersonController
                     grappleBlockedTime += dt;
                 else grappleBlockedTime = 0f;
                 if (grappleBlockedTime > 0.25f && activeGrapple != null) activeGrapple.Release();
+                ApplyReleaseMomentum();
 
                 currentVelocity = new Vector3(grappleVelocity.x, 0f, grappleVelocity.z);
                 moveDirection.y = grappleVelocity.y;
@@ -96,9 +104,20 @@ namespace EasyPeasyFirstPersonController
             return true;
         }
 
+        private void ApplyReleaseMomentum()
+        {
+            if (!releaseMomentumPending || (activeGrapple != null && activeGrapple.IsGrappling)) return;
+            // Reduce la velocidad una sola vez al soltar, sin frenado acumulativo por frame.
+            grappleVelocity *= grappleMomentumRetention;
+            currentVelocity = new Vector3(grappleVelocity.x, 0f, grappleVelocity.z);
+            moveDirection.y = grappleVelocity.y;
+            releaseMomentumPending = false;
+        }
+
         private void FinishGrappleFlight()
         {
             if (activeGrapple != null) activeGrapple.Release();
+            ApplyReleaseMomentum();
             activeGrapple = null;
             grappleFlight = false;
             currentState.ExitState();
