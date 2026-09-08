@@ -6,8 +6,7 @@ using UnityEngine.InputSystem;
 /// </summary>
 public class PlayerController : MonoBehaviour
 {
-    [Tooltip("Valor reservado para movimiento. Actualmente no se utiliza; el movimiento lo controla FirstPersonController.")]
-    [SerializeField] private float moveSpeed = 5.0f;
+    
     [Tooltip("Aspiradora controlada con el ratón: clic izquierdo para absorber y pulsación del derecho para lanzar.")]
     [SerializeField] private ObjectVacum vacuum;
 
