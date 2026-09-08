@@ -11,6 +11,8 @@ public class ObjectVacum : MonoBehaviour
 
     // Filtro de detección de absorción; se construye a partir del nombre de capa Poolable.
     LayerMask layerMask;
+    private PlayerAim aim;
+    private ToolRayVisual rayVisual;
 
     [Tooltip("Activa la absorción mientras se mantiene el clic izquierdo. PlayerController actualiza este estado.")]
     public bool vacuumActive = false;
@@ -59,6 +61,9 @@ public class ObjectVacum : MonoBehaviour
             firstPersonController = GetComponentInParent<EasyPeasyFirstPersonController.FirstPersonController>();
         }
 
+        aim = PlayerAim.GetOrCreate(firstPersonController);
+        rayVisual = new ToolRayVisual(transform, new Color(0.1f, 0.9f, 1f, 0.85f));
+
         if (firstPersonController == null || firstPersonController.playerCamera == null) return;
 
         Transform lookCamera = firstPersonController.playerCamera;
@@ -77,30 +82,28 @@ public class ObjectVacum : MonoBehaviour
     /// </summary>
     void FixedUpdate()
     {
-
-        if (!vacuumActive) return;
-
-        RaycastHit hit;
-        // El rayo solo busca colliders de la capa Poolable; el controlador puede estar en un padre.
-        if (Physics.Raycast(transform.position, transform.TransformDirection(Vector3.forward), out hit, maxDistance, layerMask))
-
+        if (!vacuumActive || aim == null || !aim.IsReady) return;
+        if (aim.TryGetHit(maxDistance, out RaycastHit hit) &&
+            ((1 << hit.collider.gameObject.layer) & layerMask.value) != 0)
         {
-            Debug.DrawRay(transform.position, transform.TransformDirection(Vector3.forward) * hit.distance, Color.yellow);
-            //Debug.Log("Did Hit");
-			Debug.Log("ObjectsToPool Quantity: " + objectsToPool.Count);
             PoolableController poolable = hit.collider.GetComponentInParent<PoolableController>();
-            if (poolable != null)
-            {
-                poolable.pooller = this;
-            }
+            if (poolable != null) poolable.pooller = this;
         }
-        else
-        {
-            Debug.DrawRay(transform.position, transform.TransformDirection(Vector3.forward) * 1000, Color.white);
-            //Debug.Log("Did not Hit");
-        }
-
     }
+
+    void LateUpdate()
+    {
+        if (aim == null || !aim.IsReady) { rayVisual?.Hide(); return; }
+        rayVisual?.Draw(transform.position, aim.GetEndPoint(maxDistance), vacuumActive);
+    }
+
+    void OnDisable()
+    {
+        vacuumActive = false;
+        rayVisual?.Hide();
+    }
+
+    void OnDestroy() { rayVisual?.Dispose(); }
 
     /// <summary>
     /// Guarda una sola vez el objeto a tamaño completo, registra su volumen y lo desactiva.
@@ -158,7 +161,10 @@ public class ObjectVacum : MonoBehaviour
         if (!pooledObj.TryGetComponent<Rigidbody>(out var body) ||
             !storedBounds.TryGetValue(pooledObj, out Bounds bounds)) return false;
 
-        Vector3 direction = transform.forward;
+        // El proyectil converge al punto que marca la retícula desde la boquilla.
+        Vector3 direction = aim != null && aim.IsReady
+            ? (aim.GetEndPoint(maxDistance) - transform.position).normalized : transform.forward;
+        if (direction.sqrMagnitude < 0.0001f) return false;
         Vector3 extents = Vector3.Max(bounds.extents, Vector3.one * 0.01f);
         // Proyecta las semidimensiones sobre la dirección de salida para calcular la separación.
         float forwardExtent = Mathf.Abs(direction.x) * extents.x +

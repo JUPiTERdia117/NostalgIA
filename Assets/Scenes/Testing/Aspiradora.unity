@@ -6611,6 +6611,7 @@ Rigidbody:
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
+  - {fileID: 552391330}
   - {fileID: 410087041}
   - {fileID: 832575519}
   - {fileID: 374981753}
@@ -6651,4 +6652,3 @@ SceneRoots:
   - {fileID: 1665997330}
   - {fileID: 1382107024}
   - {fileID: 1789204083}
-  - {fileID: 552391330}

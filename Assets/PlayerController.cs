@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 
 /// <summary>
-/// Conecta los botones del ratón con las acciones de la aspiradora.
+/// Conecta el ratón con la aspiradora y la tecla X con el gancho.
 /// </summary>
 public class PlayerController : MonoBehaviour
 {
@@ -10,11 +10,24 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float moveSpeed = 5.0f;
     [Tooltip("Aspiradora controlada con el ratón: clic izquierdo para absorber y pulsación del derecho para lanzar.")]
     [SerializeField] private ObjectVacum vacuum;
+
+    [Tooltip("Gancho: X engancha y una segunda pulsación lo suelta conservando el impulso.")]
+    [SerializeField] private GrapleController graple;
+    void Awake()
+    {
+        if (graple == null) graple = GetComponentInChildren<GrapleController>();
+        if (vacuum == null) vacuum = GetComponentInChildren<ObjectVacum>();
+    }
     /// <summary>
-    /// Lee el ratón en cada fotograma usando el paquete Input System.
+    /// Lee el teclado y el ratón en cada fotograma usando el paquete Input System.
     /// </summary>
     void Update()
     {
+        if (Keyboard.current != null && Keyboard.current.xKey.wasPressedThisFrame)
+        {
+            if (graple != null && graple.isActiveAndEnabled) graple.Graple();
+        }
+
         if (vacuum == null) return;
 
         // El botón izquierdo mantiene la absorción activa; admite que no haya ratón conectado.
@@ -25,7 +38,6 @@ public class PlayerController : MonoBehaviour
         {
             vacuum.LaunchObject();
         }
-
     }
 
     /// <summary>
@@ -33,6 +45,7 @@ public class PlayerController : MonoBehaviour
     /// </summary>
     void OnDisable()
     {
+        if (graple != null) graple.Release();
         if (vacuum != null)
         {
             vacuum.vacuumActive = false;

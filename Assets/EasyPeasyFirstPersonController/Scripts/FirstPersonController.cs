@@ -133,7 +133,7 @@ namespace EasyPeasyFirstPersonController
 
             isGrounded = characterController.isGrounded || Physics.CheckSphere(groundCheck.position, characterController.radius * 0.9f, groundMask, QueryTriggerInteraction.Ignore);
 
-            currentState.UpdateState();
+            if (!UpdateGrappleMotion()) currentState.UpdateState();
             HandleRotation();
             UpdateVisuals();
         }
