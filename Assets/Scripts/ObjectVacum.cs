@@ -183,11 +183,12 @@ public class ObjectVacum : MonoBehaviour
             if (IsLaunchObstacle(hit.collider, playerRoot, pooledObj.transform)) return false;
         }
         // Comprueba que la caja completa del objeto quepa donde va a aparecer.
+        /*
         foreach (Collider obstacle in Physics.OverlapBox(spawnCenter, extents,
                      Quaternion.identity, launchObstacleMask, QueryTriggerInteraction.Ignore))
         {
             if (IsLaunchObstacle(obstacle, playerRoot, pooledObj.transform)) return false;
-        }
+        }*/
 
         // Coloca el pivote de modo que la caja quede centrada en spawnCenter.
         pooledObj.transform.SetParent(null, true);
