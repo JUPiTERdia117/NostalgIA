@@ -12,13 +12,24 @@ namespace EasyPeasyFirstPersonController
             get
             {
 #if ENABLE_INPUT_SYSTEM
-                if (Keyboard.current == null) return Vector2.zero;
-                Vector2 input = Vector2.zero;
+                if (Keyboard.current == null && Gamepad.current == null) return Vector2.zero;
+                    Vector2 input = Vector2.zero;
+                if (Gamepad.current != null)
+                {
+                    input = Gamepad.current.leftStick.ReadValue();
+                    return input.normalized;
+
+                    
+                } 
+                    
                 if (Keyboard.current.wKey.isPressed || Keyboard.current.upArrowKey.isPressed) input.y += 1;
                 if (Keyboard.current.sKey.isPressed || Keyboard.current.downArrowKey.isPressed) input.y -= 1;
                 if (Keyboard.current.aKey.isPressed || Keyboard.current.leftArrowKey.isPressed) input.x -= 1;
                 if (Keyboard.current.dKey.isPressed || Keyboard.current.rightArrowKey.isPressed) input.x += 1;
                 return input.normalized;
+                
+               
+                
 #else
                 return new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
 #endif
@@ -30,9 +41,17 @@ namespace EasyPeasyFirstPersonController
             get
             {
 #if ENABLE_INPUT_SYSTEM
-                if (Mouse.current == null) return Vector2.zero;
+                if (Keyboard.current == null && Gamepad.current == null) return Vector2.zero;
+                if (Gamepad.current != null)
+                {
+                    Vector2 input = Gamepad.current.rightStick.ReadValue();
+                    return input;
+
+                    
+                }
                 // Multiply by a small delta factor to match the feeling of the old Input.GetAxis
                 return Mouse.current.delta.ReadValue() * 0.05f; 
+                
 #else
                 return new Vector2(Input.GetAxis("Mouse X"), Input.GetAxis("Mouse Y"));
 #endif
