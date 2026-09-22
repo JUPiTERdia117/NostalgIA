@@ -17,6 +17,7 @@ namespace EasyPeasyFirstPersonController
                 if (Gamepad.current != null)
                 {
                     input = Gamepad.current.leftStick.ReadValue();
+                   
                     return input.normalized;
 
                     
@@ -63,6 +64,14 @@ namespace EasyPeasyFirstPersonController
             get
             {
 #if ENABLE_INPUT_SYSTEM
+
+                if (Keyboard.current == null && Gamepad.current == null) return false;
+
+                if (Gamepad.current != null && Gamepad.current.buttonSouth.isPressed)
+                {
+                    return true;
+                }
+
                 return Keyboard.current != null && Keyboard.current.spaceKey.isPressed;
 #else
                 return Input.GetKey(KeyCode.Space);
@@ -75,6 +84,19 @@ namespace EasyPeasyFirstPersonController
             get
             {
 #if ENABLE_INPUT_SYSTEM
+                if (Keyboard.current == null && Gamepad.current == null) return false;
+                if (Gamepad.current != null)
+                {
+                    Vector2 input = Gamepad.current.leftStick.ReadValue();
+                    if(input.normalized.y >= 0.9f)
+                    {
+                        
+                        return true;
+                    }
+                    
+
+                    
+                } 
                 return Keyboard.current != null && Keyboard.current.leftShiftKey.isPressed;
 #else
                 return Input.GetKey(KeyCode.LeftShift);
@@ -87,6 +109,12 @@ namespace EasyPeasyFirstPersonController
             get
             {
 #if ENABLE_INPUT_SYSTEM
+                if (Keyboard.current == null && Gamepad.current == null) return false;
+
+                if(Gamepad.current != null && Gamepad.current.buttonEast.isPressed)
+                {
+                    return true;
+                }
                 return Keyboard.current != null && (Keyboard.current.leftCtrlKey.isPressed || Keyboard.current.cKey.isPressed);
 #else
                 return Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.C);
