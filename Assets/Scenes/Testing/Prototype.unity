@@ -1194,6 +1194,7 @@ GameObject:
   - component: {fileID: 203305032}
   - component: {fileID: 203305031}
   - component: {fileID: 203305033}
+  - component: {fileID: 203305034}
   m_Layer: 5
   m_Name: ToolButtton
   m_TagString: Untagged
@@ -1267,28 +1268,41 @@ MonoBehaviour:
   m_GameObject: {fileID: 203305028}
   m_Enabled: 1
   m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6d54531977ecb194c95e2d3aa7a5d72a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.InputSystem::UnityEngine.InputSystem.OnScreen.OnScreenButton
+  m_ControlPath: <Gamepad>/buttonWest
+--- !u!114 &203305034
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 203305028}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e9d677f1681015749b15c436eec6d880, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.InputSystem::UnityEngine.InputSystem.OnScreen.OnScreenStick
-  m_MovementRange: 1
+  m_MovementRange: 10
   m_DynamicOriginRange: 100
   m_ControlPath: <Gamepad>/rightStick
   m_Behaviour: 0
-  m_UseIsolatedInputActions: 1
+  m_UseIsolatedInputActions: 0
   m_PointerDownAction:
-    m_Name: Pointer Down
+    m_Name: 
     m_Type: 0
-    m_ExpectedControlType: Button
-    m_Id: 069af8b1-d32a-4fdf-b587-69628a86d32c
+    m_ExpectedControlType: 
+    m_Id: e2fabfac-f733-4dc3-826d-c84edd344bb4
     m_Processors: 
     m_Interactions: 
     m_SingletonActionBindings: []
     m_Flags: 0
   m_PointerMoveAction:
-    m_Name: Pointer Move
+    m_Name: 
     m_Type: 0
     m_ExpectedControlType: 
-    m_Id: c2978d8b-b724-4e9c-8010-90b6744005fd
+    m_Id: 11bad37a-130c-4ad7-870a-5187f779f5a8
     m_Processors: 
     m_Interactions: 
     m_SingletonActionBindings: []
@@ -2381,6 +2395,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerController
   vacuum: {fileID: 1048108837}
   graple: {fileID: 1048108841}
+  selectedTool: 0
+  vacuumHoldTime: 0.2
+  toolStick: {fileID: 203305034}
 --- !u!114 &560267829
 MonoBehaviour:
   m_ObjectHideFlags: 0

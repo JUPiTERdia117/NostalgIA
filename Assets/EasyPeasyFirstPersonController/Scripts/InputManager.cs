@@ -5,7 +5,7 @@ namespace EasyPeasyFirstPersonController
     using UnityEngine.InputSystem;
 #endif
 
-    public class InputManager : MonoBehaviour, IInputManager
+    public class InputManager : MonoBehaviour, IInputManager, IAnalogLookInputManager
     {
         public Vector2 moveInput
         {
@@ -37,22 +37,33 @@ namespace EasyPeasyFirstPersonController
             }
         }
 
+        public bool UsesAnalogLook
+        {
+            get
+            {
+#if ENABLE_INPUT_SYSTEM
+                return Gamepad.current != null;
+#else
+                return false;
+#endif
+            }
+        }
+
         public Vector2 lookInput
         {
             get
             {
 #if ENABLE_INPUT_SYSTEM
-                if (Keyboard.current == null && Gamepad.current == null) return Vector2.zero;
                 if (Gamepad.current != null)
                 {
                     Vector2 input = Gamepad.current.rightStick.ReadValue();
                     
-                    return input.normalized*0.05f;
+                    return Vector2.ClampMagnitude(input, 1f);
 
                     
                 }
                 // Multiply by a small delta factor to match the feeling of the old Input.GetAxis
-                return Mouse.current.delta.ReadValue() * 0.05f; 
+                return Mouse.current != null ? Mouse.current.delta.ReadValue() * 0.05f : Vector2.zero;
                 
 #else
                 return new Vector2(Input.GetAxis("Mouse X"), Input.GetAxis("Mouse Y"));

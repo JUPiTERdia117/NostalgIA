@@ -174,6 +174,12 @@ MonoBehaviour:
   slideDuration: 0.7
   slideSpeed: 6
   mouseSensitivity: 2
+  useLookAcceleration: 1
+  lookSpeedX: 2.5
+  lookSpeedY: 2.5
+  lookAccelerationX: 3
+  lookAccelerationY: 3
+  lookDeadZone: 0.1
   strafeTiltAmount: 1.5
   playerCamera: {fileID: 9156347143994207885}
   cameraParent: {fileID: 9156347144824098802}

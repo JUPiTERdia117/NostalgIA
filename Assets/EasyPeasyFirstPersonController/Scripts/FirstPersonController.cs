@@ -16,6 +16,18 @@ namespace EasyPeasyFirstPersonController
         public float lookSensitivityY = 2f;
         public float strafeTiltAmount = 2f;
 
+        [Header("Analog Look (Mobile / Gamepad)")]
+        public bool useLookAcceleration = true;
+        [Tooltip("Maximum horizontal and vertical speed in degrees/second, multiplied by look sensitivity.")]
+        [Min(0f)] public float lookSpeedX = 2.5f;
+        [Min(0f)] public float lookSpeedY = 2.5f;
+        [Tooltip("Ramp rate relative to maximum speed, per second. 3 reaches full speed in about 0.33 seconds, even with low sensitivity.")]
+        [Min(0.01f)] public float lookAccelerationX = 3f;
+        [Min(0.01f)] public float lookAccelerationY = 3f;
+        [Tooltip("Per-axis dead zone. Release stops rotation immediately.")]
+        [Range(0f, 0.95f)] public float lookDeadZone = 0.1f;
+        private Vector2 currentLookVelocity;
+
         [Header("Movement Polish")]
         public float groundAcceleration = 50f;
         public float groundDeceleration = 60f;
@@ -141,8 +153,24 @@ namespace EasyPeasyFirstPersonController
 
         private void HandleRotation()
         {
-            float mouseX = input.lookInput.x * lookSensitivityX;
-            float mouseY = input.lookInput.y * lookSensitivityY;
+            Vector2 look = input.lookInput;
+            if (input is IAnalogLookInputManager analogInput && analogInput.UsesAnalogLook)
+            {
+                float deltaTime = Time.deltaTime;
+                currentLookVelocity.x = AccelerateLookAxis(look.x, currentLookVelocity.x,
+                    lookSpeedX * lookSensitivityX, lookAccelerationX, deltaTime);
+                currentLookVelocity.y = AccelerateLookAxis(look.y, currentLookVelocity.y,
+                    lookSpeedY * lookSensitivityY, lookAccelerationY, deltaTime);
+                look = currentLookVelocity * deltaTime;
+            }
+            else
+            {
+                currentLookVelocity = Vector2.zero;
+                look = Vector2.Scale(look, new Vector2(lookSensitivityX, lookSensitivityY));
+            }
+
+            float mouseX = look.x;
+            float mouseY = look.y;
 
             transform.Rotate(Vector3.up * mouseX);
 
@@ -154,6 +182,31 @@ namespace EasyPeasyFirstPersonController
 
             currentTilt = Mathf.SmoothDamp(currentTilt, combinedTargetTilt, ref tiltVelocity, 0.1f);
             playerCamera.localRotation = Quaternion.Euler(xRotation, 0, currentTilt);
+        }
+
+        private float AccelerateLookAxis(float value, float velocity, float speed,
+            float acceleration, float deltaTime)
+        {
+            if (deltaTime <= 0f) return 0f;
+            float deadZone = Mathf.Clamp(lookDeadZone, 0f, 0.95f);
+            float magnitude = Mathf.Abs(value);
+            if (magnitude <= deadZone) return 0f;
+
+            float target = Mathf.Sign(value) * Mathf.Clamp01((magnitude - deadZone) / (1f - deadZone)) * speed;
+            if (!useLookAcceleration) return target;
+            // Reversing the stick should never keep turning in the previous direction.
+            if (velocity * target < 0f) velocity = 0f;
+            return Mathf.MoveTowards(velocity, target, Mathf.Abs(speed) * Mathf.Max(0.01f, acceleration) * deltaTime);
+        }
+
+        private void OnDisable()
+        {
+            currentLookVelocity = Vector2.zero;
+        }
+
+        private void OnApplicationFocus(bool hasFocus)
+        {
+            if (!hasFocus) currentLookVelocity = Vector2.zero;
         }
 
         public void UpdateVisuals()
