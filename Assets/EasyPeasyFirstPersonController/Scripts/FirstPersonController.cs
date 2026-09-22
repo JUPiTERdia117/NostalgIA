@@ -12,7 +12,8 @@ namespace EasyPeasyFirstPersonController
         public float gravity = 9.81f;
         public float slideDuration = 0.7f;
         public float slideSpeed = 6f;
-        public float mouseSensitivity = 2f;
+        public float lookSensitivityX = 2f;
+        public float lookSensitivityY = 2f;
         public float strafeTiltAmount = 2f;
 
         [Header("Movement Polish")]
@@ -140,8 +141,8 @@ namespace EasyPeasyFirstPersonController
 
         private void HandleRotation()
         {
-            float mouseX = input.lookInput.x * mouseSensitivity;
-            float mouseY = input.lookInput.y * mouseSensitivity;
+            float mouseX = input.lookInput.x * lookSensitivityX;
+            float mouseY = input.lookInput.y * lookSensitivityY;
 
             transform.Rotate(Vector3.up * mouseX);
 

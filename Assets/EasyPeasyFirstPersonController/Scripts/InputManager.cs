@@ -46,7 +46,8 @@ namespace EasyPeasyFirstPersonController
                 if (Gamepad.current != null)
                 {
                     Vector2 input = Gamepad.current.rightStick.ReadValue();
-                    return input;
+                    
+                    return input.normalized*0.05f;
 
                     
                 }
