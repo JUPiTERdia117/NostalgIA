@@ -16,6 +16,8 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private OnScreenStick toolStick;
 
     public Tool SelectedTool => selectedTool;
+    public bool dead = false;
+    private int health = 3;
     private bool toolHeld;
     private bool mouseVacuumHeld;
     private bool waitForToolRelease;
@@ -89,6 +91,17 @@ public class PlayerController : MonoBehaviour
         if (vacuum != null)
             vacuum.vacuumActive = selectedTool == Tool.Vacuum && vacuum.isActiveAndEnabled &&
                 (mouseVacuumHeld || (toolHeld && Time.unscaledTime - toolPressedAt >= Mathf.Max(0.05f, vacuumHoldTime)));
+    }
+
+    [ContextMenu("Take Damage")]
+    void TakeDamage(int damage)
+    {
+        health -= damage;
+        if (health <= 0)
+        {
+            dead = true;
+            // Aquí puedes agregar lógica adicional para manejar la muerte del jugador, como reiniciar el nivel o mostrar una pantalla de Game Over.
+        }
     }
 
     public void ChangeTool()
@@ -168,4 +181,6 @@ public class PlayerController : MonoBehaviour
         CancelToolInput();
         if (graple != null) graple.Release();
     }
+
+    
 }
