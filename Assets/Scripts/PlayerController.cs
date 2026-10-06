@@ -17,7 +17,8 @@ public class PlayerController : MonoBehaviour
 
     public Tool SelectedTool => selectedTool;
     public bool dead = false;
-    private int health = 3;
+    public int health = 3;
+    private GameController gameController;
     private bool toolHeld;
     private bool mouseVacuumHeld;
     private bool waitForToolRelease;
@@ -28,6 +29,7 @@ public class PlayerController : MonoBehaviour
     {
         if (graple == null) graple = GetComponentInChildren<GrapleController>(true);
         if (vacuum == null) vacuum = GetComponentInChildren<ObjectVacum>(true);
+        gameController = FindAnyObjectByType<GameController>();
     }
 
     void OnEnable() { ApplyToolSelection(); }
@@ -99,9 +101,18 @@ public class PlayerController : MonoBehaviour
         health -= damage;
         if (health <= 0)
         {
-            dead = true;
-            // Aquí puedes agregar lógica adicional para manejar la muerte del jugador, como reiniciar el nivel o mostrar una pantalla de Game Over.
+            Die();
+            
+
         }
+    }
+    
+    [ContextMenu("Kill Player")]
+    void Die()
+    {
+        dead = true;
+        health = 0;
+        gameController.RespawnPlayer();
     }
 
     public void ChangeTool()
@@ -182,5 +193,5 @@ public class PlayerController : MonoBehaviour
         if (graple != null) graple.Release();
     }
 
-    
+
 }
