@@ -3,7 +3,7 @@ using UnityEngine;
 public class RespawnController : MonoBehaviour
 {
     GameController gameController;
-
+    private bool activated;
 
 
     void Awake()
@@ -13,10 +13,14 @@ public class RespawnController : MonoBehaviour
 
     void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Player"))
+        if (!activated && other.CompareTag("Player"))
         {
-            gameController.UpdateSpawnPoint(transform.position);
-            Destroy(gameObject);
+            if (gameController == null) gameController = FindAnyObjectByType<GameController>();
+            if (gameController != null)
+            {
+                gameController.UpdateSpawnPoint(transform.position);
+                activated = true;
+            }
         }
     }
 

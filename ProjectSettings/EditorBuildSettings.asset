@@ -6,11 +6,17 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
+    path: Assets/Scenes/Level1.unity
+    guid: 1ffe2c12bfc0d4505947e333d2c928cc
+  - enabled: 0
     path: Assets/Scenes/Testing/Prototype.unity
     guid: e54a9330262f843b9906db015e9bf1de
   - enabled: 0
     path: Assets/Scenes/Testing/Aspiradora.unity
     guid: 99c9720ab356a0642a771bea13969a05
+  - enabled: 0
+    path: Assets/Scenes/Testing/Gancho.unity
+    guid: 155979e55af69489aac169b4a50f12c8
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   m_UseUCBPForAssetBundles: 0

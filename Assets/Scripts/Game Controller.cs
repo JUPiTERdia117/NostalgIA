@@ -1,5 +1,6 @@
 using UnityEngine;
 using TMPro;
+using System;
 
 public class GameController : MonoBehaviour
 {
@@ -8,17 +9,37 @@ public class GameController : MonoBehaviour
     private Vector3 spawnPoint = Vector3.zero;
 
     [SerializeField] TextMeshProUGUI scoreText;
+    public int StarsCollected => starsCollected;
+    public bool HasWon { get; private set; }
+    public event Action CheckpointReached;
+
+    void Start()
+    {
+        UpdateScoreText();
+    }
 
 
     public void CollectStar()
     {
         starsCollected++;
-        scoreText.text = "Stars Collected: " + starsCollected.ToString() + "/3";
+        UpdateScoreText();
+    }
+
+    private void UpdateScoreText()
+    {
+        if (scoreText != null)
+            scoreText.text = $"PRISMAS   {starsCollected} / 3";
+    }
+
+    public void CompleteLevel()
+    {
+        HasWon = true;
     }
 
     public void UpdateSpawnPoint(Vector3 newSpawnPoint)
     {
         spawnPoint = newSpawnPoint;
+        CheckpointReached?.Invoke();
 
     }
 
