@@ -96,23 +96,29 @@ public class PlayerController : MonoBehaviour
     }
 
     [ContextMenu("Take Damage")]
-    void TakeDamage(int damage)
+    public void TakeDamage(int damage)
     {
         health -= damage;
         if (health <= 0)
         {
             Die();
-            
-
         }
     }
     
     [ContextMenu("Kill Player")]
-    void Die()
+    public void Die()
     {
         dead = true;
         health = 0;
-        gameController.RespawnPlayer();
+        if (gameController != null)
+        {
+            gameController.RespawnPlayer();
+        }
+        else
+        {
+            gameController = FindAnyObjectByType<GameController>();
+            if (gameController != null) gameController.RespawnPlayer();
+        }
     }
 
     public void ChangeTool()

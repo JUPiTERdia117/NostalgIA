@@ -9,19 +9,33 @@ public class GameController : MonoBehaviour
 
     [SerializeField] TextMeshProUGUI scoreText;
 
+    public int StarsCollected => starsCollected;
+
+    void Start()
+    {
+        if (spawnPoint == Vector3.zero)
+        {
+            GameObject player = GameObject.FindGameObjectWithTag("Player");
+            if (player != null)
+            {
+                spawnPoint = player.transform.position;
+            }
+        }
+    }
 
     public void CollectStar()
     {
         starsCollected++;
-        scoreText.text = "Stars Collected: " + starsCollected.ToString() + "/3";
+        if (scoreText != null)
+        {
+            scoreText.text = "Stars Collected: " + starsCollected.ToString() + "/3";
+        }
     }
 
     public void UpdateSpawnPoint(Vector3 newSpawnPoint)
     {
         spawnPoint = newSpawnPoint;
-
     }
-
 
     [ContextMenu("Respawn Player")]
     public void RespawnPlayer()
@@ -38,5 +52,4 @@ public class GameController : MonoBehaviour
             }
         }
     }
-
 }
