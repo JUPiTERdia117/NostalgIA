@@ -7645,11 +7645,11 @@ SphereCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 1
+  m_IsTrigger: 0
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Radius: 0.9
+  m_Radius: 0.8
   m_Center: {x: 0, y: 1, z: 0}
 --- !u!23 &2000000318
 MeshRenderer:
@@ -7663,7 +7663,7 @@ MeshRenderer:
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
   m_Materials:
-  - {fileID: 2100000, guid: 3bb25e6e048764f80974203ab8f0bcc0, type: 2}
+  - {fileID: 2100000, guid: 8efcc32dc367c4b46b10ab575e2efa49, type: 2}
 --- !u!33 &2000000319
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -7690,12 +7690,12 @@ MonoBehaviour:
   moveSpeed: 3.8
   rotationSpeed: 8
   gravity: 15
-  attackRange: 2
+  attackRange: 1.8
   attackCooldown: 1.2
   attackDamage: 1
-  minImpactVelocity: 2.5
+  minImpactVelocity: 3
   enemyRenderer: {fileID: 2000000318}
-  damageFlashColor: {r: 1, g: 1, b: 1, a: 1}
+  damageFlashColor: {r: 1, g: 0.1, b: 0.1, a: 1}
 --- !u!1 &2000000321
 GameObject:
   m_ObjectHideFlags: 0
