@@ -1,0 +1,13 @@
+# Material Library for Prop_AncientBrazier
+newmtl Mat_SanctuaryStone
+Ka 0.2 0.2 0.2
+Kd 0.8 0.8 0.8
+Ks 0.5 0.5 0.5
+Ns 32.0
+
+newmtl Mat_HazardGlow
+Ka 0.2 0.2 0.2
+Kd 0.8 0.8 0.8
+Ks 0.5 0.5 0.5
+Ns 32.0
+
