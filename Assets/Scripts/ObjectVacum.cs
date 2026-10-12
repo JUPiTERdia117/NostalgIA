@@ -191,12 +191,10 @@ public class ObjectVacum : MonoBehaviour
         }*/
 
         // Coloca el pivote de modo que la caja quede centrada en spawnCenter.
-        pooledObj.tag = "Projectile";
         pooledObj.transform.SetParent(null, true);
         pooledObj.transform.position = spawnCenter - bounds.center;
         pooledObj.SetActive(true);
         body.isKinematic = false;
-
         // Parte del reposo y aplica el mismo impulso: el cambio de velocidad es impulso / masa.
         body.linearVelocity = Vector3.zero;
         body.AddForce(direction * Mathf.Max(0f, launchImpulse), ForceMode.Impulse);
