@@ -9,19 +9,28 @@ public class GameController : MonoBehaviour
 
     [SerializeField] TextMeshProUGUI scoreText;
 
+    void Start()
+    {
+        GameObject player = GameObject.FindGameObjectWithTag("Player");
+        if (player != null)
+        {
+            spawnPoint = player.transform.position;
+        }
+    }
 
     public void CollectStar()
     {
         starsCollected++;
-        scoreText.text = "Stars Collected: " + starsCollected.ToString() + "/3";
+        if (scoreText != null)
+        {
+            scoreText.text = "Stars Collected: " + starsCollected.ToString() + "/3";
+        }
     }
 
     public void UpdateSpawnPoint(Vector3 newSpawnPoint)
     {
         spawnPoint = newSpawnPoint;
-
     }
-
 
     [ContextMenu("Respawn Player")]
     public void RespawnPlayer()
@@ -31,7 +40,7 @@ public class GameController : MonoBehaviour
         {
             CharacterController cc = player.GetComponent<CharacterController>();
             if (cc != null) cc.enabled = false;
-            player.transform.position = spawnPoint;
+            player.transform.position = spawnPoint + Vector3.up * 0.1f;
             if (cc != null) cc.enabled = true;
 
             PlayerController playerController = player.GetComponent<PlayerController>();
@@ -42,5 +51,4 @@ public class GameController : MonoBehaviour
             }
         }
     }
-
 }
