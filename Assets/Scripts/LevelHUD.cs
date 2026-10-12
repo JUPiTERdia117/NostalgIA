@@ -13,22 +13,11 @@ public class LevelHUD : MonoBehaviour
     private TextMeshProUGUI checkpointBannerText;
     private float checkpointBannerTimer = 0f;
     private int lastHealth = -1;
-    private System.Collections.Generic.List<GameObject> activeCheckpoints = new System.Collections.Generic.List<GameObject>();
 
     void Start()
     {
         CreateHUDCanvas();
         FindPlayer();
-        InitializeCheckpoints();
-    }
-
-    private void InitializeCheckpoints()
-    {
-        RespawnController[] rcs = FindObjectsByType<RespawnController>(FindObjectsSortMode.None);
-        foreach (var rc in rcs)
-        {
-            if (rc != null) activeCheckpoints.Add(rc.gameObject);
-        }
     }
 
     void Update()
@@ -43,15 +32,6 @@ public class LevelHUD : MonoBehaviour
         {
             lastHealth = player.health;
             UpdateHealthDisplay();
-        }
-
-        for (int i = activeCheckpoints.Count - 1; i >= 0; i--)
-        {
-            if (activeCheckpoints[i] == null)
-            {
-                activeCheckpoints.RemoveAt(i);
-                ShowCheckpointNotification();
-            }
         }
 
         if (checkpointBannerTimer > 0f)
@@ -79,13 +59,13 @@ public class LevelHUD : MonoBehaviour
     {
         if (healthText == null || player == null) return;
 
-        string pips = "";
+        string hearts = "";
         for (int i = 0; i < 3; i++)
         {
-            pips += (i < player.health) ? "<color=#FF3344>[+]</color> " : "<color=#555555>[ ]</color> ";
+            hearts += (i < player.health) ? "<color=#FF3366>♥ </color>" : "<color=#555555>♡ </color>";
         }
 
-        healthText.text = $"VIDA: {player.health}/3  {pips}";
+        healthText.text = "SALUD: " + hearts;
     }
 
     public void ShowCheckpointNotification()

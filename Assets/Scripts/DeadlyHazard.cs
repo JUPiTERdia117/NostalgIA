@@ -48,8 +48,7 @@ public class DeadlyHazard : MonoBehaviour
 
     private void HandleHazardImpact(GameObject target, Vector3 hitPoint)
     {
-        PlayerController playerController = target.GetComponentInParent<PlayerController>();
-        if (playerController == null && !target.CompareTag("Player")) return;
+        if (!target.CompareTag("Player")) return;
 
         if (Time.time - lastDamageTime < damageCooldown && hazardType != HazardType.LethalVoid)
         {
@@ -58,21 +57,10 @@ public class DeadlyHazard : MonoBehaviour
 
         lastDamageTime = Time.time;
 
-        GameObject playerObj = playerController != null ? playerController.gameObject : target;
-
-        if (hazardType == HazardType.LethalVoid)
-        {
-            CharacterController cc = playerObj.GetComponent<CharacterController>();
-            if (cc != null) cc.enabled = false;
-
-            playerObj.SendMessage("TakeDamage", 999, SendMessageOptions.DontRequireReceiver);
-
-            if (cc != null) cc.enabled = true;
-            return;
-        }
+        int finalDamage = hazardType == HazardType.LethalVoid ? 999 : damageAmount;
 
         // Infligir daño al jugador llamando a TakeDamage(int)
-        playerObj.SendMessage("TakeDamage", damageAmount, SendMessageOptions.DontRequireReceiver);
+        target.SendMessage("TakeDamage", finalDamage, SendMessageOptions.DontRequireReceiver);
 
         // Efecto visual
         if (hitEffectPrefab != null)
@@ -81,16 +69,19 @@ public class DeadlyHazard : MonoBehaviour
         }
 
         // Si el jugador tiene CharacterController o Rigidbody, aplicar retroceso si no es vacío
-        Vector3 pushDirection = (playerObj.transform.position - transform.position).normalized;
-        pushDirection.y = 0.4f;
+        if (hazardType != HazardType.LethalVoid)
+        {
+            Vector3 pushDirection = (target.transform.position - transform.position).normalized;
+            pushDirection.y = 0.4f;
 
-        if (playerObj.TryGetComponent<CharacterController>(out var charCtrl))
-        {
-            charCtrl.Move(pushDirection * (knockbackForce * 0.1f));
-        }
-        else if (playerObj.TryGetComponent<Rigidbody>(out var rb))
-        {
-            rb.AddForce(pushDirection * knockbackForce, ForceMode.Impulse);
+            if (target.TryGetComponent<CharacterController>(out var cc))
+            {
+                cc.Move(pushDirection * (knockbackForce * 0.1f));
+            }
+            else if (target.TryGetComponent<Rigidbody>(out var rb))
+            {
+                rb.AddForce(pushDirection * knockbackForce, ForceMode.Impulse);
+            }
         }
     }
 }
