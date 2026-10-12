@@ -96,30 +96,31 @@ public class PlayerController : MonoBehaviour
     }
 
     [ContextMenu("Take Damage")]
-    public void TakeDamage(int damage)
+    void TakeDamage(int damage)
     {
-        if (dead) return;
         health -= damage;
         if (health <= 0)
         {
             Die();
+            
+
         }
     }
     
     [ContextMenu("Kill Player")]
-    public void Die()
+    void Die()
     {
         dead = true;
         health = 0;
-        if (gameController == null)
-            gameController = FindAnyObjectByType<GameController>();
-        if (gameController != null)
-            gameController.RespawnPlayer();
+        gameController.RespawnPlayer();
     }
 
     public void ChangeTool()
     {
         SelectTool(selectedTool == Tool.Grapple ? Tool.Vacuum : Tool.Grapple);
+        
+        
+        
     }
 
     private void SelectTool(Tool tool)
@@ -135,10 +136,15 @@ public class PlayerController : MonoBehaviour
         // Ambas herramientas comparten GameObject; solo cambia el componente y su rayo.
         if (graple != null) graple.enabled = selectedTool == Tool.Grapple;
         if (vacuum != null) vacuum.enabled = selectedTool == Tool.Vacuum;
-        if (toolStick != null)
+        if(graple.enabled)
         {
-            toolStick.enabled = !graple.enabled;
+            toolStick.enabled = false;
         }
+        else
+        {
+            toolStick.enabled = true;
+        }
+            
     }
 
     private void ToolButtonDown()
@@ -186,4 +192,6 @@ public class PlayerController : MonoBehaviour
         CancelToolInput();
         if (graple != null) graple.Release();
     }
+
+
 }
