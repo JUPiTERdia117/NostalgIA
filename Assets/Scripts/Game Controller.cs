@@ -9,11 +9,13 @@ public class GameController : MonoBehaviour
 
     [SerializeField] TextMeshProUGUI scoreText;
 
+    public int StarsCollected => starsCollected;
 
     public void CollectStar()
     {
         starsCollected++;
-        scoreText.text = "Stars Collected: " + starsCollected.ToString() + "/3";
+        if (scoreText != null)
+            scoreText.text = "Stars Collected: " + starsCollected.ToString() + "/3";
     }
 
     public void UpdateSpawnPoint(Vector3 newSpawnPoint)
@@ -29,7 +31,12 @@ public class GameController : MonoBehaviour
         GameObject player = GameObject.FindGameObjectWithTag("Player");
         if (player != null)
         {
+            CharacterController cc = player.GetComponent<CharacterController>();
+            if (cc != null) cc.enabled = false;
             player.transform.position = spawnPoint;
+            Physics.SyncTransforms();
+            if (cc != null) cc.enabled = true;
+
             PlayerController playerController = player.GetComponent<PlayerController>();
             if (playerController != null)
             {
