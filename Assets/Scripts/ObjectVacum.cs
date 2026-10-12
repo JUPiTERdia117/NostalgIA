@@ -39,8 +39,6 @@ public class ObjectVacum : MonoBehaviour
 	[Tooltip("Cantidad de objetos que puede almacenar la aspiradora.")]	
 	[SerializeField, Min(0f)] private int objectCapacity = 1;
 	public int currentCapacity { get { return (objectCapacity - objectsToPool.Count) ; } }
-    public int StoredCount => objectsToPool.Count;
-    public int MaxCapacity => objectCapacity;
 
     // Caja alineada con el mundo de cada objeto guardado: centro relativo a su posición y tamaño completo. Se captura antes de desactivarlo.
     private readonly Dictionary<GameObject, Bounds> storedBounds = new Dictionary<GameObject, Bounds>();

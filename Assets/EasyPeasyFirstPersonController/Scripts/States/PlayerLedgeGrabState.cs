@@ -16,11 +16,7 @@ namespace EasyPeasyFirstPersonController
 
         public override void EnterState()
         {
-            if (!ctx.CheckLedge(out targetPosition) || targetPosition == Vector3.zero)
-            {
-                SwitchState(factory.Fall());
-                return;
-            }
+            ctx.CheckLedge(out targetPosition);
             startPosition = ctx.transform.position;
             ctx.moveDirection = Vector3.zero;
             isClimbing = false;
@@ -98,11 +94,6 @@ namespace EasyPeasyFirstPersonController
 
         private void HandleOrganicClimb()
         {
-            if (targetPosition == Vector3.zero)
-            {
-                SwitchState(factory.Grounded());
-                return;
-            }
             climbTimer += Time.deltaTime;
             float linearT = Mathf.Clamp01(climbTimer / ctx.climbDuration);
 
