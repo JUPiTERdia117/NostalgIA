@@ -43,9 +43,10 @@ public class VictoryGoal : MonoBehaviour
     {
         if (levelFinished) return;
 
-        if (other.CompareTag("Player"))
+        PlayerController pc = other.GetComponentInParent<PlayerController>();
+        if (other.CompareTag("Player") || pc != null)
         {
-            CompleteLevel(other.gameObject);
+            CompleteLevel(pc != null ? pc.gameObject : other.gameObject);
         }
     }
 
@@ -126,8 +127,11 @@ public class VictoryGoal : MonoBehaviour
         // Subtítulo
         CreateText(cardObj.transform, "Subtitle", "¡Has superado el Santuario Celeste!", new Vector2(0, 90), 22, Color.white, FontStyles.Normal);
 
-        // Tiempo
-        CreateText(cardObj.transform, "TimeText", "Tiempo: " + timeString, new Vector2(0, 20), 24, new Color(0.8f, 0.9f, 1f), FontStyles.Normal);
+        // Estrellas y Tiempo
+        int remainingStars = FindObjectsByType<StarController>(FindObjectsSortMode.None).Length;
+        int collectedStars = Mathf.Clamp(3 - remainingStars, 0, 3);
+        CreateText(cardObj.transform, "StarsText", $"Estrellas: {collectedStars} / 3", new Vector2(0, 45), 22, new Color(1f, 0.85f, 0.2f), FontStyles.Bold);
+        CreateText(cardObj.transform, "TimeText", "Tiempo: " + timeString, new Vector2(0, 5), 22, new Color(0.8f, 0.9f, 1f), FontStyles.Normal);
 
         // Botón Reiniciar
         GameObject restartBtn = CreateButton(cardObj.transform, "RestartButton", "REINICIAR NIVEL", new Vector2(0, -70), new Color(0.18f, 0.6f, 0.9f));
