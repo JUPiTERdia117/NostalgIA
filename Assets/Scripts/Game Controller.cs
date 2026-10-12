@@ -29,11 +29,7 @@ public class GameController : MonoBehaviour
         GameObject player = GameObject.FindGameObjectWithTag("Player");
         if (player != null)
         {
-            CharacterController cc = player.GetComponent<CharacterController>();
-            if (cc != null) cc.enabled = false;
             player.transform.position = spawnPoint;
-            if (cc != null) cc.enabled = true;
-
             PlayerController playerController = player.GetComponent<PlayerController>();
             if (playerController != null)
             {
