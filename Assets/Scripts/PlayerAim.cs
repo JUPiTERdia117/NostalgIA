@@ -9,7 +9,24 @@ public class PlayerAim : MonoBehaviour
     private Canvas reticleCanvas;
     private RectTransform reticle;
 
-    public Ray AimRay => aimCamera.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0f));
+    public Ray AimRay
+    {
+        get
+        {
+            if (aimCamera == null)
+                return new Ray(transform.position, transform.forward);
+
+            Ray r = aimCamera.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0f));
+            Vector3 dir = r.direction;
+            if (dir.sqrMagnitude > 0.0001f)
+                dir.Normalize();
+            else
+                dir = aimCamera.transform.forward;
+
+            return new Ray(r.origin, dir);
+        }
+    }
+
     public bool IsReady => aimCamera != null && aimCamera.isActiveAndEnabled;
 
     public static PlayerAim GetOrCreate(FirstPersonController controller)
@@ -25,8 +42,11 @@ public class PlayerAim : MonoBehaviour
     {
         nearest = default;
         if (!IsReady) return false;
+        Ray ray = AimRay;
+        if (ray.direction.sqrMagnitude < 0.0001f) return false;
+
         float closest = float.PositiveInfinity;
-        foreach (RaycastHit hit in Physics.RaycastAll(AimRay, distance,
+        foreach (RaycastHit hit in Physics.RaycastAll(ray, distance,
                      Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore))
         {
             if (hit.collider.transform.IsChildOf(transform) || hit.distance >= closest) continue;
