@@ -98,7 +98,9 @@ public class PlayerController : MonoBehaviour
     [ContextMenu("Take Damage")]
     public void TakeDamage(int damage)
     {
+        if (dead) return;
         health -= damage;
+        Debug.Log($"<color=yellow>[Player]</color> Daño recibido: {damage}. Salud restante: {health}/3");
         if (health <= 0)
         {
             Die();
@@ -110,6 +112,7 @@ public class PlayerController : MonoBehaviour
     {
         dead = true;
         health = 0;
+        Debug.Log("<color=red>[Player]</color> El jugador ha muerto. Reapareciendo en el último punto de control...");
         gameController.RespawnPlayer();
     }
 

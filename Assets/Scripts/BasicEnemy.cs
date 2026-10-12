@@ -3,7 +3,7 @@ using UnityEngine;
 
 /// <summary>
 /// Enemigo básico cuerpo a cuerpo: detecta al jugador, lo persigue y lo ataca al estar a corta distancia.
-/// Puede recibir daño de objetos lanzados con la aspiradora.
+/// Puede recibir daño de objetos lanzados con la aspiradora (proyectiles de la capa Poolable).
 /// </summary>
 [RequireComponent(typeof(CharacterController))]
 public class BasicEnemy : MonoBehaviour
@@ -14,9 +14,9 @@ public class BasicEnemy : MonoBehaviour
 
     [Header("Detección y Movimiento")]
     [Tooltip("Distancia a la que el enemigo detecta y empieza a seguir al jugador.")]
-    [SerializeField] private float detectionRange = 18f;
+    [SerializeField] private float detectionRange = 20f;
     [Tooltip("Velocidad de movimiento al perseguir al jugador.")]
-    [SerializeField] private float moveSpeed = 3.5f;
+    [SerializeField] private float moveSpeed = 3.8f;
     [Tooltip("Velocidad de giro hacia el objetivo.")]
     [SerializeField] private float rotationSpeed = 8f;
     [Tooltip("Fuerza de gravedad aplicada al enemigo.")]
@@ -24,7 +24,7 @@ public class BasicEnemy : MonoBehaviour
 
     [Header("Ataque Cuerpo a Cuerpo")]
     [Tooltip("Distancia mínima para ejecutar el golpe cuerpo a cuerpo.")]
-    [SerializeField] private float attackRange = 1.8f;
+    [SerializeField] private float attackRange = 2.0f;
     [Tooltip("Tiempo de recarga entre ataques en segundos.")]
     [SerializeField] private float attackCooldown = 1.2f;
     [Tooltip("Daño infligido al jugador por cada ataque.")]
@@ -32,18 +32,18 @@ public class BasicEnemy : MonoBehaviour
 
     [Header("Daño por Impactos")]
     [Tooltip("Velocidad mínima que debe llevar un objeto lanzado para hacerle daño al enemigo.")]
-    [SerializeField] private float minImpactVelocity = 3f;
+    [SerializeField] private float minImpactVelocity = 2.5f;
 
     [Header("Feedback Visual")]
     [SerializeField] private Renderer enemyRenderer;
-    [SerializeField] private Color damageFlashColor = Color.red;
+    [SerializeField] private Color damageFlashColor = Color.white;
 
     private CharacterController controller;
     private PlayerController player;
     private Transform playerTransform;
     private float nextAttackTime = 0f;
     private float verticalVelocity = 0f;
-    private Color originalColor = Color.white;
+    private Color originalColor = Color.red;
     private bool isFlashing = false;
 
     void Awake()
@@ -54,13 +54,12 @@ public class BasicEnemy : MonoBehaviour
         if (enemyRenderer == null)
             enemyRenderer = GetComponentInChildren<Renderer>();
 
-        if (enemyRenderer != null && enemyRenderer.material.HasProperty("_Color"))
+        if (enemyRenderer != null)
         {
-            originalColor = enemyRenderer.material.color;
-        }
-        else if (enemyRenderer != null && enemyRenderer.material.HasProperty("_BaseColor"))
-        {
-            originalColor = enemyRenderer.material.GetColor("_BaseColor");
+            if (enemyRenderer.material.HasProperty("_Color"))
+                originalColor = enemyRenderer.material.color;
+            else if (enemyRenderer.material.HasProperty("_BaseColor"))
+                originalColor = enemyRenderer.material.GetColor("_BaseColor");
         }
     }
 
@@ -109,7 +108,7 @@ public class BasicEnemy : MonoBehaviour
             }
             else
             {
-                // En rango de ataque
+                // En rango de ataque: mantener gravedad y atacar
                 Vector3 motion = Vector3.up * verticalVelocity;
                 controller.Move(motion * Time.deltaTime);
 
@@ -132,7 +131,20 @@ public class BasicEnemy : MonoBehaviour
         if (playerObj != null)
         {
             player = playerObj.GetComponent<PlayerController>();
-            playerTransform = playerObj.transform;
+            if (player == null)
+                player = playerObj.GetComponentInChildren<PlayerController>();
+            if (player == null)
+                player = FindAnyObjectByType<PlayerController>();
+
+            playerTransform = player != null ? player.transform : playerObj.transform;
+        }
+        else
+        {
+            player = FindAnyObjectByType<PlayerController>();
+            if (player != null)
+            {
+                playerTransform = player.transform;
+            }
         }
     }
 
@@ -156,6 +168,7 @@ public class BasicEnemy : MonoBehaviour
         // Infligir daño al jugador
         if (player != null && !player.dead)
         {
+            Debug.Log($"<color=red>[BasicEnemy]</color> ¡Ataque cuerpo a cuerpo al jugador! Daño: {attackDamage}");
             player.TakeDamage(attackDamage);
             StartCoroutine(AttackVisualFeedback());
         }
@@ -165,14 +178,17 @@ public class BasicEnemy : MonoBehaviour
     {
         // Pequeño impulso visual / retroceso
         Vector3 originalScale = transform.localScale;
-        transform.localScale = originalScale * 1.15f;
+        transform.localScale = originalScale * 1.25f;
         yield return new WaitForSeconds(0.12f);
         transform.localScale = originalScale;
     }
 
     public void TakeDamage(int damage)
     {
+        if (currentHealth <= 0) return;
+
         currentHealth -= damage;
+        Debug.Log($"<color=orange>[BasicEnemy]</color> ¡Enemigo golpeado! Daño recibido: {damage}. Salud restante: {currentHealth}/{maxHealth}");
 
         if (!isFlashing && gameObject.activeInHierarchy)
         {
@@ -208,7 +224,10 @@ public class BasicEnemy : MonoBehaviour
 
     private void Die()
     {
-        // Efecto simple de derrota: desactiva o destruye
+        Debug.Log("<color=green>[BasicEnemy]</color> ¡El enemigo ha sido eliminado!");
+        if (controller != null) controller.enabled = false;
+        Collider[] cols = GetComponentsInChildren<Collider>();
+        foreach (var col in cols) col.enabled = false;
         Destroy(gameObject);
     }
 
@@ -221,25 +240,33 @@ public class BasicEnemy : MonoBehaviour
     void OnTriggerEnter(Collider other)
     {
         Rigidbody rb = other.attachedRigidbody;
-        if (rb != null)
+        float speed = rb != null ? rb.linearVelocity.magnitude : 0f;
+        CheckImpactDamage(other.gameObject, speed);
+    }
+
+    void OnControllerColliderHit(ControllerColliderHit hit)
+    {
+        if (hit.gameObject.CompareTag("Projectile"))
         {
-            CheckImpactDamage(other.gameObject, rb.linearVelocity.magnitude);
+            Rigidbody rb = hit.collider.attachedRigidbody;
+            float speed = rb != null ? rb.linearVelocity.magnitude : 0f;
+            CheckImpactDamage(hit.gameObject, speed);
         }
     }
 
     private void CheckImpactDamage(GameObject sourceObject, float velocityMagnitude)
     {
-        // Si es un objeto de la capa Poolable o tiene Rigidbody y suficiente velocidad
         PoolableController poolable = sourceObject.GetComponentInParent<PoolableController>();
         Rigidbody rb = sourceObject.GetComponentInParent<Rigidbody>();
 
+        bool isProjectile = sourceObject.CompareTag("Projectile") || (rb != null && rb.CompareTag("Projectile"));
         bool isPoolable = poolable != null || sourceObject.layer == LayerMask.NameToLayer("Poolable");
         bool hasSpeed = velocityMagnitude >= minImpactVelocity;
 
-        if (isPoolable || hasSpeed)
+        if (isProjectile || (isPoolable && hasSpeed))
         {
             int damage = 1;
-            if (velocityMagnitude > 15f) damage = 2;
+            if (velocityMagnitude > 12f) damage = 2;
             TakeDamage(damage);
         }
     }
