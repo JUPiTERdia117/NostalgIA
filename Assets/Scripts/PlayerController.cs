@@ -4,7 +4,7 @@ using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.OnScreen;
 
 /// <summary>Selecciona la herramienta y traduce pulsaciones cortas/largas del botón móvil.</summary>
-public class PlayerController : MonoBehaviour
+public class PlayerController : MonoBehaviour, IDamageable
 {
     public enum Tool { Grapple, Vacuum }
 
@@ -14,6 +14,8 @@ public class PlayerController : MonoBehaviour
     [Tooltip("Segundos de pulsación para empezar a aspirar. Soltar antes lanza un objeto.")]
     [SerializeField, Min(0.05f)] private float vacuumHoldTime = 0.2f;
     [SerializeField] private OnScreenStick toolStick;
+    [Tooltip("Tiempo de invulnerabilidad tras recibir daño.")]
+    [SerializeField] private float invulnerabilityDuration = 0.5f;
 
     public Tool SelectedTool => selectedTool;
     public bool dead = false;
@@ -24,6 +26,7 @@ public class PlayerController : MonoBehaviour
     private bool waitForToolRelease;
     private float toolPressedAt;
     private Gamepad toolGamepad;
+    private float lastDamageTime = -99f;
 
     void Awake()
     {
@@ -96,31 +99,36 @@ public class PlayerController : MonoBehaviour
     }
 
     [ContextMenu("Take Damage")]
-    void TakeDamage(int damage)
+    public void TakeDamageContextMenu() => TakeDamage(1);
+
+    public void TakeDamage(int damage)
     {
+        if (dead) return;
+        if (Time.time - lastDamageTime < invulnerabilityDuration) return;
+
+        lastDamageTime = Time.time;
         health -= damage;
+        Debug.Log($"[PlayerController] Player took {damage} damage! Remaining health: {health}");
         if (health <= 0)
         {
             Die();
-            
-
         }
     }
     
     [ContextMenu("Kill Player")]
-    void Die()
+    public void Die()
     {
         dead = true;
         health = 0;
-        gameController.RespawnPlayer();
+        if (gameController != null)
+        {
+            gameController.RespawnPlayer();
+        }
     }
 
     public void ChangeTool()
     {
         SelectTool(selectedTool == Tool.Grapple ? Tool.Vacuum : Tool.Grapple);
-        
-        
-        
     }
 
     private void SelectTool(Tool tool)
@@ -136,15 +144,17 @@ public class PlayerController : MonoBehaviour
         // Ambas herramientas comparten GameObject; solo cambia el componente y su rayo.
         if (graple != null) graple.enabled = selectedTool == Tool.Grapple;
         if (vacuum != null) vacuum.enabled = selectedTool == Tool.Vacuum;
-        if(graple.enabled)
+        if (toolStick != null)
         {
-            toolStick.enabled = false;
+            if (graple != null && graple.enabled)
+            {
+                toolStick.enabled = false;
+            }
+            else
+            {
+                toolStick.enabled = true;
+            }
         }
-        else
-        {
-            toolStick.enabled = true;
-        }
-            
     }
 
     private void ToolButtonDown()
@@ -192,6 +202,4 @@ public class PlayerController : MonoBehaviour
         CancelToolInput();
         if (graple != null) graple.Release();
     }
-
-
 }

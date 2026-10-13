@@ -182,13 +182,6 @@ public class ObjectVacum : MonoBehaviour
         {
             if (IsLaunchObstacle(hit.collider, playerRoot, pooledObj.transform)) return false;
         }
-        // Comprueba que la caja completa del objeto quepa donde va a aparecer.
-        /*
-        foreach (Collider obstacle in Physics.OverlapBox(spawnCenter, extents,
-                     Quaternion.identity, launchObstacleMask, QueryTriggerInteraction.Ignore))
-        {
-            if (IsLaunchObstacle(obstacle, playerRoot, pooledObj.transform)) return false;
-        }*/
 
         // Coloca el pivote de modo que la caja quede centrada en spawnCenter.
         pooledObj.transform.SetParent(null, true);
@@ -198,6 +191,12 @@ public class ObjectVacum : MonoBehaviour
         // Parte del reposo y aplica el mismo impulso: el cambio de velocidad es impulso / masa.
         body.linearVelocity = Vector3.zero;
         body.AddForce(direction * Mathf.Max(0f, launchImpulse), ForceMode.Impulse);
+
+        // Marcar como lanzado para que cause daño al impactar enemigos y se destruya
+        PoolableController poolable = pooledObj.GetComponent<PoolableController>();
+        if (poolable != null) poolable.isThrown = true;
+        ThrowableDamage throwable = pooledObj.GetComponent<ThrowableDamage>();
+        if (throwable != null) throwable.isThrown = true;
 
         // El giro disminuye con el tamaño y tiene un máximo para los objetos diminutos.
         float size = Mathf.Max(0.1f, Mathf.Max(bounds.size.x, Mathf.Max(bounds.size.y, bounds.size.z)));

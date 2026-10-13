@@ -2,6 +2,7 @@ using UnityEngine;
 
 /// <summary>
 /// Controla la animación y el estado de un objeto que puede ser absorbido.
+/// Ahora incluye daño asignado al ser lanzado y efecto de fragmentos al destruirse contra un enemigo.
 /// </summary>
 public class PoolableController : MonoBehaviour
 {
@@ -20,6 +21,24 @@ public class PoolableController : MonoBehaviour
     [SerializeField, Min(0.01f)] private float scaleRestoreDuration = 0.2f;
     [Tooltip("Distancia al centro de la aspiradora que completa la absorción y guarda el objeto, en unidades de Unity.")]
     [SerializeField, Min(0f)] private float absorptionDistance = 0.2f;
+
+    [Header("Combat & Destruction")]
+    [Tooltip("Cantidad de daño asignada que causa este objeto al ser lanzado contra un enemigo.")]
+    [SerializeField] private int impactDamage = 2;
+    [Tooltip("Si es verdadero, el objeto se destruye con fragmentos al chocar con un enemigo.")]
+    [SerializeField] private bool destroyOnEnemyHit = true;
+    [Tooltip("Cantidad de fragmentos que se generan al romperse contra un enemigo.")]
+    [SerializeField] private int debrisCount = 6;
+    [Tooltip("Velocidad mínima requerida de impacto para causar daño.")]
+    [SerializeField] private float minImpactVelocity = 2.0f;
+
+    [HideInInspector] public bool isThrown = false;
+    private bool isDestroyed = false;
+
+    public int ImpactDamage { get => impactDamage > 0 ? impactDamage : 1; set => impactDamage = value; }
+    public bool DestroyOnEnemyHit { get => destroyOnEnemyHit; set => destroyOnEnemyHit = value; }
+    public float MinImpactVelocity => minImpactVelocity;
+    public bool IsDestroyed => isDestroyed;
 
     // Escala local de referencia, incluidos tamaños no uniformes.
     private Vector3 originalScale;
@@ -97,11 +116,7 @@ public class PoolableController : MonoBehaviour
         spiralRight = Vector3.Cross(direction, reference).normalized;
         spiralUp = Vector3.Cross(direction, spiralRight).normalized;
 
-
-        //GetComponent<BoxCollider>().enabled = false;
-        
         beingPulled = true;
-        
     }
 
     /// <summary>
@@ -147,13 +162,13 @@ public class PoolableController : MonoBehaviour
     /// </summary>
     void FinishAbsorption()
     {
-		
         transform.localScale = originalScale;
 		
-		if((pooller.currentCapacity) == 0 ){
-			ResetPull();
-			return;
-		} 
+        if ((pooller.currentCapacity) == 0)
+        {
+            ResetPull();
+            return;
+        } 
         pooller.PoolObject(gameObject);
     }
 
@@ -177,5 +192,52 @@ public class PoolableController : MonoBehaviour
         transform.localScale = originalScale;
         restoreProgress = 1f;
         pooller = null;
+        isThrown = false;
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (isDestroyed) return;
+
+        // Si colisiona con un enemigo, EnemyHealth se encarga del cálculo y aplicación del daño
+        // y ejecuta BreakApart() sobre este objeto para evitar doble impacto o desincronización.
+        EnemyHealth enemy = collision.gameObject.GetComponentInParent<EnemyHealth>();
+        if (enemy != null) return;
+    }
+
+    /// <summary>
+    /// Destruye el objeto creando un estallido de fragmentos físicos con su propio material.
+    /// </summary>
+    public void BreakApart(Vector3? contactPoint = null)
+    {
+        if (isDestroyed) return;
+        isDestroyed = true;
+
+        Vector3 spawnPos = contactPoint ?? transform.position;
+        Renderer rend = GetComponentInChildren<Renderer>();
+        Material mat = rend != null ? rend.sharedMaterial : null;
+
+        for (int i = 0; i < debrisCount; i++)
+        {
+            GameObject fragment = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            fragment.name = "Object_Fragment";
+            fragment.transform.position = spawnPos + Random.insideUnitSphere * 0.25f;
+            fragment.transform.localScale = Vector3.one * Random.Range(0.12f, 0.28f);
+
+            if (mat != null)
+            {
+                fragment.GetComponent<Renderer>().sharedMaterial = mat;
+            }
+
+            Rigidbody rb = fragment.AddComponent<Rigidbody>();
+            rb.mass = 0.15f;
+            Vector3 force = (Random.onUnitSphere + Vector3.up * 0.6f).normalized * Random.Range(4f, 8f);
+            rb.AddForce(force, ForceMode.Impulse);
+            rb.angularVelocity = Random.insideUnitSphere * 12f;
+
+            Destroy(fragment, Random.Range(1.2f, 2.2f));
+        }
+
+        Destroy(gameObject);
     }
 }
