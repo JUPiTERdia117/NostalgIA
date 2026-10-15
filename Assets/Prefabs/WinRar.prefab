@@ -1009,7 +1009,7 @@ GameObject:
   - component: {fileID: 2929321425633138236}
   - component: {fileID: 7522224365719643093}
   m_Layer: 0
-  m_Name: Enemy - Bug
+  m_Name: WinRar
   m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

@@ -675,7 +675,7 @@ GameObject:
   - component: {fileID: 4465738469042643056}
   - component: {fileID: 1218259612889591765}
   m_Layer: 0
-  m_Name: Enemy - FlyingSkull
+  m_Name: FlyingEmail
   m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

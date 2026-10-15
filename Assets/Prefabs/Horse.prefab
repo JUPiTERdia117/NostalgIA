@@ -585,7 +585,7 @@ GameObject:
   - component: {fileID: 6310028976004406521}
   - component: {fileID: 5125235648342026166}
   m_Layer: 0
-  m_Name: Enemy - SpiderSpawner
+  m_Name: Horse
   m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

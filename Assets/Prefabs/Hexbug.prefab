@@ -194,7 +194,7 @@ GameObject:
   - component: {fileID: 5557240475627644207}
   - component: {fileID: 1021597658745645361}
   m_Layer: 0
-  m_Name: Enemy - Spider
+  m_Name: Hexbug
   m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
