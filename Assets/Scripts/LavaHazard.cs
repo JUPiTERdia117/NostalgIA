@@ -11,12 +11,14 @@ public class LavaHazard : MonoBehaviour
     [SerializeField] private int damage = 99;
 
     private PlayerController player;
+    private Collider myCollider;
     private Bounds worldBounds;
     private bool hasCachedBounds = false;
     private float surfaceY;
 
     private void Awake()
     {
+        myCollider = GetComponent<Collider>();
         CacheBounds();
         FindPlayer();
     }
@@ -29,10 +31,11 @@ public class LavaHazard : MonoBehaviour
 
     private void CacheBounds()
     {
-        Collider col = GetComponent<Collider>();
-        if (col != null)
+        if (myCollider == null) myCollider = GetComponent<Collider>();
+
+        if (myCollider != null)
         {
-            worldBounds = col.bounds;
+            worldBounds = myCollider.bounds;
             surfaceY = worldBounds.max.y;
             hasCachedBounds = true;
         }
@@ -62,15 +65,26 @@ public class LavaHazard : MonoBehaviour
 
         if (player.dead) return;
 
-        // Detección precisa: los pies del jugador deben estar estrictamente dentro del perímetro de la lava
-        // y a la altura de la superficie o por debajo (sumergido).
+        // Si tenemos collider, refrescamos bounds periódicamente o usamos bounds directos
+        if (myCollider != null)
+        {
+            worldBounds = myCollider.bounds;
+            surfaceY = worldBounds.max.y;
+            hasCachedBounds = true;
+        }
+
         Vector3 playerPos = player.transform.position;
 
         if (hasCachedBounds)
         {
-            bool insideX = playerPos.x >= worldBounds.min.x && playerPos.x <= worldBounds.max.x;
-            bool insideZ = playerPos.z >= worldBounds.min.z && playerPos.z <= worldBounds.max.z;
-            bool insideY = playerPos.y <= surfaceY + 0.1f && playerPos.y >= surfaceY - 5.0f;
+            float minX = Mathf.Min(worldBounds.min.x, worldBounds.max.x);
+            float maxX = Mathf.Max(worldBounds.min.x, worldBounds.max.x);
+            float minZ = Mathf.Min(worldBounds.min.z, worldBounds.max.z);
+            float maxZ = Mathf.Max(worldBounds.min.z, worldBounds.max.z);
+
+            bool insideX = playerPos.x >= minX - 0.2f && playerPos.x <= maxX + 0.2f;
+            bool insideZ = playerPos.z >= minZ - 0.2f && playerPos.z <= maxZ + 0.2f;
+            bool insideY = playerPos.y <= surfaceY + 0.4f && playerPos.y >= surfaceY - 8.0f;
 
             if (insideX && insideZ && insideY)
             {

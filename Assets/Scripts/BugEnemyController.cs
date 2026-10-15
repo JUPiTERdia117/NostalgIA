@@ -3,41 +3,52 @@ using UnityEngine;
 using UnityEngine.AI;
 
 /// <summary>
-/// Enemigo básico tipo bicho que persigue al jugador en el suelo
-/// y realiza un ataque cuerpo a cuerpo cuando está a corta distancia.
+/// Enemigo hostil tipo WinRar / bicho.
+/// Persigue al jugador y, al acercarse, realiza un salto/embestida (lunge) letal hacia adelante
+/// que elimina al jugador de un solo golpe.
 /// </summary>
 [RequireComponent(typeof(EnemyHealth))]
 public class BugEnemyController : MonoBehaviour
 {
     [Header("Movement")]
-    [SerializeField] private float moveSpeed = 3.5f;
-    [SerializeField] private float stoppingDistance = 1.5f;
-    [SerializeField] private float turnSpeed = 10f;
+    [SerializeField] private float moveSpeed = 4.0f;
+    [SerializeField] private float stoppingDistance = 1.2f;
+    [SerializeField] private float turnSpeed = 12f;
     [Tooltip("Distancia de detección para empezar a perseguir al jugador.")]
-    [SerializeField] private float detectionRange = 16f;
+    [SerializeField] private float detectionRange = 18f;
 
-    [Header("Attack Settings")]
-    [SerializeField] private float attackRange = 1.8f;
-    [SerializeField] private int attackDamage = 1;
-    [SerializeField] private float attackCooldown = 1.5f;
-    [SerializeField] private float windupTime = 0.25f;
+    [Header("Attack / Lunge Settings")]
+    [Tooltip("Distancia a la que inicia la embestida letal.")]
+    [SerializeField] private float attackRange = 6.5f;
+    [Tooltip("Daño infligido. 99 para matar al jugador de un solo golpe.")]
+    [SerializeField] private int attackDamage = 99;
+    [Tooltip("Si es verdadero, siempre inflige daño letal al impactar al jugador.")]
+    [SerializeField] private bool oneHitKill = true;
+    [SerializeField] private float attackCooldown = 2.0f;
+    [Tooltip("Tiempo de anticipación antes de lanzarse (se agacha y apunta).")]
+    [SerializeField] private float windupTime = 0.35f;
+    [Tooltip("Velocidad de traslación durante el salto/lanzamiento.")]
+    [SerializeField] private float lungeSpeed = 16f;
+    [Tooltip("Altura máxima del arco parabólico del salto.")]
+    [SerializeField] private float lungeArcHeight = 1.6f;
+    [Tooltip("Distancia adicional que rebasa la posición original del jugador si este esquiva.")]
+    [SerializeField] private float lungeOvershoot = 1.5f;
+    [Tooltip("Pausa de recuperación en el suelo tras aterrizar, dando oportunidad al jugador de contraatacar.")]
+    [SerializeField] private float recoveryTime = 0.5f;
 
     private PlayerController player;
     private NavMeshAgent navMeshAgent;
     private EnemyHealth health;
     private bool isAttacking;
+    private bool isLunging;
     private float lastAttackTime = -99f;
     private Vector3 originalScale;
-    private Vector3 spawnPosition;
-    private Quaternion spawnRotation;
 
     private void Awake()
     {
         health = GetComponent<EnemyHealth>();
         navMeshAgent = GetComponent<NavMeshAgent>();
         originalScale = transform.localScale;
-        spawnPosition = transform.position;
-        spawnRotation = transform.rotation;
 
         if (navMeshAgent != null)
         {
@@ -84,7 +95,6 @@ public class BugEnemyController : MonoBehaviour
 
         if (distanceToPlayer > detectionRange)
         {
-            // Fuera de rango de detección: quedarse quieto en su posición
             if (navMeshAgent != null && navMeshAgent.isActiveAndEnabled && navMeshAgent.isOnNavMesh)
             {
                 navMeshAgent.isStopped = true;
@@ -122,7 +132,6 @@ public class BugEnemyController : MonoBehaviour
         }
         else
         {
-            // Fallback en caso de que no haya NavMesh horneado debajo del enemigo
             if (navMeshAgent != null && navMeshAgent.enabled && !navMeshAgent.isOnNavMesh)
             {
                 navMeshAgent.enabled = false;
@@ -146,47 +155,109 @@ public class BugEnemyController : MonoBehaviour
     private IEnumerator AttackRoutine()
     {
         isAttacking = true;
+
         if (navMeshAgent != null && navMeshAgent.isActiveAndEnabled && navMeshAgent.isOnNavMesh)
         {
             navMeshAgent.isStopped = true;
         }
 
-        // Rotar hacia el jugador
-        Vector3 dir = (player.transform.position - transform.position);
-        dir.y = 0;
-        if (dir.sqrMagnitude > 0.001f)
+        // 1. ANTICIPACIÓN (WINDUP): Orientar y agacharse antes del salto
+        Vector3 playerPos = player != null ? player.transform.position : transform.position + transform.forward;
+        Vector3 dirToPlayer = (playerPos - transform.position);
+        dirToPlayer.y = 0f;
+        if (dirToPlayer.sqrMagnitude > 0.001f)
         {
-            transform.rotation = Quaternion.LookRotation(dir.normalized);
+            transform.rotation = Quaternion.LookRotation(dirToPlayer.normalized);
         }
 
-        // Animación de anticipación (encoger ligeramente)
         float elapsed = 0f;
         while (elapsed < windupTime)
         {
             elapsed += Time.deltaTime;
             float t = elapsed / windupTime;
-            transform.localScale = Vector3.Lerp(originalScale, new Vector3(originalScale.x * 1.2f, originalScale.y * 0.7f, originalScale.z * 1.2f), t);
+            // Se agacha / comprime para tomar impulso
+            transform.localScale = Vector3.Lerp(originalScale, new Vector3(originalScale.x * 1.35f, originalScale.y * 0.55f, originalScale.z * 1.35f), t);
             yield return null;
         }
 
-        // Ataque (estiramiento y golpe hacia adelante)
-        transform.localScale = new Vector3(originalScale.x * 0.9f, originalScale.y * 1.3f, originalScale.z * 1.3f);
-
-        // Verificar si el jugador sigue dentro del rango de ataque
-        float distance = Vector3.Distance(transform.position, player.transform.position);
-        if (distance <= attackRange * 1.3f && player != null && !player.dead)
+        // 2. LANZAMIENTO / EMBESTIDA (LUNGE): Salto físico hacia el jugador
+        isLunging = true;
+        bool wasNavAgentEnabled = navMeshAgent != null && navMeshAgent.enabled;
+        if (navMeshAgent != null)
         {
-            player.TakeDamage(attackDamage);
-            Debug.Log($"[BugEnemyController] ¡El bicho golpeó al jugador cuerpo a cuerpo haciendo {attackDamage} de daño!");
+            navMeshAgent.enabled = false;
         }
 
-        yield return new WaitForSeconds(0.2f);
+        Vector3 startPos = transform.position;
+        Vector3 targetPoint = player != null ? player.transform.position : startPos + transform.forward * attackRange;
+        Vector3 lungeDir = (targetPoint - startPos);
+        lungeDir.y = 0f;
+        if (lungeDir.sqrMagnitude < 0.01f) lungeDir = transform.forward;
+        lungeDir.Normalize();
 
-        // Restaurar escala original
+        // Punto de aterrizaje calculado con rebase si el jugador esquiva
+        Vector3 destination = targetPoint + lungeDir * lungeOvershoot;
+        float totalDist = Vector3.Distance(startPos, destination);
+        float leapDuration = Mathf.Max(0.25f, totalDist / Mathf.Max(1f, lungeSpeed));
+
+        // Estiramiento dinámico durante el vuelo
+        transform.localScale = new Vector3(originalScale.x * 0.85f, originalScale.y * 1.25f, originalScale.z * 1.4f);
+
+        float leapTime = 0f;
+        bool hitLethal = false;
+
+        while (leapTime < leapDuration)
+        {
+            if (health != null && health.IsDead) break;
+
+            leapTime += Time.deltaTime;
+            float progress = Mathf.Clamp01(leapTime / leapDuration);
+
+            // Trayectoria parabólica
+            Vector3 currentHoriz = Vector3.Lerp(startPos, destination, progress);
+            float currentY = Mathf.Lerp(startPos.y, destination.y, progress) + Mathf.Sin(progress * Mathf.PI) * lungeArcHeight;
+            transform.position = new Vector3(currentHoriz.x, currentY, currentHoriz.z);
+
+            // Detección de impacto letal en vuelo
+            if (!hitLethal && player != null && !player.dead)
+            {
+                float hitDist = Vector3.Distance(transform.position, player.transform.position);
+                if (hitDist <= 2.2f)
+                {
+                    hitLethal = true;
+                    DealLethalDamage(player);
+                }
+            }
+
+            yield return null;
+        }
+
+        isLunging = false;
         transform.localScale = originalScale;
+
+        // 3. RECUPERACIÓN / ATERRIZAJE
+        if (wasNavAgentEnabled && navMeshAgent != null)
+        {
+            navMeshAgent.enabled = true;
+            if (NavMesh.SamplePosition(transform.position, out NavMeshHit hit, 3.0f, NavMesh.AllAreas))
+            {
+                navMeshAgent.Warp(hit.position);
+            }
+        }
+
+        // Breve ventana de vulnerabilidad tras caer al suelo
+        yield return new WaitForSeconds(recoveryTime);
 
         lastAttackTime = Time.time;
         isAttacking = false;
+    }
+
+    private void DealLethalDamage(PlayerController target)
+    {
+        if (target == null || target.dead) return;
+        int damage = oneHitKill ? 99 : attackDamage;
+        target.TakeDamage(damage);
+        Debug.Log($"[BugEnemyController] ¡WinRar se lanzó con éxito sobre el jugador e infligió {damage} de daño letal (1 golpe = muerte)!");
     }
 
     private void OnCollisionEnter(Collision collision)
@@ -212,14 +283,13 @@ public class BugEnemyController : MonoBehaviour
     private void HandleDirectDamage(GameObject obj)
     {
         if (health != null && health.IsDead) return;
-        if (Time.time - lastAttackTime < attackCooldown) return;
+        if (!isLunging && Time.time - lastAttackTime < attackCooldown) return;
 
         PlayerController target = obj.GetComponentInParent<PlayerController>();
         if (target != null && !target.dead)
         {
-            target.TakeDamage(attackDamage);
+            DealLethalDamage(target);
             lastAttackTime = Time.time;
-            Debug.Log($"[BugEnemyController] ¡Contacto con el jugador infligió {attackDamage} de daño!");
         }
     }
 
@@ -228,7 +298,7 @@ public class BugEnemyController : MonoBehaviour
     {
         if (player != null)
         {
-            player.TakeDamage(attackDamage);
+            DealLethalDamage(player);
         }
     }
 }

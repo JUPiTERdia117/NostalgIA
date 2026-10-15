@@ -200,8 +200,24 @@ public class GameController : MonoBehaviour
         if (toolText != null && playerController != null)
         {
             bool isGrapple = playerController.SelectedTool == PlayerController.Tool.Grapple;
-            string toolName = isGrapple ? "GANCHO [X / Clic]" : "ASPIRADORA [Clics]";
-            toolText.text = $"HERRAMIENTA: <color=#00E5FF>{toolName}</color>  |  [Q] Cambiar";
+            string toolName;
+            if (isGrapple)
+            {
+                if (playerController.GrapleController != null && playerController.GrapleController.IsOnCooldown)
+                {
+                    float cd = playerController.GrapleController.CooldownRemaining;
+                    toolName = $"<color=#FFB300>GANCHO [Recarga: {cd:F1}s]</color>";
+                }
+                else
+                {
+                    toolName = "<color=#00E5FF>GANCHO [X / Clic]</color>";
+                }
+            }
+            else
+            {
+                toolName = "<color=#00E5FF>ASPIRADORA [Clics]</color>";
+            }
+            toolText.text = $"HERRAMIENTA: {toolName}  |  [Q] Cambiar";
         }
     }
 

@@ -18,6 +18,7 @@ public class PlayerController : MonoBehaviour, IDamageable
     [SerializeField] private float invulnerabilityDuration = 0.5f;
 
     public Tool SelectedTool => selectedTool;
+    public GrapleController GrapleController => graple;
     public bool dead = false;
     public int health = 3;
     private GameController gameController;

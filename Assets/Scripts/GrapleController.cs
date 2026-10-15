@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.Serialization;
 
-/// <summary>Gancho con aceleración e inercia, integrado con el CharacterController.</summary>
+/// <summary>Gancho con aceleración e inercia, integrado con el CharacterController y con tiempo de enfriamiento.</summary>
 public class GrapleController : MonoBehaviour
 {
     [SerializeField, Min(0.1f)] private float maxDistance = 60f;
@@ -26,13 +26,23 @@ public class GrapleController : MonoBehaviour
     [SerializeField, Min(0f)] private float launchLift = 4f;
     [SerializeField, Min(0.01f)] private float pullRampTime = 0.2f;
 
+    [Header("Cooldown Settings")]
+    [Tooltip("Tiempo de enfriamiento en segundos tras soltar o terminar un enganche.")]
+    [SerializeField, Min(0f)] private float cooldownDuration = 1.5f;
+
     private PlayerAim aim;
     private ToolRayVisual rayVisual;
     private Collider anchorCollider;
     private Vector3 localAnchor;
     private Vector3 approachDirection;
     private float elapsed;
+    private float lastGrappleEndTime = -99f;
+
     public bool IsGrappling { get; private set; }
+    public float CooldownDuration => cooldownDuration;
+    public float CooldownRemaining => Mathf.Max(0f, (lastGrappleEndTime + cooldownDuration) - Time.time);
+    public bool IsOnCooldown => CooldownRemaining > 0.05f;
+
     public Vector3 AnchorPoint => anchorCollider != null
         ? anchorCollider.transform.TransformPoint(localAnchor) : Vector3.zero;
     public float AirControl => airControl;
@@ -66,6 +76,13 @@ public class GrapleController : MonoBehaviour
     public void Graple()
     {
         if (IsGrappling) { Release(); return; }
+
+        if (IsOnCooldown)
+        {
+            Debug.Log($"[GrapleController] Gancho en enfriamiento. Restan {CooldownRemaining:F1}s");
+            return;
+        }
+
         if (firstPersonController == null || !firstPersonController.isActiveAndEnabled ||
             firstPersonController.characterController == null ||
             !firstPersonController.characterController.enabled || firstPersonController.isInWater) return;
@@ -81,7 +98,6 @@ public class GrapleController : MonoBehaviour
         elapsed = 0f;
         IsGrappling = true;
         firstPersonController.BeginGrappleMotion(this, launchLift);
-
     }
 
     public Vector3 Accelerate(Vector3 velocity, float deltaTime)
@@ -125,6 +141,10 @@ public class GrapleController : MonoBehaviour
 
     public void Release()
     {
+        if (IsGrappling)
+        {
+            lastGrappleEndTime = Time.time;
+        }
         IsGrappling = false;
         anchorCollider = null;
     }
