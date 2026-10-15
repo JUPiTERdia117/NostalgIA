@@ -20,6 +20,8 @@ public class SpiderEnemyController : MonoBehaviour
     }
 
     [Header("Wall Crawling & Adhesion")]
+    [Tooltip("Distancia máxima a la que detecta al jugador para iniciar persecución.")]
+    [SerializeField] private float detectionRange = 18f;
     [SerializeField] private float crawlSpeed = 3.6f;
     [SerializeField] private float surfaceAlignSpeed = 14f;
     [SerializeField] private float adhereSpeed = 16f;
@@ -173,6 +175,11 @@ public class SpiderEnemyController : MonoBehaviour
     private void HandleCrawlingState()
     {
         float distToPlayer = Vector3.Distance(transform.position, player.transform.position);
+
+        if (distToPlayer > detectionRange)
+        {
+            return; // Esperar a que el jugador entre a su territorio
+        }
 
         // Evaluar ataque de salto Abrazacaras
         if (distToPlayer >= minJumpDistance && distToPlayer <= jumpRange && Time.time - lastJumpTime >= jumpCooldown)

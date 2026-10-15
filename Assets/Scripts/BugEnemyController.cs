@@ -13,6 +13,8 @@ public class BugEnemyController : MonoBehaviour
     [SerializeField] private float moveSpeed = 3.5f;
     [SerializeField] private float stoppingDistance = 1.5f;
     [SerializeField] private float turnSpeed = 10f;
+    [Tooltip("Distancia de detección para empezar a perseguir al jugador.")]
+    [SerializeField] private float detectionRange = 16f;
 
     [Header("Attack Settings")]
     [SerializeField] private float attackRange = 1.8f;
@@ -26,12 +28,16 @@ public class BugEnemyController : MonoBehaviour
     private bool isAttacking;
     private float lastAttackTime = -99f;
     private Vector3 originalScale;
+    private Vector3 spawnPosition;
+    private Quaternion spawnRotation;
 
     private void Awake()
     {
         health = GetComponent<EnemyHealth>();
         navMeshAgent = GetComponent<NavMeshAgent>();
         originalScale = transform.localScale;
+        spawnPosition = transform.position;
+        spawnRotation = transform.rotation;
 
         if (navMeshAgent != null)
         {
@@ -48,6 +54,11 @@ public class BugEnemyController : MonoBehaviour
         {
             FindPlayer();
         }
+
+        if (navMeshAgent != null && !navMeshAgent.isOnNavMesh)
+        {
+            navMeshAgent.enabled = false;
+        }
     }
 
     private void Update()
@@ -57,12 +68,29 @@ public class BugEnemyController : MonoBehaviour
         if (player == null)
         {
             FindPlayer();
+            if (player == null) return;
+        }
+
+        if (player.dead)
+        {
+            if (navMeshAgent != null && navMeshAgent.isActiveAndEnabled && navMeshAgent.isOnNavMesh)
+            {
+                navMeshAgent.isStopped = true;
+            }
             return;
         }
 
-        if (player.dead) return;
-
         float distanceToPlayer = Vector3.Distance(transform.position, player.transform.position);
+
+        if (distanceToPlayer > detectionRange)
+        {
+            // Fuera de rango de detección: quedarse quieto en su posición
+            if (navMeshAgent != null && navMeshAgent.isActiveAndEnabled && navMeshAgent.isOnNavMesh)
+            {
+                navMeshAgent.isStopped = true;
+            }
+            return;
+        }
 
         if (!isAttacking && distanceToPlayer <= attackRange && Time.time - lastAttackTime >= attackCooldown)
         {
@@ -87,7 +115,7 @@ public class BugEnemyController : MonoBehaviour
     {
         Vector3 targetPos = player.transform.position;
 
-        if (navMeshAgent != null && navMeshAgent.isOnNavMesh && navMeshAgent.isActiveAndEnabled)
+        if (navMeshAgent != null && navMeshAgent.isActiveAndEnabled && navMeshAgent.isOnNavMesh)
         {
             navMeshAgent.isStopped = false;
             navMeshAgent.SetDestination(targetPos);
@@ -95,6 +123,11 @@ public class BugEnemyController : MonoBehaviour
         else
         {
             // Fallback en caso de que no haya NavMesh horneado debajo del enemigo
+            if (navMeshAgent != null && navMeshAgent.enabled && !navMeshAgent.isOnNavMesh)
+            {
+                navMeshAgent.enabled = false;
+            }
+
             Vector3 direction = (targetPos - transform.position);
             direction.y = 0f;
             if (direction.sqrMagnitude > 0.01f)
@@ -113,7 +146,7 @@ public class BugEnemyController : MonoBehaviour
     private IEnumerator AttackRoutine()
     {
         isAttacking = true;
-        if (navMeshAgent != null && navMeshAgent.isOnNavMesh && navMeshAgent.isActiveAndEnabled)
+        if (navMeshAgent != null && navMeshAgent.isActiveAndEnabled && navMeshAgent.isOnNavMesh)
         {
             navMeshAgent.isStopped = true;
         }
@@ -156,18 +189,37 @@ public class BugEnemyController : MonoBehaviour
         isAttacking = false;
     }
 
+    private void OnCollisionEnter(Collision collision)
+    {
+        HandleDirectDamage(collision.gameObject);
+    }
+
     private void OnCollisionStay(Collision collision)
     {
-        // Daño por contacto si se acerca al jugador y no está en cooldown
+        HandleDirectDamage(collision.gameObject);
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        HandleDirectDamage(other.gameObject);
+    }
+
+    private void OnTriggerStay(Collider other)
+    {
+        HandleDirectDamage(other.gameObject);
+    }
+
+    private void HandleDirectDamage(GameObject obj)
+    {
         if (health != null && health.IsDead) return;
-        if (collision.gameObject.CompareTag("Player") && Time.time - lastAttackTime >= attackCooldown)
+        if (Time.time - lastAttackTime < attackCooldown) return;
+
+        PlayerController target = obj.GetComponentInParent<PlayerController>();
+        if (target != null && !target.dead)
         {
-            PlayerController target = collision.gameObject.GetComponent<PlayerController>();
-            if (target != null && !target.dead)
-            {
-                target.TakeDamage(attackDamage);
-                lastAttackTime = Time.time;
-            }
+            target.TakeDamage(attackDamage);
+            lastAttackTime = Time.time;
+            Debug.Log($"[BugEnemyController] ¡Contacto con el jugador infligió {attackDamage} de daño!");
         }
     }
 

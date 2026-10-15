@@ -16,6 +16,8 @@ public class FlyingEnemyController : MonoBehaviour
     [SerializeField] private float rotationSpeed = 5f;
 
     [Header("Combat Distances")]
+    [Tooltip("Distancia a partir de la cual detecta y ataca al jugador.")]
+    [SerializeField] private float detectionRange = 24f;
     [Tooltip("Distancia deseada que intentará mantener respecto al jugador.")]
     [SerializeField] private float preferredDistance = 8f;
     [Tooltip("Distancia mínima; si el jugador se acerca más, el enemigo retrocede.")]
@@ -34,18 +36,20 @@ public class FlyingEnemyController : MonoBehaviour
     private float nextFireTime;
     private bool isCharging;
     private Vector3 originalScale;
+    private Vector3 spawnPosition;
 
     private void Awake()
     {
         health = GetComponent<EnemyHealth>();
         originalScale = transform.localScale;
+        spawnPosition = transform.position;
         FindPlayer();
     }
 
     private void Start()
     {
         if (player == null) FindPlayer();
-        nextFireTime = Time.time + Random.Range(1f, fireRate);
+        nextFireTime = Time.time + Random.Range(1.5f, fireRate);
     }
 
     private void Update()
@@ -58,9 +62,21 @@ public class FlyingEnemyController : MonoBehaviour
             return;
         }
 
-        if (player.dead) return;
+        if (player.dead)
+        {
+            HandleIdleHover();
+            return;
+        }
 
-        HandleFlightMovement();
+        float distanceToPlayer = Vector3.Distance(transform.position, player.transform.position);
+
+        if (distanceToPlayer > detectionRange)
+        {
+            HandleIdleHover();
+            return;
+        }
+
+        HandleFlightMovement(distanceToPlayer);
 
         if (!isCharging && Time.time >= nextFireTime)
         {
@@ -77,7 +93,14 @@ public class FlyingEnemyController : MonoBehaviour
         }
     }
 
-    private void HandleFlightMovement()
+    private void HandleIdleHover()
+    {
+        float bobOffset = Mathf.Sin(Time.time * bobSpeed) * bobAmount;
+        Vector3 targetPos = spawnPosition + Vector3.up * bobOffset;
+        transform.position = Vector3.Lerp(transform.position, targetPos, Time.deltaTime * 2f);
+    }
+
+    private void HandleFlightMovement(float currentDistance)
     {
         Vector3 playerPos = player.transform.position;
         Vector3 targetPos = playerPos;
@@ -85,10 +108,6 @@ public class FlyingEnemyController : MonoBehaviour
         // Mantener altura sobre el suelo / jugador con efecto de flotación
         float bobOffset = Mathf.Sin(Time.time * bobSpeed) * bobAmount;
         targetPos.y = Mathf.Max(playerPos.y + hoverHeight + bobOffset, hoverHeight * 0.5f);
-
-        // Vector hacia el jugador
-        Vector3 vectorToPlayer = playerPos - transform.position;
-        float currentDistance = vectorToPlayer.magnitude;
 
         // Movimiento de acercamiento o retroceso
         Vector3 desiredPosition = transform.position;
@@ -139,8 +158,11 @@ public class FlyingEnemyController : MonoBehaviour
 
         transform.localScale = originalScale;
 
-        // Disparar proyectil
-        Shoot();
+        // Disparar proyectil si sigue en rango
+        if (player != null && !player.dead && Vector3.Distance(transform.position, player.transform.position) <= detectionRange * 1.2f)
+        {
+            Shoot();
+        }
 
         nextFireTime = Time.time + fireRate;
         isCharging = false;
@@ -149,35 +171,40 @@ public class FlyingEnemyController : MonoBehaviour
     [ContextMenu("Test Shoot")]
     public void Shoot()
     {
-        if (player == null) FindPlayer();
+        Vector3 origin = shootPoint != null ? shootPoint.position : transform.position + transform.forward * 0.8f;
+        Vector3 target = player != null ? player.transform.position + Vector3.up * 1f : origin + transform.forward * 10f;
+        Vector3 direction = (target - origin).normalized;
 
-        Vector3 spawnPos = shootPoint != null ? shootPoint.position : transform.position + transform.forward * 0.8f;
-        Vector3 targetPos = player != null ? (player.transform.position + Vector3.up * 1.0f) : (transform.position + transform.forward * 5f);
-        Vector3 shootDir = (targetPos - spawnPos).normalized;
-
-        GameObject projObj;
         if (projectilePrefab != null)
         {
-            projObj = Instantiate(projectilePrefab, spawnPos, Quaternion.LookRotation(shootDir));
+            GameObject projObj = Instantiate(projectilePrefab, origin, Quaternion.LookRotation(direction));
+            EnemyProjectile proj = projObj.GetComponent<EnemyProjectile>();
+            if (proj != null)
+            {
+                proj.Initialize(direction, projectileDamage, projectileSpeed);
+            }
         }
         else
         {
-            // Si no se asignó prefab en el inspector, crear uno dinámico con primitivo de esfera
-            projObj = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-            projObj.name = "FloatingSkull_Fireball";
-            projObj.transform.position = spawnPos;
-            projObj.transform.localScale = Vector3.one * 0.45f;
-            Collider col = projObj.GetComponent<Collider>();
-            col.isTrigger = true;
+            // Proyectil de respaldo si no hay prefab asignado
+            GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            sphere.name = "EnemyFireball";
+            sphere.transform.position = origin;
+            sphere.transform.localScale = Vector3.one * 0.5f;
+
+            var rend = sphere.GetComponent<Renderer>();
+            if (rend != null)
+            {
+                rend.material.color = new Color(1f, 0.3f, 0f);
+            }
+
+            SphereCollider col = sphere.GetComponent<SphereCollider>();
+            if (col != null) col.isTrigger = true;
+
+            EnemyProjectile proj = sphere.AddComponent<EnemyProjectile>();
+            proj.Initialize(direction, projectileDamage, projectileSpeed);
         }
 
-        EnemyProjectile projectile = projObj.GetComponent<EnemyProjectile>();
-        if (projectile == null)
-        {
-            projectile = projObj.AddComponent<EnemyProjectile>();
-        }
-
-        projectile.Initialize(shootDir, projectileDamage, projectileSpeed);
         Debug.Log($"[FlyingEnemyController] ¡Calavera flotante disparó un proyectil hacia el jugador!");
     }
 }

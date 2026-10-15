@@ -104,11 +104,18 @@ public class PlayerController : MonoBehaviour, IDamageable
     public void TakeDamage(int damage)
     {
         if (dead) return;
-        if (Time.time - lastDamageTime < invulnerabilityDuration) return;
+        // Daño letal por lava o caída ignora el cooldown de invulnerabilidad
+        if (damage < 90 && Time.time - lastDamageTime < invulnerabilityDuration) return;
 
         lastDamageTime = Time.time;
         health -= damage;
         Debug.Log($"[PlayerController] Player took {damage} damage! Remaining health: {health}");
+
+        if (gameController != null)
+        {
+            gameController.OnPlayerTookDamage();
+        }
+
         if (health <= 0)
         {
             Die();
@@ -118,11 +125,60 @@ public class PlayerController : MonoBehaviour, IDamageable
     [ContextMenu("Kill Player")]
     public void Die()
     {
+        if (dead) return;
         dead = true;
         health = 0;
+        Debug.Log("[PlayerController] ¡El jugador ha muerto!");
         if (gameController != null)
         {
-            gameController.RespawnPlayer();
+            gameController.OnPlayerDied();
+        }
+        else
+        {
+            gameController = FindAnyObjectByType<GameController>();
+            if (gameController != null) gameController.OnPlayerDied();
+        }
+    }
+
+    private void OnControllerColliderHit(ControllerColliderHit hit)
+    {
+        if (dead) return;
+        if (hit.gameObject.name.Contains("Lava") || hit.gameObject.CompareTag("Lava") ||
+            hit.gameObject.GetComponentInParent<LavaHazard>() != null)
+        {
+            TakeDamage(99);
+            return;
+        }
+
+        if (hit.gameObject.CompareTag("Enemy") || hit.gameObject.GetComponentInParent<EnemyHealth>() != null)
+        {
+            TakeDamage(1);
+        }
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        CheckHazards(other.gameObject);
+    }
+
+    private void OnTriggerStay(Collider other)
+    {
+        CheckHazards(other.gameObject);
+    }
+
+    private void CheckHazards(GameObject obj)
+    {
+        if (dead) return;
+        if (obj.name.Contains("Lava") || obj.CompareTag("Lava") ||
+            obj.GetComponentInParent<LavaHazard>() != null)
+        {
+            TakeDamage(99);
+            return;
+        }
+
+        if (obj.CompareTag("Enemy") || obj.GetComponentInParent<EnemyHealth>() != null)
+        {
+            TakeDamage(1);
         }
     }
 
