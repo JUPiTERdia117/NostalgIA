@@ -1,14 +1,17 @@
 using UnityEngine;
 
 /// <summary>
-/// Zona de peligro por lava ardiente.
+/// Zona de peligro por lava ("Piscina Azul" con código animado bajando).
 /// Aplica daño letal instantáneo al jugador si la toca, cae en ella o entra en su volumen,
-/// provocando su muerte y reaparición en el último punto de control.
+/// provocando su muerte y reaparicion en el último punto de control.
 /// </summary>
 public class LavaHazard : MonoBehaviour
 {
     [Tooltip("Cantidad de daño infligido. 99 para muerte instantánea.")]
     [SerializeField] private int damage = 99;
+    [SerializeField] private bool applyBlueCodeShader = true;
+
+    private static Material sharedBlueCodeMaterial;
 
     private PlayerController player;
     private Collider myCollider;
@@ -21,12 +24,49 @@ public class LavaHazard : MonoBehaviour
         myCollider = GetComponent<Collider>();
         CacheBounds();
         FindPlayer();
+        if (applyBlueCodeShader)
+        {
+            ApplyBlueCodeVisuals();
+        }
     }
 
     private void Start()
     {
         CacheBounds();
         if (player == null) FindPlayer();
+        if (applyBlueCodeShader)
+        {
+            ApplyBlueCodeVisuals();
+        }
+    }
+
+    public void ApplyBlueCodeVisuals()
+    {
+        Renderer rend = GetComponent<Renderer>();
+        if (rend != null)
+        {
+            Shader blueShader = Shader.Find("Tutorial/BlueCodeLava");
+            if (blueShader == null)
+            {
+                blueShader = Resources.Load<Shader>("BlueCodeLava");
+            }
+
+            if (blueShader != null)
+            {
+                if (sharedBlueCodeMaterial == null || sharedBlueCodeMaterial.shader != blueShader)
+                {
+                    sharedBlueCodeMaterial = new Material(blueShader);
+                    sharedBlueCodeMaterial.name = "BlueCodePool_RuntimeMat";
+                }
+                rend.sharedMaterial = sharedBlueCodeMaterial;
+            }
+        }
+
+        // Actualizar luces de resplandor a tono azul eléctrico
+        foreach (Light l in GetComponentsInChildren<Light>(true))
+        {
+            l.color = new Color(0.05f, 0.45f, 1.0f, 1.0f);
+        }
     }
 
     private void CacheBounds()
@@ -65,7 +105,6 @@ public class LavaHazard : MonoBehaviour
 
         if (player.dead) return;
 
-        // Si tenemos collider, refrescamos bounds periódicamente o usamos bounds directos
         if (myCollider != null)
         {
             worldBounds = myCollider.bounds;
@@ -82,9 +121,11 @@ public class LavaHazard : MonoBehaviour
             float minZ = Mathf.Min(worldBounds.min.z, worldBounds.max.z);
             float maxZ = Mathf.Max(worldBounds.min.z, worldBounds.max.z);
 
-            bool insideX = playerPos.x >= minX - 0.2f && playerPos.x <= maxX + 0.2f;
-            bool insideZ = playerPos.z >= minZ - 0.2f && playerPos.z <= maxZ + 0.2f;
-            bool insideY = playerPos.y <= surfaceY + 0.4f && playerPos.y >= surfaceY - 8.0f;
+            // Margen interior para no matar al jugador cuando pisa el borde seco junto a la piscina
+            bool insideX = playerPos.x >= minX + 0.15f && playerPos.x <= maxX - 0.15f;
+            bool insideZ = playerPos.z >= minZ + 0.15f && playerPos.z <= maxZ - 0.15f;
+            // playerPos.y está en los pies de la cápsula; solo es letal si los pies bajan al nivel de la superficie de lava
+            bool insideY = playerPos.y <= surfaceY + 0.12f && playerPos.y >= surfaceY - 3.0f;
 
             if (insideX && insideZ && insideY)
             {

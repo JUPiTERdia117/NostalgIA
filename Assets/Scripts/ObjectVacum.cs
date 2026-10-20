@@ -1,14 +1,13 @@
 using UnityEngine;
 using UnityEngine.Serialization;
 using System.Collections.Generic;
+using System;
 
 /// <summary>
 /// Detecta, almacena y lanza objetos absorbibles desde la dirección de la mirada.
 /// </summary>
 public class ObjectVacum : MonoBehaviour
 {
-
-
     // Filtro de detección de absorción; se construye a partir del nombre de capa Poolable.
     LayerMask layerMask;
     private PlayerAim aim;
@@ -37,8 +36,13 @@ public class ObjectVacum : MonoBehaviour
     [SerializeField, Min(0f)] private float maxLaunchSpin = 5f;
 	
 	[Tooltip("Cantidad de objetos que puede almacenar la aspiradora.")]	
-	[SerializeField, Min(0f)] private int objectCapacity = 1;
-	public int currentCapacity { get { return (objectCapacity - objectsToPool.Count) ; } }
+	[SerializeField, Min(1)] private int objectCapacity = 5;
+	public int currentCapacity { get { return Mathf.Max(0, objectCapacity - objectsToPool.Count); } }
+    public int StoredCount => objectsToPool != null ? objectsToPool.Count : 0;
+    public int ObjectCapacity => Mathf.Max(1, objectCapacity);
+
+    public event Action<GameObject> OnObjectAbsorbed;
+    public event Action<GameObject> OnObjectLaunched;
 
     // Caja alineada con el mundo de cada objeto guardado: centro relativo a su posición y tamaño completo. Se captura antes de desactivarlo.
     private readonly Dictionary<GameObject, Bounds> storedBounds = new Dictionary<GameObject, Bounds>();
@@ -49,6 +53,10 @@ public class ObjectVacum : MonoBehaviour
     void Awake()
     {
         layerMask = LayerMask.GetMask("Poolable");
+        if (GetComponent<ToolVisualController>() == null)
+        {
+            gameObject.AddComponent<ToolVisualController>();
+        }
     }
 
     /// <summary>
@@ -62,7 +70,8 @@ public class ObjectVacum : MonoBehaviour
         }
 
         aim = PlayerAim.GetOrCreate(firstPersonController);
-        rayVisual = new ToolRayVisual(transform, new Color(0.1f, 0.9f, 1f, 0.85f));
+        // Guía tenue gris neutra en reposo; al aspirar se oculta para dar protagonismo a las rayas grises de viento
+        rayVisual = new ToolRayVisual(transform, new Color(0.75f, 0.78f, 0.82f, 0.28f));
 
         if (firstPersonController == null || firstPersonController.playerCamera == null) return;
 
@@ -93,8 +102,8 @@ public class ObjectVacum : MonoBehaviour
 
     void LateUpdate()
     {
-        if (aim == null || !aim.IsReady) { rayVisual?.Hide(); return; }
-        rayVisual?.Draw(transform.position, aim.GetEndPoint(maxDistance), vacuumActive);
+        if (aim == null || !aim.IsReady || vacuumActive) { rayVisual?.Hide(); return; }
+        rayVisual?.Draw(transform.position, aim.GetEndPoint(maxDistance), false);
     }
 
     void OnDisable()
@@ -123,6 +132,8 @@ public class ObjectVacum : MonoBehaviour
         storedBounds[obj] = new Bounds(bounds.center - obj.transform.position, bounds.size);
         objectsToPool.Push(obj);
         obj.SetActive(false);
+
+        OnObjectAbsorbed?.Invoke(obj);
     }
 
     /// <summary>
@@ -133,6 +144,7 @@ public class ObjectVacum : MonoBehaviour
         // Aparta temporalmente los objetos bloqueados para poder probar los siguientes.
         var skipped = new Stack<GameObject>();
         bool launched = false;
+        GameObject launchedCandidate = null;
         while (objectsToPool.Count > 0)
         {
             GameObject candidate = objectsToPool.Pop();
@@ -140,6 +152,7 @@ public class ObjectVacum : MonoBehaviour
             if (TryLaunchObject(candidate))
             {
                 launched = true;
+                launchedCandidate = candidate;
                 break;
             }
             skipped.Push(candidate);
@@ -147,7 +160,11 @@ public class ObjectVacum : MonoBehaviour
 
         // Repone los objetos descartados en su orden original.
         while (skipped.Count > 0) objectsToPool.Push(skipped.Pop());
-        if (!launched && objectsToPool.Count > 0)
+        if (launched && launchedCandidate != null)
+        {
+            OnObjectLaunched?.Invoke(launchedCandidate);
+        }
+        else if (!launched && objectsToPool.Count > 0)
         {
             Debug.Log("No se pudo lanzar: comprueba el espacio libre y que los objetos tengan un Rigidbody en la raíz.", this);
         }
@@ -192,17 +209,17 @@ public class ObjectVacum : MonoBehaviour
         body.linearVelocity = Vector3.zero;
         body.AddForce(direction * Mathf.Max(0f, launchImpulse), ForceMode.Impulse);
 
-        // Marcar como lanzado para que cause daño al impactar enemigos y se destruya
+        // Marcar como lanzado por el jugador para garantizar daño mínimo y cálculo de fuerza al impactar
         PoolableController poolable = pooledObj.GetComponent<PoolableController>();
-        if (poolable != null) poolable.isThrown = true;
+        if (poolable != null) poolable.MarkAsThrownByPlayer(launchImpulse);
         ThrowableDamage throwable = pooledObj.GetComponent<ThrowableDamage>();
-        if (throwable != null) throwable.isThrown = true;
+        if (throwable != null) throwable.MarkAsThrownByPlayer(launchImpulse);
 
         // El giro disminuye con el tamaño y tiene un máximo para los objetos diminutos.
         float size = Mathf.Max(0.1f, Mathf.Max(bounds.size.x, Mathf.Max(bounds.size.y, bounds.size.z)));
         float spinSpeed = Mathf.Min(Mathf.Max(0f, maxLaunchSpin), Mathf.Max(0f, launchSpin) / size);
         // Inclina ligeramente el eje de giro para dar variedad a cada lanzamiento.
-        Vector3 spinAxis = (transform.right + transform.up * Random.Range(-0.35f, 0.35f)).normalized;
+        Vector3 spinAxis = (transform.right + transform.up * UnityEngine.Random.Range(-0.35f, 0.35f)).normalized;
         body.maxAngularVelocity = Mathf.Max(body.maxAngularVelocity, spinSpeed);
         body.angularVelocity = spinAxis * spinSpeed;
         storedBounds.Remove(pooledObj);

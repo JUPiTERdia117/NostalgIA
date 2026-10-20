@@ -2,7 +2,8 @@ using UnityEngine;
 
 /// <summary>
 /// Controla la animación y el estado de un objeto que puede ser absorbido.
-/// Ahora incluye daño asignado al ser lanzado y efecto de fragmentos al destruirse contra un enemigo.
+/// Registra su masa y aceleración (F = m * a) para el sistema de daño físico contra enemigos
+/// y genera fragmentos al destruirse.
 /// </summary>
 public class PoolableController : MonoBehaviour
 {
@@ -22,23 +23,34 @@ public class PoolableController : MonoBehaviour
     [Tooltip("Distancia al centro de la aspiradora que completa la absorción y guarda el objeto, en unidades de Unity.")]
     [SerializeField, Min(0f)] private float absorptionDistance = 0.2f;
 
-    [Header("Combat & Destruction")]
-    [Tooltip("Cantidad de daño asignada que causa este objeto al ser lanzado contra un enemigo.")]
-    [SerializeField] private int impactDamage = 2;
+    [Header("Combat & Physics Force (F = m * a)")]
+    [Tooltip("Daño mínimo garantizado cuando este objeto es lanzado por el jugador contra un enemigo.")]
+    [SerializeField] private int impactDamage = 1;
     [Tooltip("Si es verdadero, el objeto se destruye con fragmentos al chocar con un enemigo.")]
     [SerializeField] private bool destroyOnEnemyHit = true;
     [Tooltip("Cantidad de fragmentos que se generan al romperse contra un enemigo.")]
     [SerializeField] private int debrisCount = 6;
-    [Tooltip("Velocidad mínima requerida de impacto para causar daño.")]
-    [SerializeField] private float minImpactVelocity = 2.0f;
+    [Tooltip("Velocidad mínima requerida de impacto para causar daño cuando no fue lanzado.")]
+    [SerializeField] private float minImpactVelocity = 1.8f;
 
     [HideInInspector] public bool isThrown = false;
     private bool isDestroyed = false;
+
+    private Rigidbody rb;
+    private Vector3 previousVelocity;
+    private float currentAcceleration;
+    private float peakRecentAcceleration;
+    private float peakAccelerationTimer;
+    private float launchAcceleration;
+    private float thrownTimestamp = -99f;
 
     public int ImpactDamage { get => impactDamage > 0 ? impactDamage : 1; set => impactDamage = value; }
     public bool DestroyOnEnemyHit { get => destroyOnEnemyHit; set => destroyOnEnemyHit = value; }
     public float MinImpactVelocity => minImpactVelocity;
     public bool IsDestroyed => isDestroyed;
+    public float CurrentAcceleration => Mathf.Max(currentAcceleration, peakRecentAcceleration);
+    public float LaunchAcceleration => launchAcceleration;
+    public Vector3 PreImpactVelocity => previousVelocity;
 
     // Escala local de referencia, incluidos tamaños no uniformes.
     private Vector3 originalScale;
@@ -65,13 +77,16 @@ public class PoolableController : MonoBehaviour
     void Awake()
     {
         originalScale = transform.localScale;
+        rb = GetComponent<Rigidbody>();
     }
 
     /// <summary>
-    /// Avanza la absorción o recupera gradualmente el tamaño cuando deja de haber una aspiradora activa.
+    /// Avanza la absorción, recupera gradualmente el tamaño y registra la aceleración física (a = dv/dt).
     /// </summary>
     void FixedUpdate()
     {
+        TrackPhysicsKinematics();
+
         if (pooller == null || !pooller.vacuumActive)
         {
             // Captura la escala una sola vez al interrumpir la trayectoria.
@@ -94,6 +109,60 @@ public class PoolableController : MonoBehaviour
         }
 
         MoveToVacuum();
+    }
+
+    private void TrackPhysicsKinematics()
+    {
+        if (rb == null) rb = GetComponent<Rigidbody>();
+        if (rb == null) return;
+
+        float dt = Mathf.Max(0.0001f, Time.fixedDeltaTime);
+        Vector3 vel = rb.linearVelocity;
+        Vector3 dv = vel - previousVelocity;
+        float kinematicAccel = dv.magnitude / dt;
+
+        if (vel.y < -0.5f && rb.useGravity)
+        {
+            kinematicAccel = Mathf.Max(kinematicAccel, Physics.gravity.magnitude + Mathf.Abs(vel.y) * 1.5f);
+        }
+
+        currentAcceleration = kinematicAccel;
+        if (kinematicAccel >= peakRecentAcceleration)
+        {
+            peakRecentAcceleration = kinematicAccel;
+            peakAccelerationTimer = 0.25f;
+        }
+        else if (peakAccelerationTimer > 0f)
+        {
+            peakAccelerationTimer -= dt;
+        }
+        else
+        {
+            peakRecentAcceleration = kinematicAccel;
+        }
+
+        previousVelocity = vel;
+
+        if (isThrown && Time.time - thrownTimestamp > 0.6f && vel.sqrMagnitude < 0.25f)
+        {
+            isThrown = false;
+            launchAcceleration = 0f;
+        }
+    }
+
+    /// <summary>
+    /// Registra que el objeto fue lanzado por el jugador con el impulso indicado.
+    /// </summary>
+    public void MarkAsThrownByPlayer(float launchImpulse)
+    {
+        if (rb == null) rb = GetComponent<Rigidbody>();
+        isThrown = true;
+        thrownTimestamp = Time.time;
+        float mass = rb != null ? Mathf.Max(0.1f, rb.mass) : 1f;
+        float dt = Mathf.Max(0.005f, Time.fixedDeltaTime);
+        launchAcceleration = (launchImpulse / dt) / mass;
+        peakRecentAcceleration = Mathf.Max(peakRecentAcceleration, launchAcceleration);
+        peakAccelerationTimer = 0.5f;
     }
 
     /// <summary>
@@ -163,12 +232,12 @@ public class PoolableController : MonoBehaviour
     void FinishAbsorption()
     {
         transform.localScale = originalScale;
-		
+
         if ((pooller.currentCapacity) == 0)
         {
             ResetPull();
             return;
-        } 
+        }
         pooller.PoolObject(gameObject);
     }
 
@@ -193,6 +262,10 @@ public class PoolableController : MonoBehaviour
         restoreProgress = 1f;
         pooller = null;
         isThrown = false;
+        previousVelocity = Vector3.zero;
+        currentAcceleration = 0f;
+        peakRecentAcceleration = 0f;
+        launchAcceleration = 0f;
     }
 
     private void OnCollisionEnter(Collision collision)
@@ -229,11 +302,11 @@ public class PoolableController : MonoBehaviour
                 fragment.GetComponent<Renderer>().sharedMaterial = mat;
             }
 
-            Rigidbody rb = fragment.AddComponent<Rigidbody>();
-            rb.mass = 0.15f;
+            Rigidbody fragRb = fragment.AddComponent<Rigidbody>();
+            fragRb.mass = 0.15f;
             Vector3 force = (Random.onUnitSphere + Vector3.up * 0.6f).normalized * Random.Range(4f, 8f);
-            rb.AddForce(force, ForceMode.Impulse);
-            rb.angularVelocity = Random.insideUnitSphere * 12f;
+            fragRb.AddForce(force, ForceMode.Impulse);
+            fragRb.angularVelocity = Random.insideUnitSphere * 12f;
 
             Destroy(fragment, Random.Range(1.2f, 2.2f));
         }

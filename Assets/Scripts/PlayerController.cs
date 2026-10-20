@@ -3,14 +3,15 @@ using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.OnScreen;
 
-/// <summary>Selecciona la herramienta y traduce pulsaciones cortas/largas del botón móvil.</summary>
+/// <summary>Selecciona la herramienta y traduce pulsaciones cortas/largas del botón móvil.
+/// El cambio de herramienta SOLO ocurre mediante el botón dedicado de cambiar herramienta ([Q] / Gamepad North).</summary>
 public class PlayerController : MonoBehaviour, IDamageable
 {
     public enum Tool { Grapple, Vacuum }
 
     [SerializeField] private ObjectVacum vacuum;
     [SerializeField] private GrapleController graple;
-    [SerializeField] private Tool selectedTool = Tool.Grapple;
+    [SerializeField] private Tool selectedTool = Tool.Vacuum;
     [Tooltip("Segundos de pulsación para empezar a aspirar. Soltar antes lanza un objeto.")]
     [SerializeField, Min(0.05f)] private float vacuumHoldTime = 0.2f;
     [SerializeField] private OnScreenStick toolStick;
@@ -19,6 +20,7 @@ public class PlayerController : MonoBehaviour, IDamageable
 
     public Tool SelectedTool => selectedTool;
     public GrapleController GrapleController => graple;
+    public ObjectVacum VacuumController => vacuum;
     public bool dead = false;
     public int health = 3;
     private GameController gameController;
@@ -50,6 +52,7 @@ public class PlayerController : MonoBehaviour, IDamageable
         bool toolDown = gamepad != null && gamepad.buttonWest.isPressed;
         if (!toolDown) waitForToolRelease = false;
 
+        // ÚNICA forma permitida de cambiar de herramienta: botón indicado ([Q] o botón Norte del mando)
         bool changeTool = (gamepad != null && gamepad.buttonNorth.wasPressedThisFrame) ||
             (Keyboard.current != null && Keyboard.current.qKey.wasPressedThisFrame);
         if (changeTool)
@@ -71,28 +74,43 @@ public class PlayerController : MonoBehaviour, IDamageable
             }
         }
 
-        // Evita interpretar un toque sobre la UI como un clic de aspiración.
+        // Tecla X o Clics solo ejecutan la acción de la herramienta ACTUALMENTE seleccionada,
+        // NUNCA cambian de herramienta automáticamente.
         if (Keyboard.current != null && Keyboard.current.xKey.wasPressedThisFrame)
         {
-            SelectTool(Tool.Grapple);
-            if (graple != null && graple.isActiveAndEnabled) graple.Graple();
+            if (selectedTool == Tool.Grapple && graple != null && graple.isActiveAndEnabled)
+            {
+                graple.Graple();
+            }
         }
+
         Mouse mouse = Application.isMobilePlatform ? null : Mouse.current;
         bool overUI = EventSystem.current != null && EventSystem.current.IsPointerOverGameObject();
         if (mouse != null && !overUI)
         {
-            if (mouse.leftButton.wasPressedThisFrame)
+            if (selectedTool == Tool.Vacuum)
             {
-                SelectTool(Tool.Vacuum);
-                mouseVacuumHeld = true;
+                if (mouse.leftButton.wasPressedThisFrame)
+                {
+                    mouseVacuumHeld = true;
+                }
+                if (mouse.rightButton.wasPressedThisFrame)
+                {
+                    if (vacuum != null && vacuum.isActiveAndEnabled) vacuum.LaunchObject();
+                }
             }
-            if (mouse.rightButton.wasPressedThisFrame)
+            else if (selectedTool == Tool.Grapple)
             {
-                SelectTool(Tool.Vacuum);
-                if (vacuum != null && vacuum.isActiveAndEnabled) vacuum.LaunchObject();
+                if (mouse.leftButton.wasPressedThisFrame)
+                {
+                    if (graple != null && graple.isActiveAndEnabled) graple.Graple();
+                }
             }
         }
-        if (mouse == null || !mouse.leftButton.isPressed) mouseVacuumHeld = false;
+        if (mouse == null || !mouse.leftButton.isPressed || selectedTool != Tool.Vacuum)
+        {
+            mouseVacuumHeld = false;
+        }
 
         if (vacuum != null)
             vacuum.vacuumActive = selectedTool == Tool.Vacuum && vacuum.isActiveAndEnabled &&
@@ -192,6 +210,7 @@ public class PlayerController : MonoBehaviour, IDamageable
     {
         if (selectedTool == tool) return;
         CancelToolInput();
+        if (graple != null && graple.IsGrappling) graple.Release();
         selectedTool = tool;
         ApplyToolSelection();
     }

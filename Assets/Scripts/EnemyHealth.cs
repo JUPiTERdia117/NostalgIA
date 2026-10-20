@@ -15,10 +15,12 @@ public enum EnemyHealthTier
 
 /// <summary>
 /// Gestiona la vida, los niveles de salud, el daño recibido y la muerte de los enemigos.
-/// Cambia dinámicamente el color del enemigo según su porcentaje de salud y muestra
-/// retroalimentación visual completa (flash, popups numéricos de daño y barra de vida).
-/// Al ser impactado por objetos lanzados, recibe el daño asignado a ese objeto específico
-/// y permite que el objeto se destruya con su propio efecto de fragmentos.
+/// El sistema de daño por impacto se basa en la Fuerza física en el momento del impacto:
+///   F = m * a (Masa del objeto * Aceleración en el impacto / desaceleración de choque / gravedad).
+/// - Si un objeto pesado cae sobre un enemigo (aunque NO haya sido lanzado por el jugador),
+///   su gran peso y aceleración de caída generan una fuerza F = m * a capaz de aplastarlo y matarlo.
+/// - Siempre que el jugador lance un objeto (isThrown == true), se garantiza que inflija al menos
+///   el daño mínimo al enemigo, escalando hacia arriba si la fuerza F = m * a es mayor.
 /// </summary>
 public class EnemyHealth : MonoBehaviour, IDamageable
 {
@@ -36,11 +38,15 @@ public class EnemyHealth : MonoBehaviour, IDamageable
     [Tooltip("Color a baja salud (crítico / sangrante).")]
     [SerializeField] private Color criticalColor = new Color(0.85f, 0.08f, 0.08f);
 
-    [Header("Impact Settings")]
-    [Tooltip("Velocidad mínima de impacto de un objeto genérico para causar daño.")]
-    [SerializeField] private float minImpactVelocity = 3.5f;
-    [Tooltip("Daño por defecto si el objeto impactante no tiene daño asignado.")]
-    [SerializeField] private int defaultImpactDamage = 1;
+    [Header("Physics Impact Settings (F = m * a)")]
+    [Tooltip("Cantidad de Fuerza física (Newtons = kg * m/s^2) equivalente a 1 punto de daño.")]
+    [SerializeField] private float forcePerDamageUnit = 45f;
+    [Tooltip("Fuerza mínima (Newtons) para que un objeto NO lanzado por el jugador haga daño al caer o chocar.")]
+    [SerializeField] private float minUnthrownForceThreshold = 25f;
+    [Tooltip("Velocidad mínima de impacto de un objeto no lanzado para activar el cálculo de fuerza.")]
+    [SerializeField] private float minImpactVelocity = 1.6f;
+    [Tooltip("Daño mínimo garantizado siempre que el jugador lance un objeto.")]
+    [SerializeField] private int minPlayerThrownDamage = 1;
 
     [Header("Visual Feedback")]
     [SerializeField] private Color damageFlashColor = Color.white;
@@ -204,54 +210,136 @@ public class EnemyHealth : MonoBehaviour, IDamageable
     {
         if (IsDead) return;
 
-        // Comprobar si el objeto es arrojable (PoolableController o ThrowableDamage)
+        // Ignorar colisiones con el propio jugador o con otros enemigos
+        if (collision.gameObject.CompareTag("Player") ||
+            collision.gameObject.GetComponentInParent<PlayerController>() != null ||
+            collision.gameObject.GetComponentInParent<EnemyHealth>() != null)
+        {
+            return;
+        }
+
         PoolableController poolable = collision.gameObject.GetComponentInParent<PoolableController>();
         ThrowableDamage throwable = collision.gameObject.GetComponentInParent<ThrowableDamage>();
 
         if (poolable != null && poolable.IsDestroyed) return;
         if (throwable != null && throwable.IsDestroyed) return;
 
-        float speed = collision.relativeVelocity.magnitude;
-        float requiredVelocity = poolable != null ? poolable.MinImpactVelocity : (throwable != null ? throwable.MinImpactVelocity : minImpactVelocity);
+        Rigidbody incomingRb = collision.rigidbody != null
+            ? collision.rigidbody
+            : collision.gameObject.GetComponentInParent<Rigidbody>();
 
-        bool isThrownObject = (poolable != null && (poolable.isThrown || speed >= 1.5f)) ||
-                              (throwable != null && (throwable.isThrown || speed >= 1.5f));
+        // Solo evaluar objetos con física o componentes arrojables
+        if (incomingRb == null && poolable == null && throwable == null) return;
 
-        if (isThrownObject || speed >= requiredVelocity)
+        bool isThrownByPlayer = (poolable != null && poolable.isThrown) ||
+                                (throwable != null && throwable.isThrown);
+
+        float dt = Mathf.Max(0.005f, Time.fixedDeltaTime);
+        float impactSpeed = collision.relativeVelocity.magnitude;
+
+        // 1. Obtener la MASA efectiva (m) del objeto que impacta
+        float explicitMass = incomingRb != null ? Mathf.Max(0.1f, incomingRb.mass) : 1.0f;
+        Vector3 scale = collision.transform.lossyScale;
+        float volumeEstimate = Mathf.Abs(scale.x * scale.y * scale.z);
+        // Si es un bloque/obstáculo grande que cae y tenía masa por defecto (1), su volumen aporta peso real de aplastamiento
+        float effectiveMass = (!isThrownByPlayer && volumeEstimate > 1.8f && explicitMass <= 1.5f)
+            ? Mathf.Max(explicitMass, volumeEstimate * 2.2f)
+            : explicitMass;
+
+        // 2. Obtener la ACELERACIÓN en el momento del impacto (a)
+        //    a) Desaceleración brusca de contacto: a_impact = dv / dt
+        float contactDeceleration = impactSpeed / dt;
+        //    b) Aceleración derivada del impulso físico resuelto por Unity: a_impulse = (J / dt) / m
+        float impulseAcceleration = (collision.impulse.magnitude / dt) / Mathf.Max(0.1f, effectiveMass);
+        //    c) Aceleración cinemática previa registrada en el objeto (incluyendo lanzamiento y caída libre)
+        float trackedAccel = 0f;
+        if (throwable != null)
         {
-            int damageToApply = defaultImpactDamage;
-            bool shouldBreak = false;
+            trackedAccel = Mathf.Max(throwable.CurrentAcceleration, isThrownByPlayer ? throwable.LaunchAcceleration * 0.35f : 0f);
+        }
+        if (poolable != null)
+        {
+            trackedAccel = Mathf.Max(trackedAccel, Mathf.Max(poolable.CurrentAcceleration, isThrownByPlayer ? poolable.LaunchAcceleration * 0.35f : 0f));
+        }
 
+        //    d) Verificar si el objeto está cayendo sobre el enemigo (aplastamiento por gravedad y peso)
+        Vector3 preVel = throwable != null ? throwable.PreImpactVelocity :
+                         (poolable != null ? poolable.PreImpactVelocity :
+                         (incomingRb != null ? incomingRb.linearVelocity : -collision.relativeVelocity));
+        bool isFallingFromAbove = (collision.transform.position.y > transform.position.y + 0.15f) ||
+                                  (preVel.y < -1.0f) ||
+                                  (collision.relativeVelocity.y < -1.0f);
+
+        float gravityAccel = isFallingFromAbove ? Physics.gravity.magnitude * (1f + Mathf.Abs(preVel.y) * 0.35f) : 0f;
+
+        // Aceleración neta efectiva en el instante del choque
+        float effectiveAcceleration = Mathf.Max(contactDeceleration * 0.35f, impulseAcceleration, trackedAccel * 0.5f) + gravityAccel;
+
+        // 3. Calcular FUERZA F = m * a
+        float forceMultiplier = throwable != null ? throwable.ForceMultiplier : 1.0f;
+        float impactForce = effectiveMass * effectiveAcceleration * forceMultiplier;
+
+        // Si un objeto muy pesado cae sobre el enemigo (aplastamiento por gran peso), amplificar efecto de aplastamiento
+        if (!isThrownByPlayer && isFallingFromAbove && effectiveMass >= 2.5f && impactSpeed >= 1.1f)
+        {
+            impactForce *= 1.85f;
+        }
+
+        float minVelRequired = poolable != null ? poolable.MinImpactVelocity :
+                               (throwable != null ? throwable.MinImpactVelocity : minImpactVelocity);
+
+        bool qualifiesForUnthrownImpact = !isThrownByPlayer &&
+                                          (impactSpeed >= minVelRequired || (isFallingFromAbove && effectiveMass >= 2.5f && impactSpeed >= 0.9f)) &&
+                                          impactForce >= minUnthrownForceThreshold;
+
+        if (!isThrownByPlayer && !qualifiesForUnthrownImpact)
+        {
+            return;
+        }
+
+        // 4. Convertir Fuerza (F = m * a) en puntos de daño
+        int forceBasedDamage = Mathf.FloorToInt(impactForce / Mathf.Max(1f, forcePerDamageUnit));
+
+        int damageToApply = forceBasedDamage;
+        if (isThrownByPlayer)
+        {
+            // Garantizar SIEMPRE daño mínimo cuando el objeto es lanzado por el jugador
+            int guaranteedMin = Mathf.Max(1, minPlayerThrownDamage);
+            if (throwable != null) guaranteedMin = Mathf.Max(guaranteedMin, throwable.MinPlayerThrowDamage);
+            else if (poolable != null) guaranteedMin = Mathf.Max(guaranteedMin, poolable.ImpactDamage);
+
+            damageToApply = Mathf.Max(guaranteedMin, forceBasedDamage);
+        }
+        else if (isFallingFromAbove && effectiveMass >= 4.0f && impactSpeed >= 2.0f)
+        {
+            // Un objeto de gran peso que cae sobre un enemigo puede aplastarlo y matarlo de golpe
+            damageToApply = Mathf.Max(forceBasedDamage, currentHealth);
+        }
+        else
+        {
+            damageToApply = Mathf.Max(1, forceBasedDamage);
+        }
+
+        if (damageToApply <= 0) return;
+
+        Debug.Log($"[EnemyHealth] {gameObject.name} impactado por {collision.gameObject.name} | LanzadoPorJugador={isThrownByPlayer} | Masa(m)={effectiveMass:F2}kg | Acel(a)={effectiveAcceleration:F2}m/s² | Fuerza(F=m*a)={impactForce:F1}N -> Daño={damageToApply}");
+        TakeDamage(damageToApply);
+
+        bool shouldBreak = false;
+        if (throwable != null) shouldBreak = throwable.DestroyOnImpact;
+        else if (poolable != null) shouldBreak = poolable.DestroyOnEnemyHit;
+
+        // Si fue lanzado por el jugador o si el impacto de caída fue suficientemente fuerte, romper en fragmentos
+        if (shouldBreak && (isThrownByPlayer || impactForce >= forcePerDamageUnit * 1.2f))
+        {
+            Vector3 hitPoint = collision.contactCount > 0 ? collision.contacts[0].point : collision.transform.position;
             if (throwable != null)
             {
-                damageToApply = throwable.Damage;
-                shouldBreak = throwable.DestroyOnImpact;
+                throwable.BreakApart(hitPoint);
             }
             else if (poolable != null)
             {
-                damageToApply = poolable.ImpactDamage;
-                shouldBreak = poolable.DestroyOnEnemyHit;
-            }
-            else if (speed >= requiredVelocity * 2f)
-            {
-                damageToApply = defaultImpactDamage * 2;
-            }
-
-            Debug.Log($"[EnemyHealth] {gameObject.name} impactado por objeto lanzado {collision.gameObject.name}. Daño asignado: {damageToApply}");
-            TakeDamage(damageToApply);
-
-            // Destruir el objeto arrojadizo generando su propio estallido de fragmentos
-            if (shouldBreak)
-            {
-                Vector3 hitPoint = collision.contactCount > 0 ? collision.contacts[0].point : collision.transform.position;
-                if (throwable != null)
-                {
-                    throwable.BreakApart(hitPoint);
-                }
-                else if (poolable != null)
-                {
-                    poolable.BreakApart(hitPoint);
-                }
+                poolable.BreakApart(hitPoint);
             }
         }
     }

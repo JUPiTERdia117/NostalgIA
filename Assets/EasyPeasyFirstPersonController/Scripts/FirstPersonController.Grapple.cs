@@ -5,6 +5,7 @@ namespace EasyPeasyFirstPersonController
     public partial class FirstPersonController
     {
         private GrapleController activeGrapple;
+        public GrapleController GrapleControllerSafe => activeGrapple;
         private Vector3 grappleVelocity;
         private bool grappleFlight;
         private bool movingGrapple;
