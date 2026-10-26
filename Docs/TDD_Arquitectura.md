@@ -109,7 +109,7 @@ Dividimos el código en ensamblados para acortar la compilación y, sobre todo, 
 
 | Escena | Rol | Carga |
 | :--- | :--- | :--- |
-| `00_Boot` | Instancia el prefab persistente `GameRoot` (servicios) y aplica calidad, configuración y guardado | Primera del build, una vez |
+| `00_Boot` | Primera escena del build. El prefab persistente `GameRoot` (servicios) se instancia justo antes de cargarla, desde `Prefabs/Core/Resources/`, mediante `RuntimeInitializeOnLoadMethod(BeforeSceneLoad)`; así también existe al abrir una estación directamente en el editor. Aplica calidad, configuración y guardado | Primera del build, una vez |
 | `01_MainMenu` | Menú principal y opciones | Única (`LoadSceneMode.Single`, `GameRoot` persiste) |
 | `02_StationSelect` | Selección de estación con estrellas obtenidas | Única |
 | `10_Station_Primavera` | Estación 1 (incluye la secuencia tutorial) | Única, asíncrona con pantalla de carga |
@@ -390,7 +390,7 @@ El escalado de huesos del prototipo (`ToolVisualController`) se conserva para ga
 
 ### 7.1. Asset de acciones y esquemas de control
 
-El asset existente `InputSystem_Actions.inputactions` se reestructura en dos mapas: `Gameplay` y `UI`. Se genera su clase C# (`NostalgIAInputActions`) y se conservan tres esquemas de control: `KeyboardMouse`, `Gamepad` y `Touch`. Los esquemas `Joystick` y `XR` se eliminan.
+El asset existente `InputSystem_Actions.inputactions` se reestructura en dos mapas: `Gameplay` y `UI`. Se conservan tres esquemas de control: `KeyboardMouse`, `Gamepad` y `Touch`. *Decisión de implementación (Fase 1):* no se genera la clase C# del asset. El asset funciona como acciones de todo el proyecto (*Project-wide Actions*), y la clase generada crearía una segunda copia del asset en memoria. En su lugar, `InputReader` busca cada acción por nombre una sola vez al inicializarse (`InputActionNames`) y conserva las referencias. Los esquemas `Joystick` y `XR` se eliminan.
 
 | Acción | Tipo | Teclado y ratón | Mando Xbox | Táctil |
 | :--- | :--- | :--- | :--- | :--- |
@@ -410,7 +410,7 @@ El deslizamiento no es una acción independiente: el motor lo deriva de `Crouch`
 
 ### 7.2. `InputReader`
 
-`InputReader` es un `ScriptableObject` que implementa la interfaz de *callbacks* del mapa `Gameplay` generado. Expone:
+`InputReader` es un `ScriptableObject` que se suscribe a los *callbacks* de las acciones del mapa `Gameplay`, cuyas referencias cachea al inicializarse. Expone:
 
 - Valores continuos de lectura directa: `Move`, `LookDegrees` (ya convertido a grados de este frame), `SprintHeld`, `AbsorbHeld`.
 - Eventos de pulsación: `JumpPressed`, `CrouchPressed/Released`, `SwitchToolPressed`, `FirePressed`, `GrapplePressed`, `PausePressed`.
