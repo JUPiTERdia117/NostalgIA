@@ -3,7 +3,8 @@
     "rootNamespace": "NostalgIA.Input",
     "references": [
         "NostalgIA.Core",
-        "Unity.InputSystem"
+        "Unity.InputSystem",
+        "UnityEngine.UI"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
