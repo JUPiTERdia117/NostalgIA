@@ -8,8 +8,8 @@ using TMPro;
 
 public static class TutorialSceneSetup
 {
-    private const string ScenePath = "Assets/Scenes/Levels/Tutorial.unity";
-    private const string TutorialMaterialsPath = "Assets/Materials/Tutorial";
+    private const string ScenePath = "Assets/_Project/Scenes/Stations/Tutorial.unity";
+    private const string TutorialMaterialsPath = "Assets/_Project/Art/Materials/Primavera";
     private const string TMPFontPath = "Assets/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF.asset";
 
     [MenuItem("Tools/Setup Tutorial Level (Safe Refresh)")]

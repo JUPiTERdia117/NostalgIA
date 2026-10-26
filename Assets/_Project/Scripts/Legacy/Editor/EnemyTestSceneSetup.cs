@@ -6,9 +6,9 @@ using UnityEngine.AI;
 
 public static class EnemyTestSceneSetup
 {
-    private const string MaterialsPath = "Assets/Materials/Testing";
-    private const string PrefabsPath = "Assets/Prefabs";
-    private const string ScenePath = "Assets/Scenes/Testing/Enemies/EnemyTest.unity";
+    private const string MaterialsPath = "Assets/_Project/Art/Materials/Prototype";
+    private const string PrefabsPath = "Assets/_Project/Prefabs/Enemies/Prototype";
+    private const string ScenePath = "Assets/_Project/Scenes/Sandbox/Enemies/EnemyTest.unity";
     private const string PrefKey = "EnemySetup_InitialRunDone_v4";
 
     [InitializeOnLoadMethod]
