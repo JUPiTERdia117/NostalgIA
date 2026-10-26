@@ -1,3 +1,4 @@
+using NostalgIA.Gameplay.Player;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -39,7 +40,7 @@ public class NonEuclideanPortal : MonoBehaviour
     // Control de cruce fluido del jugador (dot-product de qué lado del plano de la puerta está)
     private Transform trackedPlayer;
     private CharacterController trackedCC;
-    private EasyPeasyFirstPersonController.FirstPersonController trackedFPC;
+    private PlayerMotor trackedMotor;
     private bool playerInTrigger = false;
     private float previousSideDot = 0f;
     private float lastTeleportTime = -99f;
@@ -113,7 +114,7 @@ public class NonEuclideanPortal : MonoBehaviour
             {
                 trackedPlayer = pObj.transform;
                 trackedCC = pObj.GetComponent<CharacterController>();
-                trackedFPC = pObj.GetComponent<EasyPeasyFirstPersonController.FirstPersonController>();
+                trackedMotor = pObj.GetComponent<PlayerMotor>();
             }
         }
     }
@@ -167,7 +168,7 @@ public class NonEuclideanPortal : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Player") || other.GetComponentInParent<PlayerController>() != null)
+        if (other.CompareTag("Player") || other.GetComponentInParent<PlayerHealth>() != null)
         {
             playerInTrigger = true;
             Vector3 checkPos = mainCamera != null ? mainCamera.transform.position : other.transform.position;
@@ -177,7 +178,7 @@ public class NonEuclideanPortal : MonoBehaviour
 
     private void OnTriggerExit(Collider other)
     {
-        if (other.CompareTag("Player") || other.GetComponentInParent<PlayerController>() != null)
+        if (other.CompareTag("Player") || other.GetComponentInParent<PlayerHealth>() != null)
         {
             playerInTrigger = false;
             previousSideDot = 0f;
@@ -215,8 +216,11 @@ public class NonEuclideanPortal : MonoBehaviour
         Quaternion newPlayerRot = Quaternion.LookRotation(newForward.normalized, Vector3.up);
 
         // Pequeño empuje en la dirección de salida para evitar re-colisionar con el plano en el siguiente frame
-        Vector3 moveVec = (trackedFPC != null && trackedFPC.currentVelocity.sqrMagnitude > 0.1f)
-            ? trackedFPC.currentVelocity.normalized
+        Vector3 currentHorizontal = trackedMotor != null
+            ? Vector3.ProjectOnPlane(trackedMotor.RawVelocity, Vector3.up)
+            : Vector3.zero;
+        Vector3 moveVec = currentHorizontal.sqrMagnitude > 0.1f
+            ? currentHorizontal.normalized
             : transform.forward;
         Vector3 exitDir = portalTransferMatrix.MultiplyVector(moveVec);
         exitDir.y = 0f;
@@ -224,13 +228,11 @@ public class NonEuclideanPortal : MonoBehaviour
         newPlayerPos += exitDir * 0.35f;
 
         // 2. Rotar también la velocidad e inercia actual del jugador para que el movimiento sea 100% continuo
-        if (trackedFPC != null)
+        if (trackedMotor != null)
         {
-            if (trackedFPC.GrapleControllerSafe != null && trackedFPC.GrapleControllerSafe.IsGrappling)
-            {
-                trackedFPC.GrapleControllerSafe.Release();
-            }
-            trackedFPC.currentVelocity = portalTransferMatrix.MultiplyVector(trackedFPC.currentVelocity);
+            // El gancho se suelta al cruzar y la velocidad completa se rota con el portal.
+            trackedMotor.CancelGrapple();
+            trackedMotor.SetVelocity(portalTransferMatrix.MultiplyVector(trackedMotor.RawVelocity));
         }
 
         if (trackedCC != null) trackedCC.enabled = false;

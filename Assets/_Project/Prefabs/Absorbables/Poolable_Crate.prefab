@@ -14,7 +14,6 @@ GameObject:
   - component: {fileID: 8096729380887448517}
   - component: {fileID: 8745038038206795229}
   - component: {fileID: 3187530264058370626}
-  - component: {fileID: 1238116632206568921}
   m_Layer: 7
   m_Name: Poolable_Crate
   m_TagString: Untagged
@@ -163,23 +162,6 @@ MonoBehaviour:
   absorptionDistance: 0.2
   impactDamage: 2
   destroyOnEnemyHit: 1
-  debrisCount: 6
-  minImpactVelocity: 1.5
-  isThrown: 0
---- !u!114 &1238116632206568921
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8010055661403593681}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 65e4836cdb824eec97e5935546d6b99e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ThrowableDamage
-  damage: 2
-  destroyOnImpact: 1
   debrisCount: 6
   minImpactVelocity: 1.5
   isThrown: 0

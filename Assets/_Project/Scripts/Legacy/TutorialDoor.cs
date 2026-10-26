@@ -1,3 +1,6 @@
+using NostalgIA.Core.Events;
+using NostalgIA.Gameplay.Player;
+using NostalgIA.Gameplay.Tools;
 using System.Collections;
 using NostalgIA.Core;
 using UnityEngine;
@@ -36,7 +39,6 @@ public class TutorialDoor : MonoBehaviour
     [SerializeField] private Color portalColor = new Color(0.15f, 0.85f, 1f, 1f);
     [SerializeField] private Color frameBodyColor = new Color(0.12f, 0.16f, 0.22f, 1f);
 
-    private GameController gameController;
     private NonEuclideanPortal tutorialSidePortal;
     private NonEuclideanPortal otherDimensionPortal;
     private GameObject otherDimensionRoot;
@@ -54,11 +56,6 @@ public class TutorialDoor : MonoBehaviour
         }
     }
 #endif
-
-    private void Awake()
-    {
-        gameController = FindAnyObjectByType<GameController>();
-    }
 
     private void Start()
     {
@@ -326,7 +323,7 @@ public class TutorialDoor : MonoBehaviour
 
     private void SanitizeAdditiveSceneObject(GameObject rootObj)
     {
-        if (rootObj.CompareTag("Player") || rootObj.GetComponentInChildren<PlayerController>(true) != null)
+        if (rootObj.CompareTag("Player") || rootObj.GetComponentInChildren<PlayerHealth>(true) != null)
         {
             rootObj.SetActive(false);
             return;
@@ -517,8 +514,7 @@ public class TutorialDoor : MonoBehaviour
                 c.GetComponent<Renderer>().sharedMaterial = crateMat;
                 Rigidbody rb = c.AddComponent<Rigidbody>();
                 rb.mass = 1.5f;
-                c.AddComponent<PoolableController>();
-                c.AddComponent<ThrowableDamage>();
+                c.AddComponent<Absorbable>();
             }
         }
 
@@ -603,20 +599,14 @@ public class TutorialDoor : MonoBehaviour
         l.intensity = intensity;
     }
 
+    /// <summary>
+    /// Notifica el cruce del portal mediante el bus de eventos (Fase 1): el HUD del Tutorial
+    /// completa el último paso al entrar a la dimensión enlazada y avisa al regresar.
+    /// </summary>
     public void OnPlayerCrossedDimensionalPortal(NonEuclideanPortal destinationPortal)
     {
-        if (gameController == null) gameController = FindAnyObjectByType<GameController>();
-        if (gameController == null) return;
-
-        bool enteredNewDimension = (destinationPortal == otherDimensionPortal);
-        if (enteredNewDimension)
-        {
-            gameController.OnPlayerReachedDimensionalGoal();
-        }
-        else
-        {
-            gameController.NotifyCheckpoint("Regresaste a la dimensión del Tutorial.");
-        }
+        bool enteredNewDimension = destinationPortal == otherDimensionPortal;
+        EventBus<DimensionalPortalCrossed>.Raise(new DimensionalPortalCrossed(enteredNewDimension));
     }
 }
 

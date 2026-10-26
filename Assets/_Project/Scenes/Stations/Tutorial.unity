@@ -1529,7 +1529,6 @@ GameObject:
   - component: {fileID: 79088132}
   - component: {fileID: 79088131}
   - component: {fileID: 79088130}
-  - component: {fileID: 79088129}
   m_Layer: 7
   m_Name: Poolable_Crate_29
   m_TagString: Untagged
@@ -1552,23 +1551,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 382411780}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &79088129
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 79088127}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 65e4836cdb824eec97e5935546d6b99e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ThrowableDamage
-  damage: 3
-  destroyOnImpact: 1
-  debrisCount: 6
-  minImpactVelocity: 2
-  isThrown: 0
 --- !u!114 &79088130
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2646,7 +2628,6 @@ GameObject:
   - component: {fileID: 117259691}
   - component: {fileID: 117259690}
   - component: {fileID: 117259689}
-  - component: {fileID: 117259688}
   m_Layer: 0
   m_Name: Crate_12
   m_TagString: Untagged
@@ -2669,23 +2650,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 382411780}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &117259688
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 117259686}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 65e4836cdb824eec97e5935546d6b99e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ThrowableDamage
-  damage: 3
-  destroyOnImpact: 1
-  debrisCount: 6
-  minImpactVelocity: 2
-  isThrown: 0
 --- !u!114 &117259689
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -11769,7 +11733,6 @@ GameObject:
   m_Component:
   - component: {fileID: 440071501}
   - component: {fileID: 440071503}
-  - component: {fileID: 440071502}
   - component: {fileID: 440071504}
   m_Layer: 0
   m_Name: PromptZone_1
@@ -11793,26 +11756,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 185278521}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &440071502
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 440071500}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8272adc31486454f9c6d9b020bb079aa, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TutorialZonePrompt
-  phaseBadge: "FASE 1 / 4 \xB7 FUNDAMENTOS"
-  zoneTitle: "1. EXPLORACI\xD3N Y MOVIMIENTO"
-  description: Avanza por el pasillo inicial, salta sobre la barricada y encuentra
-    la primera estrella dorada.
-  controls: <color=#FFE600><b>[ W A S D ]</b></color> Moverse   <color=#FFE600><b>[
-    ESPACIO ]</b></color> Saltar   <color=#FFE600><b>[ SHIFT ]</b></color> Correr
-  task: '>> Encuentra la 1ra Estrella dorada en el camino.'
-  triggerOnce: 0
 --- !u!65 &440071503
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -21450,7 +21393,6 @@ GameObject:
   - component: {fileID: 891393633}
   - component: {fileID: 891393632}
   - component: {fileID: 891393631}
-  - component: {fileID: 891393630}
   m_Layer: 7
   m_Name: Poolable_Crate_23
   m_TagString: Untagged
@@ -21473,23 +21415,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 382411780}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &891393630
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 891393628}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 65e4836cdb824eec97e5935546d6b99e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ThrowableDamage
-  damage: 3
-  destroyOnImpact: 1
-  debrisCount: 6
-  minImpactVelocity: 2
-  isThrown: 0
 --- !u!114 &891393631
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -26344,7 +26269,6 @@ GameObject:
   - component: {fileID: 1076265690}
   - component: {fileID: 1076265689}
   - component: {fileID: 1076265688}
-  - component: {fileID: 1076265687}
   m_Layer: 7
   m_Name: Poolable_Crate_27
   m_TagString: Untagged
@@ -26367,23 +26291,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 382411780}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1076265687
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1076265685}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 65e4836cdb824eec97e5935546d6b99e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ThrowableDamage
-  damage: 3
-  destroyOnImpact: 1
-  debrisCount: 6
-  minImpactVelocity: 2
-  isThrown: 0
 --- !u!114 &1076265688
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -26584,7 +26491,6 @@ GameObject:
   - component: {fileID: 1097172116}
   - component: {fileID: 1097172115}
   - component: {fileID: 1097172114}
-  - component: {fileID: 1097172113}
   m_Layer: 7
   m_Name: Poolable_Crate_24
   m_TagString: Untagged
@@ -26607,23 +26513,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 382411780}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1097172113
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1097172111}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 65e4836cdb824eec97e5935546d6b99e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ThrowableDamage
-  damage: 3
-  destroyOnImpact: 1
-  debrisCount: 6
-  minImpactVelocity: 2
-  isThrown: 0
 --- !u!114 &1097172114
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -29875,7 +29764,6 @@ GameObject:
   - component: {fileID: 1167614592}
   - component: {fileID: 1167614595}
   - component: {fileID: 1167614594}
-  - component: {fileID: 1167614593}
   m_Layer: 0
   m_Name: PromptZone_5
   m_TagString: Untagged
@@ -29898,27 +29786,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 185278521}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1167614593
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1167614591}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8272adc31486454f9c6d9b020bb079aa, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TutorialZonePrompt
-  phaseBadge: "FASE 4 / 4 \xB7 DESAF\xCDO FINAL"
-  zoneTitle: "4. PASILLO DE LAVA Y GUARDI\xC1N TROYANO"
-  description: El pasillo final es un lago de lava ardiente. Salta entre plataformas
-    y usa los anclajes para vencer a las amenazas y al Troyano.
-  controls: <color=#00E5FF><b>[ Q ]</b></color> Cambiar Herramienta   <color=#FFE600><b>[
-    W A S D + Espacio ]</b></color> Subir Escalera
-  task: ">> Vence al guardi\xE1n, recoge la 3ra estrella y cruza el portal en la
-    cima."
-  triggerOnce: 0
 --- !u!54 &1167614594
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -31114,7 +30981,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1222772361}
   - component: {fileID: 1222772363}
-  - component: {fileID: 1222772362}
   - component: {fileID: 1222772364}
   m_Layer: 0
   m_Name: PromptZone_2
@@ -31138,26 +31004,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 185278521}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1222772362
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1222772360}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8272adc31486454f9c6d9b020bb079aa, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TutorialZonePrompt
-  phaseBadge: "FASE 1.5 / 4 \xB7 PRIMER CONTACTO"
-  zoneTitle: 'ALERTA DE AMENAZA: BICHO WINRAR'
-  description: "\xA1CUIDADO! WinRar te eliminar\xE1 DE UN SOLO GOLPE lanz\xE1ndose
-    agresivamente sobre ti. Esquiva su salto hacia los lados."
-  controls: <color=#FF3344><b>[ A / D + SHIFT ]</b></color> Esquivar salto mortal  
-    <color=#00E5FF><b>[ Q ]</b></color> Preparar Herramientas
-  task: '>> Evade la embestida letal y avanza hacia la sala de armamento.'
-  triggerOnce: 0
 --- !u!65 &1222772363
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -32338,7 +32184,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1247872411}
   - component: {fileID: 1247872413}
-  - component: {fileID: 1247872412}
   - component: {fileID: 1247872414}
   m_Layer: 0
   m_Name: PromptZone_4
@@ -32362,28 +32207,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 185278521}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1247872412
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1247872410}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8272adc31486454f9c6d9b020bb079aa, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TutorialZonePrompt
-  phaseBadge: "FASE 3 / 4 \xB7 MOVILIDAD VERTICAL"
-  zoneTitle: 3. EL GANCHO Y EL ABISMO DE LAVA
-  description: "\xA1PELIGRO! La lava te desintegrar\xE1 al tocarla. Apunta a los
-    orbes anaranjados para engancharte. Ojo: el gancho tiene tiempo de recarga."
-  controls: <color=#00E5FF><b>[ Q ]</b></color> Equipar Gancho   <color=#00E5FF><b>[
-    X / Clic ]</b></color> Disparar Gancho   <color=#FFAA00><b>[ HUD ]</b></color>
-    Monitorear Recarga
-  task: ">> Balanc\xE9ate de anclaje en anclaje sobre la lava y llega al pasillo
-    final."
-  triggerOnce: 0
 --- !u!65 &1247872413
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -54536,7 +54359,6 @@ GameObject:
   - component: {fileID: 1312756412}
   - component: {fileID: 1312756411}
   - component: {fileID: 1312756410}
-  - component: {fileID: 1312756409}
   m_Layer: 7
   m_Name: Poolable_Crate_31
   m_TagString: Untagged
@@ -54559,23 +54381,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 382411780}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1312756409
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1312756407}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 65e4836cdb824eec97e5935546d6b99e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ThrowableDamage
-  damage: 3
-  destroyOnImpact: 1
-  debrisCount: 6
-  minImpactVelocity: 2
-  isThrown: 0
 --- !u!114 &1312756410
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -55369,7 +55174,6 @@ GameObject:
   - component: {fileID: 1348748114}
   - component: {fileID: 1348748113}
   - component: {fileID: 1348748112}
-  - component: {fileID: 1348748111}
   m_Layer: 7
   m_Name: Poolable_Crate_32
   m_TagString: Untagged
@@ -55392,23 +55196,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 382411780}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1348748111
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1348748109}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 65e4836cdb824eec97e5935546d6b99e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ThrowableDamage
-  damage: 3
-  destroyOnImpact: 1
-  debrisCount: 6
-  minImpactVelocity: 2
-  isThrown: 0
 --- !u!114 &1348748112
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -56179,7 +55966,6 @@ GameObject:
   - component: {fileID: 1373005032}
   - component: {fileID: 1373005031}
   - component: {fileID: 1373005030}
-  - component: {fileID: 1373005029}
   m_Layer: 7
   m_Name: Poolable_Crate_26
   m_TagString: Untagged
@@ -56202,23 +55988,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 382411780}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1373005029
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1373005027}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 65e4836cdb824eec97e5935546d6b99e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ThrowableDamage
-  damage: 3
-  destroyOnImpact: 1
-  debrisCount: 6
-  minImpactVelocity: 2
-  isThrown: 0
 --- !u!114 &1373005030
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -56912,7 +56681,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1397848429}
   - component: {fileID: 1397848431}
-  - component: {fileID: 1397848430}
   - component: {fileID: 1397848432}
   m_Layer: 0
   m_Name: PromptZone_3
@@ -56936,27 +56704,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 185278521}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1397848430
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1397848428}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8272adc31486454f9c6d9b020bb079aa, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TutorialZonePrompt
-  phaseBadge: "FASE 2 / 4 \xB7 HERRAMIENTA ASPIRADORA"
-  zoneTitle: "2. ABSORCI\xD3N Y COMBATE CIN\xC9TICO"
-  description: Equipa la aspiradora para succionar cajas pesadas del suelo y expulsarlas
-    con fuerza para eliminar a los enemigos.
-  controls: <color=#00E5FF><b>[ Q ]</b></color> Equipar Aspiradora   <color=#00E5FF><b>[
-    Clic Izquierdo ]</b></color> Absorber Caja   <color=#00E5FF><b>[ Clic Derecho
-    ]</b></color> Lanzar
-  task: '>> Destruye a los bichos arrojando cajas y toma la 2da estrella.'
-  triggerOnce: 0
 --- !u!65 &1397848431
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -58480,7 +58227,6 @@ GameObject:
   - component: {fileID: 1471290732}
   - component: {fileID: 1471290731}
   - component: {fileID: 1471290730}
-  - component: {fileID: 1471290729}
   m_Layer: 7
   m_Name: Poolable_Crate_22
   m_TagString: Untagged
@@ -58503,23 +58249,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 382411780}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1471290729
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1471290727}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 65e4836cdb824eec97e5935546d6b99e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ThrowableDamage
-  damage: 3
-  destroyOnImpact: 1
-  debrisCount: 6
-  minImpactVelocity: 2
-  isThrown: 0
 --- !u!114 &1471290730
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -59005,7 +58734,6 @@ GameObject:
   - component: {fileID: 1479761280}
   - component: {fileID: 1479761279}
   - component: {fileID: 1479761278}
-  - component: {fileID: 1479761277}
   m_Layer: 0
   m_Name: Crate_10
   m_TagString: Untagged
@@ -59028,23 +58756,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 382411780}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1479761277
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1479761275}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 65e4836cdb824eec97e5935546d6b99e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ThrowableDamage
-  damage: 3
-  destroyOnImpact: 1
-  debrisCount: 6
-  minImpactVelocity: 2
-  isThrown: 0
 --- !u!114 &1479761278
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -61001,7 +60712,6 @@ GameObject:
   - component: {fileID: 1494299789}
   - component: {fileID: 1494299788}
   - component: {fileID: 1494299787}
-  - component: {fileID: 1494299786}
   m_Layer: 7
   m_Name: Poolable_Crate_21
   m_TagString: Untagged
@@ -61024,23 +60734,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 382411780}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1494299786
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1494299784}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 65e4836cdb824eec97e5935546d6b99e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ThrowableDamage
-  damage: 3
-  destroyOnImpact: 1
-  debrisCount: 6
-  minImpactVelocity: 2
-  isThrown: 0
 --- !u!114 &1494299787
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -63901,7 +63594,6 @@ GameObject:
   - component: {fileID: 1671280156}
   - component: {fileID: 1671280155}
   - component: {fileID: 1671280154}
-  - component: {fileID: 1671280153}
   m_Layer: 7
   m_Name: Poolable_Crate_25
   m_TagString: Untagged
@@ -63924,23 +63616,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 382411780}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1671280153
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1671280151}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 65e4836cdb824eec97e5935546d6b99e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ThrowableDamage
-  damage: 3
-  destroyOnImpact: 1
-  debrisCount: 6
-  minImpactVelocity: 2
-  isThrown: 0
 --- !u!114 &1671280154
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -70982,7 +70657,6 @@ GameObject:
   - component: {fileID: 1877257344}
   - component: {fileID: 1877257343}
   - component: {fileID: 1877257342}
-  - component: {fileID: 1877257341}
   m_Layer: 0
   m_Name: Crate_11
   m_TagString: Untagged
@@ -71005,23 +70679,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 382411780}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1877257341
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1877257339}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 65e4836cdb824eec97e5935546d6b99e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ThrowableDamage
-  damage: 3
-  destroyOnImpact: 1
-  debrisCount: 6
-  minImpactVelocity: 2
-  isThrown: 0
 --- !u!114 &1877257342
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -72451,7 +72108,6 @@ GameObject:
   - component: {fileID: 1918658498}
   - component: {fileID: 1918658497}
   - component: {fileID: 1918658496}
-  - component: {fileID: 1918658495}
   m_Layer: 7
   m_Name: Poolable_Crate_30
   m_TagString: Untagged
@@ -72474,23 +72130,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 382411780}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1918658495
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1918658493}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 65e4836cdb824eec97e5935546d6b99e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ThrowableDamage
-  damage: 3
-  destroyOnImpact: 1
-  debrisCount: 6
-  minImpactVelocity: 2
-  isThrown: 0
 --- !u!114 &1918658496
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -72748,7 +72387,6 @@ GameObject:
   - component: {fileID: 1928911220}
   - component: {fileID: 1928911219}
   - component: {fileID: 1928911218}
-  - component: {fileID: 1928911217}
   m_Layer: 7
   m_Name: Poolable_Crate_15
   m_TagString: Untagged
@@ -72756,23 +72394,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1928911217
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1928911216}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 65e4836cdb824eec97e5935546d6b99e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ThrowableDamage
-  damage: 3
-  destroyOnImpact: 1
-  debrisCount: 6
-  minImpactVelocity: 2
-  isThrown: 0
 --- !u!114 &1928911218
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -73759,7 +73380,6 @@ GameObject:
   - component: {fileID: 1958044438}
   - component: {fileID: 1958044437}
   - component: {fileID: 1958044436}
-  - component: {fileID: 1958044435}
   m_Layer: 7
   m_Name: Poolable_Crate_15
   m_TagString: Untagged
@@ -73782,23 +73402,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 382411780}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1958044435
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1958044433}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 65e4836cdb824eec97e5935546d6b99e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ThrowableDamage
-  damage: 3
-  destroyOnImpact: 1
-  debrisCount: 6
-  minImpactVelocity: 2
-  isThrown: 0
 --- !u!114 &1958044436
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -73942,7 +73545,6 @@ GameObject:
   - component: {fileID: 1960834775}
   - component: {fileID: 1960834774}
   - component: {fileID: 1960834773}
-  - component: {fileID: 1960834772}
   m_Layer: 7
   m_Name: Poolable_Crate_15 (1)
   m_TagString: Untagged
@@ -73950,23 +73552,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1960834772
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1960834771}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 65e4836cdb824eec97e5935546d6b99e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ThrowableDamage
-  damage: 3
-  destroyOnImpact: 1
-  debrisCount: 6
-  minImpactVelocity: 2
-  isThrown: 0
 --- !u!114 &1960834773
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -74581,7 +74166,6 @@ GameObject:
   - component: {fileID: 1983552532}
   - component: {fileID: 1983552531}
   - component: {fileID: 1983552530}
-  - component: {fileID: 1983552529}
   m_Layer: 7
   m_Name: Poolable_Crate_28
   m_TagString: Untagged
@@ -74604,23 +74188,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 382411780}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1983552529
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1983552527}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 65e4836cdb824eec97e5935546d6b99e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ThrowableDamage
-  damage: 3
-  destroyOnImpact: 1
-  debrisCount: 6
-  minImpactVelocity: 2
-  isThrown: 0
 --- !u!114 &1983552530
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -74992,7 +74559,6 @@ GameObject:
   - component: {fileID: 2015682349}
   - component: {fileID: 2015682348}
   - component: {fileID: 2015682347}
-  - component: {fileID: 2015682346}
   m_Layer: 0
   m_Name: Crate_9
   m_TagString: Untagged
@@ -75015,23 +74581,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 382411780}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &2015682346
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2015682344}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 65e4836cdb824eec97e5935546d6b99e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ThrowableDamage
-  damage: 3
-  destroyOnImpact: 1
-  debrisCount: 6
-  minImpactVelocity: 2
-  isThrown: 0
 --- !u!114 &2015682347
 MonoBehaviour:
   m_ObjectHideFlags: 0

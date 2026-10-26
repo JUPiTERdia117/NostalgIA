@@ -1,3 +1,4 @@
+using NostalgIA.Gameplay.Player;
 using System.Collections;
 using UnityEngine;
 
@@ -57,7 +58,7 @@ public class SpiderEnemyController : MonoBehaviour
     public SpiderState CurrentState => state;
 
     private SpiderState state = SpiderState.Crawling;
-    private PlayerController player;
+    private PlayerHealth player;
     private Transform playerCameraTransform;
     private EnemyHealth health;
     private Rigidbody rb;
@@ -136,7 +137,7 @@ public class SpiderEnemyController : MonoBehaviour
             if (player == null) return;
         }
 
-        if (player.dead)
+        if (player.IsDead)
         {
             if (state == SpiderState.FacehuggerLatched) DetachFromFace();
             return;
@@ -159,7 +160,7 @@ public class SpiderEnemyController : MonoBehaviour
         GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
         if (playerObj != null)
         {
-            player = playerObj.GetComponent<PlayerController>();
+            player = playerObj.GetComponent<PlayerHealth>();
             Camera cam = playerObj.GetComponentInChildren<Camera>();
             if (cam != null)
             {
@@ -391,7 +392,7 @@ public class SpiderEnemyController : MonoBehaviour
         }
 
         // Daño periódico
-        if (Time.time >= nextLatchDamageTime && player != null && !player.dead)
+        if (Time.time >= nextLatchDamageTime && player != null && !player.IsDead)
         {
             player.TakeDamage(latchDamage);
             nextLatchDamageTime = Time.time + latchDamageInterval;
@@ -494,8 +495,8 @@ public class SpiderEnemyController : MonoBehaviour
         // Daño por contacto melee normal mientras camina
         if (state == SpiderState.Crawling && collision.gameObject.CompareTag("Player") && Time.time - lastMeleeTime >= meleeCooldown)
         {
-            PlayerController target = collision.gameObject.GetComponentInParent<PlayerController>();
-            if (target != null && !target.dead)
+            PlayerHealth target = collision.gameObject.GetComponentInParent<PlayerHealth>();
+            if (target != null && !target.IsDead)
             {
                 target.TakeDamage(contactDamage);
                 lastMeleeTime = Time.time;

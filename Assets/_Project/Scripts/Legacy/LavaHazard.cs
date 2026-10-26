@@ -1,3 +1,4 @@
+using NostalgIA.Gameplay.Player;
 using UnityEngine;
 
 /// <summary>
@@ -13,7 +14,7 @@ public class LavaHazard : MonoBehaviour
 
     private static Material sharedBlueCodeMaterial;
 
-    private PlayerController player;
+    private PlayerHealth player;
     private Collider myCollider;
     private Bounds worldBounds;
     private bool hasCachedBounds = false;
@@ -103,7 +104,7 @@ public class LavaHazard : MonoBehaviour
             if (player == null) return;
         }
 
-        if (player.dead) return;
+        if (player.IsDead) return;
 
         if (myCollider != null)
         {
@@ -139,7 +140,7 @@ public class LavaHazard : MonoBehaviour
         GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
         if (playerObj != null)
         {
-            player = playerObj.GetComponent<PlayerController>();
+            player = playerObj.GetComponent<PlayerHealth>();
         }
     }
 
@@ -165,8 +166,8 @@ public class LavaHazard : MonoBehaviour
 
     private void HandleContact(GameObject obj)
     {
-        PlayerController targetPlayer = obj.GetComponentInParent<PlayerController>();
-        if (targetPlayer != null && !targetPlayer.dead)
+        PlayerHealth targetPlayer = obj.GetComponentInParent<PlayerHealth>();
+        if (targetPlayer != null && !targetPlayer.IsDead)
         {
             targetPlayer.TakeDamage(damage);
             return;
@@ -181,7 +182,7 @@ public class LavaHazard : MonoBehaviour
 
     private void KillPlayer()
     {
-        if (player != null && !player.dead)
+        if (player != null && !player.IsDead)
         {
             Debug.Log($"[LavaHazard] ¡El jugador cayó en la lava ({gameObject.name})! Infligiendo daño letal...");
             player.TakeDamage(damage);

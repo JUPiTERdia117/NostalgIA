@@ -1,3 +1,4 @@
+using NostalgIA.Gameplay.Player;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
@@ -36,7 +37,7 @@ public class BugEnemyController : MonoBehaviour
     [Tooltip("Pausa de recuperación en el suelo tras aterrizar, dando oportunidad al jugador de contraatacar.")]
     [SerializeField] private float recoveryTime = 0.5f;
 
-    private PlayerController player;
+    private PlayerHealth player;
     private NavMeshAgent navMeshAgent;
     private EnemyHealth health;
     private bool isAttacking;
@@ -82,7 +83,7 @@ public class BugEnemyController : MonoBehaviour
             if (player == null) return;
         }
 
-        if (player.dead)
+        if (player.IsDead)
         {
             if (navMeshAgent != null && navMeshAgent.isActiveAndEnabled && navMeshAgent.isOnNavMesh)
             {
@@ -117,7 +118,7 @@ public class BugEnemyController : MonoBehaviour
         GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
         if (playerObj != null)
         {
-            player = playerObj.GetComponent<PlayerController>();
+            player = playerObj.GetComponent<PlayerHealth>();
         }
     }
 
@@ -219,7 +220,7 @@ public class BugEnemyController : MonoBehaviour
             transform.position = new Vector3(currentHoriz.x, currentY, currentHoriz.z);
 
             // Detección de impacto letal en vuelo
-            if (!hitLethal && player != null && !player.dead)
+            if (!hitLethal && player != null && !player.IsDead)
             {
                 float hitDist = Vector3.Distance(transform.position, player.transform.position);
                 if (hitDist <= 2.2f)
@@ -252,9 +253,9 @@ public class BugEnemyController : MonoBehaviour
         isAttacking = false;
     }
 
-    private void DealLethalDamage(PlayerController target)
+    private void DealLethalDamage(PlayerHealth target)
     {
-        if (target == null || target.dead) return;
+        if (target == null || target.IsDead) return;
         int damage = oneHitKill ? 99 : attackDamage;
         target.TakeDamage(damage);
         Debug.Log($"[BugEnemyController] ¡WinRar se lanzó con éxito sobre el jugador e infligió {damage} de daño letal (1 golpe = muerte)!");
@@ -285,8 +286,8 @@ public class BugEnemyController : MonoBehaviour
         if (health != null && health.IsDead) return;
         if (!isLunging && Time.time - lastAttackTime < attackCooldown) return;
 
-        PlayerController target = obj.GetComponentInParent<PlayerController>();
-        if (target != null && !target.dead)
+        PlayerHealth target = obj.GetComponentInParent<PlayerHealth>();
+        if (target != null && !target.IsDead)
         {
             DealLethalDamage(target);
             lastAttackTime = Time.time;

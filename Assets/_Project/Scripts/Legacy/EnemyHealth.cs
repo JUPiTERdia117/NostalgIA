@@ -1,3 +1,7 @@
+using NostalgIA.Core.Damage;
+using NostalgIA.Core.Events;
+using NostalgIA.Gameplay.Player;
+using NostalgIA.Gameplay.Tools;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.Events;
@@ -22,7 +26,7 @@ public enum EnemyHealthTier
 /// - Siempre que el jugador lance un objeto (isThrown == true), se garantiza que inflija al menos
 ///   el daño mínimo al enemigo, escalando hacia arriba si la fuerza F = m * a es mayor.
 /// </summary>
-public class EnemyHealth : MonoBehaviour, IDamageable
+public class EnemyHealth : MonoBehaviour, IDamageable, IContactHazard
 {
     [Header("Health Tiers & Levels")]
     [SerializeField] private EnemyHealthTier healthTier = EnemyHealthTier.Normal;
@@ -56,6 +60,10 @@ public class EnemyHealth : MonoBehaviour, IDamageable
     [SerializeField] private float healthBarHeight = 1.1f;
     [SerializeField] private bool spawnGibsOnDeath = true;
     [SerializeField] private int gibCount = 5;
+
+    [Header("Contacto con el jugador")]
+    [Tooltip("Corazones que resta al jugador por contacto directo (0 lo desactiva).")]
+    [SerializeField, Min(0)] private int contactDamageToPlayer = 1;
 
     [Header("Events")]
     public UnityEvent<int> onTakeDamage;
@@ -212,60 +220,51 @@ public class EnemyHealth : MonoBehaviour, IDamageable
 
         // Ignorar colisiones con el propio jugador o con otros enemigos
         if (collision.gameObject.CompareTag("Player") ||
-            collision.gameObject.GetComponentInParent<PlayerController>() != null ||
+            collision.gameObject.GetComponentInParent<PlayerHealth>() != null ||
             collision.gameObject.GetComponentInParent<EnemyHealth>() != null)
         {
             return;
         }
 
-        PoolableController poolable = collision.gameObject.GetComponentInParent<PoolableController>();
-        ThrowableDamage throwable = collision.gameObject.GetComponentInParent<ThrowableDamage>();
-
-        if (poolable != null && poolable.IsDestroyed) return;
-        if (throwable != null && throwable.IsDestroyed) return;
+        // Fase 1: Absorbable reúne el registro cinemático que antes estaba repartido entre
+        // PoolableController y ThrowableDamage.
+        Absorbable absorbable = collision.gameObject.GetComponentInParent<Absorbable>();
+        if (absorbable != null && absorbable.IsDestroyed) return;
 
         Rigidbody incomingRb = collision.rigidbody != null
             ? collision.rigidbody
             : collision.gameObject.GetComponentInParent<Rigidbody>();
 
-        // Solo evaluar objetos con física o componentes arrojables
-        if (incomingRb == null && poolable == null && throwable == null) return;
+        // Solo evaluar objetos con física o absorbibles
+        if (incomingRb == null && absorbable == null) return;
 
-        bool isThrownByPlayer = (poolable != null && poolable.isThrown) ||
-                                (throwable != null && throwable.isThrown);
+        bool isThrownByPlayer = absorbable != null && absorbable.IsThrown;
 
         float dt = Mathf.Max(0.005f, Time.fixedDeltaTime);
         float impactSpeed = collision.relativeVelocity.magnitude;
 
-        // 1. Obtener la MASA efectiva (m) del objeto que impacta
+        // 1. Masa efectiva (m) del objeto que impacta
         float explicitMass = incomingRb != null ? Mathf.Max(0.1f, incomingRb.mass) : 1.0f;
         Vector3 scale = collision.transform.lossyScale;
         float volumeEstimate = Mathf.Abs(scale.x * scale.y * scale.z);
-        // Si es un bloque/obstáculo grande que cae y tenía masa por defecto (1), su volumen aporta peso real de aplastamiento
+        // Un bloque grande con masa por defecto (1) aporta peso de aplastamiento según su volumen
         float effectiveMass = (!isThrownByPlayer && volumeEstimate > 1.8f && explicitMass <= 1.5f)
             ? Mathf.Max(explicitMass, volumeEstimate * 2.2f)
             : explicitMass;
 
-        // 2. Obtener la ACELERACIÓN en el momento del impacto (a)
-        //    a) Desaceleración brusca de contacto: a_impact = dv / dt
+        // 2. Aceleración en el impacto (a)
+        //    a) Desaceleración de contacto: a = Δv / Δt
         float contactDeceleration = impactSpeed / dt;
-        //    b) Aceleración derivada del impulso físico resuelto por Unity: a_impulse = (J / dt) / m
+        //    b) Aceleración derivada del impulso resuelto por el motor: a = (J / Δt) / m
         float impulseAcceleration = (collision.impulse.magnitude / dt) / Mathf.Max(0.1f, effectiveMass);
-        //    c) Aceleración cinemática previa registrada en el objeto (incluyendo lanzamiento y caída libre)
-        float trackedAccel = 0f;
-        if (throwable != null)
-        {
-            trackedAccel = Mathf.Max(throwable.CurrentAcceleration, isThrownByPlayer ? throwable.LaunchAcceleration * 0.35f : 0f);
-        }
-        if (poolable != null)
-        {
-            trackedAccel = Mathf.Max(trackedAccel, Mathf.Max(poolable.CurrentAcceleration, isThrownByPlayer ? poolable.LaunchAcceleration * 0.35f : 0f));
-        }
+        //    c) Aceleración registrada por el absorbible (lanzamiento y caída libre)
+        float trackedAccel = absorbable != null
+            ? Mathf.Max(absorbable.CurrentAcceleration, isThrownByPlayer ? absorbable.LaunchAcceleration * 0.35f : 0f)
+            : 0f;
 
-        //    d) Verificar si el objeto está cayendo sobre el enemigo (aplastamiento por gravedad y peso)
-        Vector3 preVel = throwable != null ? throwable.PreImpactVelocity :
-                         (poolable != null ? poolable.PreImpactVelocity :
-                         (incomingRb != null ? incomingRb.linearVelocity : -collision.relativeVelocity));
+        //    d) ¿Cae sobre el enemigo? (aplastamiento por gravedad y peso)
+        Vector3 preVel = absorbable != null ? absorbable.PreImpactVelocity :
+                         (incomingRb != null ? incomingRb.linearVelocity : -collision.relativeVelocity);
         bool isFallingFromAbove = (collision.transform.position.y > transform.position.y + 0.15f) ||
                                   (preVel.y < -1.0f) ||
                                   (collision.relativeVelocity.y < -1.0f);
@@ -275,18 +274,17 @@ public class EnemyHealth : MonoBehaviour, IDamageable
         // Aceleración neta efectiva en el instante del choque
         float effectiveAcceleration = Mathf.Max(contactDeceleration * 0.35f, impulseAcceleration, trackedAccel * 0.5f) + gravityAccel;
 
-        // 3. Calcular FUERZA F = m * a
-        float forceMultiplier = throwable != null ? throwable.ForceMultiplier : 1.0f;
+        // 3. Fuerza F = m · a
+        float forceMultiplier = absorbable != null ? absorbable.ForceMultiplier : 1.0f;
         float impactForce = effectiveMass * effectiveAcceleration * forceMultiplier;
 
-        // Si un objeto muy pesado cae sobre el enemigo (aplastamiento por gran peso), amplificar efecto de aplastamiento
+        // Objeto muy pesado cayendo sobre el enemigo: se amplifica el aplastamiento
         if (!isThrownByPlayer && isFallingFromAbove && effectiveMass >= 2.5f && impactSpeed >= 1.1f)
         {
             impactForce *= 1.85f;
         }
 
-        float minVelRequired = poolable != null ? poolable.MinImpactVelocity :
-                               (throwable != null ? throwable.MinImpactVelocity : minImpactVelocity);
+        float minVelRequired = absorbable != null ? absorbable.MinImpactVelocity : minImpactVelocity;
 
         bool qualifiesForUnthrownImpact = !isThrownByPlayer &&
                                           (impactSpeed >= minVelRequired || (isFallingFromAbove && effectiveMass >= 2.5f && impactSpeed >= 0.9f)) &&
@@ -297,22 +295,19 @@ public class EnemyHealth : MonoBehaviour, IDamageable
             return;
         }
 
-        // 4. Convertir Fuerza (F = m * a) en puntos de daño
+        // 4. Conversión de fuerza en puntos de daño
         int forceBasedDamage = Mathf.FloorToInt(impactForce / Mathf.Max(1f, forcePerDamageUnit));
 
-        int damageToApply = forceBasedDamage;
+        int damageToApply;
         if (isThrownByPlayer)
         {
-            // Garantizar SIEMPRE daño mínimo cuando el objeto es lanzado por el jugador
-            int guaranteedMin = Mathf.Max(1, minPlayerThrownDamage);
-            if (throwable != null) guaranteedMin = Mathf.Max(guaranteedMin, throwable.MinPlayerThrowDamage);
-            else if (poolable != null) guaranteedMin = Mathf.Max(guaranteedMin, poolable.ImpactDamage);
-
+            // Daño mínimo garantizado cuando el objeto lo lanza el jugador
+            int guaranteedMin = Mathf.Max(Mathf.Max(1, minPlayerThrownDamage), absorbable.ImpactDamage);
             damageToApply = Mathf.Max(guaranteedMin, forceBasedDamage);
         }
         else if (isFallingFromAbove && effectiveMass >= 4.0f && impactSpeed >= 2.0f)
         {
-            // Un objeto de gran peso que cae sobre un enemigo puede aplastarlo y matarlo de golpe
+            // Un objeto de gran peso que cae sobre un enemigo puede aplastarlo de golpe
             damageToApply = Mathf.Max(forceBasedDamage, currentHealth);
         }
         else
@@ -322,26 +317,34 @@ public class EnemyHealth : MonoBehaviour, IDamageable
 
         if (damageToApply <= 0) return;
 
-        Debug.Log($"[EnemyHealth] {gameObject.name} impactado por {collision.gameObject.name} | LanzadoPorJugador={isThrownByPlayer} | Masa(m)={effectiveMass:F2}kg | Acel(a)={effectiveAcceleration:F2}m/s² | Fuerza(F=m*a)={impactForce:F1}N -> Daño={damageToApply}");
         TakeDamage(damageToApply);
 
-        bool shouldBreak = false;
-        if (throwable != null) shouldBreak = throwable.DestroyOnImpact;
-        else if (poolable != null) shouldBreak = poolable.DestroyOnEnemyHit;
-
-        // Si fue lanzado por el jugador o si el impacto de caída fue suficientemente fuerte, romper en fragmentos
-        if (shouldBreak && (isThrownByPlayer || impactForce >= forcePerDamageUnit * 1.2f))
+        // Si fue lanzado por el jugador o el impacto fue fuerte, el objeto se rompe en fragmentos
+        if (absorbable != null && absorbable.DestroyOnEnemyHit && (isThrownByPlayer || impactForce >= forcePerDamageUnit * 1.2f))
         {
-            Vector3 hitPoint = collision.contactCount > 0 ? collision.contacts[0].point : collision.transform.position;
-            if (throwable != null)
-            {
-                throwable.BreakApart(hitPoint);
-            }
-            else if (poolable != null)
-            {
-                poolable.BreakApart(hitPoint);
-            }
+            Vector3 hitPoint = collision.contactCount > 0 ? collision.GetContact(0).point : collision.transform.position;
+            absorbable.BreakApart(hitPoint);
         }
+    }
+
+    // ------------------------------------------------------------------ contratos de NostalgIA.Core
+
+    /// <summary>Aplica un golpe descrito por <see cref="DamageInfo"/> (lava, peligros, Fase 2).</summary>
+    public void TakeDamage(in DamageInfo info)
+    {
+        if (IsDead) return;
+        if (info.Type == DamageType.Instakill) TakeDamage(currentHealth);
+        else TakeDamage(info.Amount);
+    }
+
+    /// <summary>
+    /// Daño por contacto al jugador: un corazón mientras el enemigo esté vivo (comportamiento
+    /// del prototipo, que antes resolvía el controlador del jugador por etiqueta).
+    /// </summary>
+    public bool TryGetContactDamage(Vector3 contactPoint, out DamageInfo info)
+    {
+        info = DamageInfo.Normal(contactDamageToPlayer, transform.position);
+        return !IsDead && isActiveAndEnabled && contactDamageToPlayer > 0;
     }
 
     /// <summary>

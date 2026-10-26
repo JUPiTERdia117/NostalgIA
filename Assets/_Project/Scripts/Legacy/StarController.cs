@@ -1,30 +1,45 @@
+using NostalgIA.Core.Events;
+using NostalgIA.Gameplay.Player;
 using UnityEngine;
 
 /// <summary>
-/// Estrella coleccionable para el tutorial y niveles.
-/// Rota continuamente y se balancea; al ser recogida por el jugador,
-/// notifica al GameController y se destruye.
+/// Estrella coleccionable del Tutorial y de los niveles.
+/// Rota y flota; al recogerla el jugador publica <see cref="StarCollected"/> y se destruye.
 /// </summary>
+/// <remarks>
+/// Fase 1: la estrella ya no busca al controlador del juego; comunica la recolección por el bus
+/// de eventos y el HUD, la guía y la progresión la escuchan. La rotación y la flotación siguen
+/// en <c>Update</c> hasta que la Fase 3 las traslade a un shader de vértices.
+/// </remarks>
 public class StarController : MonoBehaviour
 {
+    [Header("Identidad")]
+    [Tooltip("Índice de la estrella dentro de la estación (0–2). Lo asigna el constructor de la Fase 1 a partir del nombre.")]
+    [SerializeField] private int starIndex = -1;
+
     [Header("Animation")]
     [SerializeField] private float rotationSpeed = 90f;
     [SerializeField] private float bobHeight = 0.25f;
     [SerializeField] private float bobFrequency = 2f;
 
-    private GameController gameController;
     private Vector3 startPosition;
-    private bool collected = false;
+    private bool collected;
+
+    /// <summary>Índice de la estrella.</summary>
+    public int StarIndex
+    {
+        get => starIndex;
+        set => starIndex = value;
+    }
 
     private void Awake()
     {
-        gameController = FindAnyObjectByType<GameController>();
         startPosition = transform.position;
     }
 
     private void Update()
     {
-        // Animación de rotación y flotación suave
+        // Rotación continua y flotación senoidal: y = y0 + A·sin(ω·t)
         transform.Rotate(Vector3.up, rotationSpeed * Time.deltaTime, Space.World);
         float newY = startPosition.y + Mathf.Sin(Time.time * bobFrequency) * bobHeight;
         transform.position = new Vector3(transform.position.x, newY, transform.position.z);
@@ -32,22 +47,10 @@ public class StarController : MonoBehaviour
 
     private void OnTriggerEnter(Collider col)
     {
-        if (collected) return;
+        if (collected || !col.TryGetComponent(out PlayerHealth health) || health.IsDead) return;
 
-        if (col.CompareTag("Player") || col.GetComponentInParent<PlayerController>() != null)
-        {
-            collected = true;
-            if (gameController == null)
-            {
-                gameController = FindAnyObjectByType<GameController>();
-            }
-
-            if (gameController != null)
-            {
-                gameController.CollectStar(gameObject.name);
-            }
-
-            Destroy(gameObject);
-        }
+        collected = true;
+        EventBus<StarCollected>.Raise(new StarCollected(starIndex, transform.position));
+        Destroy(gameObject);
     }
 }

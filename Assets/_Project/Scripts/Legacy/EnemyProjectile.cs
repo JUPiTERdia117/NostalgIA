@@ -1,3 +1,4 @@
+using NostalgIA.Gameplay.Player;
 using UnityEngine;
 
 /// <summary>
@@ -57,8 +58,8 @@ public class EnemyProjectile : MonoBehaviour
         hasImpacted = true;
 
         // Comprobar si impactó al jugador
-        PlayerController player = hitObject.GetComponentInParent<PlayerController>();
-        if (player != null && !player.dead)
+        PlayerHealth player = hitObject.GetComponentInParent<PlayerHealth>();
+        if (player != null && !player.IsDead)
         {
             player.TakeDamage(damage);
             Debug.Log($"[EnemyProjectile] ¡Proyectil impactó al jugador infligiendo {damage} de daño!");

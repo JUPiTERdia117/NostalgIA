@@ -1,3 +1,4 @@
+using NostalgIA.Gameplay.Player;
 using System.Collections;
 using UnityEngine;
 
@@ -31,7 +32,7 @@ public class FlyingEnemyController : MonoBehaviour
     [SerializeField] private int projectileDamage = 1;
     [SerializeField] private float projectileSpeed = 12f;
 
-    private PlayerController player;
+    private PlayerHealth player;
     private EnemyHealth health;
     private float nextFireTime;
     private bool isCharging;
@@ -62,7 +63,7 @@ public class FlyingEnemyController : MonoBehaviour
             return;
         }
 
-        if (player.dead)
+        if (player.IsDead)
         {
             HandleIdleHover();
             return;
@@ -89,7 +90,7 @@ public class FlyingEnemyController : MonoBehaviour
         GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
         if (playerObj != null)
         {
-            player = playerObj.GetComponent<PlayerController>();
+            player = playerObj.GetComponent<PlayerHealth>();
         }
     }
 
@@ -159,7 +160,7 @@ public class FlyingEnemyController : MonoBehaviour
         transform.localScale = originalScale;
 
         // Disparar proyectil si sigue en rango
-        if (player != null && !player.dead && Vector3.Distance(transform.position, player.transform.position) <= detectionRange * 1.2f)
+        if (player != null && !player.IsDead && Vector3.Distance(transform.position, player.transform.position) <= detectionRange * 1.2f)
         {
             Shoot();
         }

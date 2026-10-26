@@ -1,3 +1,5 @@
+using NostalgIA.Core.Events;
+using NostalgIA.Gameplay.Tools;
 using UnityEngine;
 using UnityEngine.Rendering;
 
@@ -13,9 +15,9 @@ using UnityEngine.Rendering;
 public class ToolVisualController : MonoBehaviour
 {
     [Header("Referencias")]
-    [SerializeField] private PlayerController playerController;
-    [SerializeField] private ObjectVacum vacuum;
-    [SerializeField] private GrapleController grapple;
+    [SerializeField] private ToolController playerController;
+    [SerializeField] private VacuumTool vacuum;
+    [SerializeField] private GrappleTool grapple;
     [SerializeField] private Transform robotRoot;
 
     [Header("Velocidades de Animación")]
@@ -117,9 +119,9 @@ public class ToolVisualController : MonoBehaviour
     {
         if (initialized) return;
 
-        if (playerController == null) playerController = GetComponentInParent<PlayerController>();
-        if (vacuum == null) vacuum = GetComponent<ObjectVacum>() ?? GetComponentInChildren<ObjectVacum>(true);
-        if (grapple == null) grapple = GetComponent<GrapleController>() ?? GetComponentInChildren<GrapleController>(true);
+        if (playerController == null) playerController = GetComponentInParent<ToolController>();
+        if (vacuum == null) vacuum = GetComponent<VacuumTool>() ?? GetComponentInChildren<VacuumTool>(true);
+        if (grapple == null) grapple = GetComponent<GrappleTool>() ?? GetComponentInChildren<GrappleTool>(true);
 
         if (robotRoot == null)
         {
@@ -215,7 +217,7 @@ public class ToolVisualController : MonoBehaviour
 
         if (playerController != null)
         {
-            grappleModeBlend = playerController.SelectedTool == PlayerController.Tool.Grapple ? 1f : 0f;
+            grappleModeBlend = playerController.ActiveTool == ToolId.Grapple ? 1f : 0f;
         }
 
         SetupNozzleTip();
@@ -483,14 +485,14 @@ public class ToolVisualController : MonoBehaviour
     {
         if (playerController == null) return;
 
-        PlayerController.Tool currentTool = playerController.SelectedTool;
-        float targetBlend = (currentTool == PlayerController.Tool.Grapple) ? 1f : 0f;
+        ToolId currentTool = playerController.ActiveTool;
+        float targetBlend = (currentTool == ToolId.Grapple) ? 1f : 0f;
         grappleModeBlend = Mathf.MoveTowards(grappleModeBlend, targetBlend, dt * modeTransitionSpeed);
 
         if (robotRoot != null)
         {
             Vector3 suctionShake = Vector3.zero;
-            if (vacuum != null && vacuum.vacuumActive && currentTool == PlayerController.Tool.Vacuum)
+            if (vacuum != null && vacuum.IsSuctioning && currentTool == ToolId.Vacuum)
             {
                 suctionShake = new Vector3(
                     Mathf.Sin(Time.time * 55f) * 0.006f,
@@ -514,7 +516,7 @@ public class ToolVisualController : MonoBehaviour
         if (vacuum == null) return;
 
         int stored = vacuum.StoredCount;
-        int capacity = Mathf.Max(1, vacuum.ObjectCapacity);
+        int capacity = Mathf.Max(1, vacuum.Capacity);
 
         if (stored > lastStoredCount)
         {
@@ -651,7 +653,7 @@ public class ToolVisualController : MonoBehaviour
         }
 
         float vacuumOpen = 1f - Mathf.SmoothStep(0f, 1f, grappleModeBlend);
-        float suctionBonus = (vacuum != null && vacuum.vacuumActive) ? 14f : 0f;
+        float suctionBonus = (vacuum != null && vacuum.IsSuctioning) ? 14f : 0f;
         for (int i = 0; i < nozzleFlapBones.Length; i++)
         {
             if (nozzleFlapBones[i] != null)
@@ -730,9 +732,9 @@ public class ToolVisualController : MonoBehaviour
     private void UpdateSuctionWind(float dt)
     {
         bool shouldPlayWind = playerController != null &&
-                              playerController.SelectedTool == PlayerController.Tool.Vacuum &&
+                              playerController.ActiveTool == ToolId.Vacuum &&
                               vacuum != null &&
-                              vacuum.vacuumActive;
+                              vacuum.IsSuctioning;
 
         if (suctionWindParticles != null)
         {
