@@ -1563,18 +1563,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0e3f975a7f4bc41d6b168cb05932b95f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PoolableController
-  beingPulled: 0
-  pooller: {fileID: 0}
-  absorptionDuration: 1
-  spiralRadius: 0.5
-  spiralTurns: 2
-  scaleRestoreDuration: 0.2
-  absorptionDistance: 0.2
   impactDamage: 3
+  forceMultiplier: 1
   destroyOnEnemyHit: 1
   debrisCount: 6
   minImpactVelocity: 2
-  isThrown: 0
 --- !u!54 &79088131
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -1794,6 +1787,72 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 0846a831cafda4932b3dc900a476ea9b, type: 3}
+--- !u!1 &80546943
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 80546946}
+  - component: {fileID: 80546945}
+  - component: {fileID: 80546944}
+  m_Layer: 14
+  m_Name: KillVolume_Void
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &80546944
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 80546943}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e73a7820a0814edfb06181936145440e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: NostalgIA.Gameplay::NostalgIA.Gameplay.Player.KillVolume
+--- !u!65 &80546945
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 80546943}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1200, y: 10, z: 1200}
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!4 &80546946
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 80546943}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: -20, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &85280097
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2662,18 +2721,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0e3f975a7f4bc41d6b168cb05932b95f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PoolableController
-  beingPulled: 0
-  pooller: {fileID: 0}
-  absorptionDuration: 1
-  spiralRadius: 0.5
-  spiralTurns: 2
-  scaleRestoreDuration: 0.2
-  absorptionDistance: 0.2
   impactDamage: 3
+  forceMultiplier: 1
   destroyOnEnemyHit: 1
   debrisCount: 6
   minImpactVelocity: 2
-  isThrown: 0
 --- !u!54 &117259690
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -4639,7 +4691,7 @@ GameObject:
   - component: {fileID: 197979375}
   - component: {fileID: 197979377}
   - component: {fileID: 197979376}
-  m_Layer: 0
+  m_Layer: 14
   m_Name: Checkpoint_2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4654,8 +4706,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 197979373}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -12.3, y: 1.0, z: -14.0}
+  m_LocalRotation: {x: -0, y: 1, z: -0, w: -0.00000004371139}
+  m_LocalPosition: {x: -12.3, y: 1, z: -14}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -4673,8 +4725,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8a8ddc71bd8a245a697ea47d31187afb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RespawnController
+  index: 1
+  label: 'Punto de control: Agilidad'
+  spawnHeightOffset: 0.2
   activatedColor: {r: 0.2, g: 1, b: 0.4, a: 1}
-  checkpointName: "\xA1Punto de control 2: Alerta WinRar!"
 --- !u!54 &197979376
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -7667,7 +7721,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &296796801
 RectTransform:
   m_ObjectHideFlags: 0
@@ -9717,7 +9771,7 @@ GameObject:
   - component: {fileID: 354707491}
   - component: {fileID: 354707493}
   - component: {fileID: 354707492}
-  m_Layer: 0
+  m_Layer: 14
   m_Name: Checkpoint_4
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -9732,8 +9786,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 354707489}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 42.0, y: 1.0, z: -49.0}
+  m_LocalRotation: {x: -0, y: 0.92387956, z: -0, w: 0.38268346}
+  m_LocalPosition: {x: 42, y: 1, z: -49}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -9751,8 +9805,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8a8ddc71bd8a245a697ea47d31187afb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RespawnController
+  index: 3
+  label: 'Punto de control: Zona Este'
+  spawnHeightOffset: 0.2
   activatedColor: {r: 0.2, g: 1, b: 0.4, a: 1}
-  checkpointName: "\xA1Punto de control 4: Combate Cin\xE9tico!"
 --- !u!54 &354707492
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -12157,7 +12213,7 @@ GameObject:
   - component: {fileID: 473329926}
   - component: {fileID: 473329925}
   - component: {fileID: 473329924}
-  m_Layer: 0
+  m_Layer: 14
   m_Name: Checkpoint_8
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -12172,8 +12228,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 473329922}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 138.0, y: 1.0, z: -114.0}
+  m_LocalRotation: {x: -0, y: 0.7071068, z: -0, w: 0.7071068}
+  m_LocalPosition: {x: 138, y: 1, z: -114}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -12191,8 +12247,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8a8ddc71bd8a245a697ea47d31187afb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RespawnController
+  index: 7
+  label: 'Punto de control: Isla Segura 2'
+  spawnHeightOffset: 0.2
   activatedColor: {r: 0.2, g: 1, b: 0.4, a: 1}
-  checkpointName: "\xA1Punto de control 8: Entrada al Pasillo Final!"
 --- !u!54 &473329925
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -16084,8 +16142,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 20
-  m_fontSizeBase: 20
+  m_fontSize: 15.5
+  m_fontSizeBase: 15.5
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -16901,6 +16959,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LavaHazard
   damage: 99
+  applyBlueCodeShader: 1
 --- !u!54 &730165534
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -18826,7 +18885,7 @@ GameObject:
   - component: {fileID: 794257883}
   - component: {fileID: 794257882}
   - component: {fileID: 794257881}
-  m_Layer: 0
+  m_Layer: 14
   m_Name: Checkpoint_5
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -18841,8 +18900,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 794257879}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 54.5, y: 1.0, z: -61.0}
+  m_LocalRotation: {x: -0, y: 1, z: -0, w: -0.00000004371139}
+  m_LocalPosition: {x: 54.5, y: 1, z: -61}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -18860,8 +18919,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8a8ddc71bd8a245a697ea47d31187afb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RespawnController
+  index: 4
+  label: 'Punto de control: Muralla de Cajas'
+  spawnHeightOffset: 0.2
   activatedColor: {r: 0.2, g: 1, b: 0.4, a: 1}
-  checkpointName: "\xA1Punto de control 5: Umbral del Abismo!"
 --- !u!54 &794257882
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -19982,7 +20043,7 @@ GameObject:
   - component: {fileID: 829965417}
   - component: {fileID: 829965416}
   - component: {fileID: 829965415}
-  m_Layer: 0
+  m_Layer: 14
   m_Name: Checkpoint_11
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -19997,8 +20058,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 829965413}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 243.5, y: 19.0, z: 95.0}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 243.5, y: 19, z: 95}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -20016,8 +20077,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8a8ddc71bd8a245a697ea47d31187afb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RespawnController
+  index: 10
+  label: 'Punto de control: Escalera al Portal'
+  spawnHeightOffset: 0.2
   activatedColor: {r: 0.2, g: 1, b: 0.4, a: 1}
-  checkpointName: "\xA1Punto de control 11: Escalera a la Meta!"
 --- !u!54 &829965416
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -21427,18 +21490,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0e3f975a7f4bc41d6b168cb05932b95f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PoolableController
-  beingPulled: 0
-  pooller: {fileID: 0}
-  absorptionDuration: 1
-  spiralRadius: 0.5
-  spiralTurns: 2
-  scaleRestoreDuration: 0.2
-  absorptionDistance: 0.2
   impactDamage: 3
+  forceMultiplier: 1
   destroyOnEnemyHit: 1
   debrisCount: 6
   minImpactVelocity: 2
-  isThrown: 0
 --- !u!54 &891393632
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -21552,6 +21608,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 2887401025001297545, guid: df2a49966b35c40218e4485f863c7e5f, type: 3}
+      propertyPath: m_AdditionalShaderChannelsFlag
+      value: 25
+      objectReference: {fileID: 0}
     - target: {fileID: 5952393192728891583, guid: df2a49966b35c40218e4485f863c7e5f, type: 3}
       propertyPath: m_LocalPosition.x
       value: -11.7
@@ -22627,8 +22687,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 25, y: -25}
-  m_SizeDelta: {x: 400, y: 140}
+  m_AnchoredPosition: {x: 22, y: -20}
+  m_SizeDelta: {x: 315, y: 74}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &945285305
 MonoBehaviour:
@@ -22643,7 +22703,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 0.06, g: 0.08, b: 0.12, a: 0.88}
+  m_Color: {r: 0.04, g: 0.06, b: 0.1, a: 0.56}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -25614,7 +25674,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1057804240
 RectTransform:
   m_ObjectHideFlags: 0
@@ -26303,18 +26363,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0e3f975a7f4bc41d6b168cb05932b95f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PoolableController
-  beingPulled: 0
-  pooller: {fileID: 0}
-  absorptionDuration: 1
-  spiralRadius: 0.5
-  spiralTurns: 2
-  scaleRestoreDuration: 0.2
-  absorptionDistance: 0.2
   impactDamage: 3
+  forceMultiplier: 1
   destroyOnEnemyHit: 1
   debrisCount: 6
   minImpactVelocity: 2
-  isThrown: 0
 --- !u!54 &1076265689
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -26525,18 +26578,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0e3f975a7f4bc41d6b168cb05932b95f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PoolableController
-  beingPulled: 0
-  pooller: {fileID: 0}
-  absorptionDuration: 1
-  spiralRadius: 0.5
-  spiralTurns: 2
-  scaleRestoreDuration: 0.2
-  absorptionDistance: 0.2
   impactDamage: 3
+  forceMultiplier: 1
   destroyOnEnemyHit: 1
   debrisCount: 6
   minImpactVelocity: 2
-  isThrown: 0
 --- !u!54 &1097172115
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -30868,8 +30914,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 20, y: -44}
-  m_SizeDelta: {x: -40, y: 30}
+  m_AnchoredPosition: {x: 18, y: -13}
+  m_SizeDelta: {x: -36, y: 28}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &1218125549
 MonoBehaviour:
@@ -30918,8 +30964,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 22
-  m_fontSizeBase: 22
+  m_fontSize: 17.5
+  m_fontSizeBase: 17.5
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -30935,9 +30981,9 @@ MonoBehaviour:
   m_lineSpacingMax: 0
   m_paragraphSpacing: 0
   m_charWidthMaxAdj: 0
-  m_TextWrappingMode: 1
+  m_TextWrappingMode: 0
   m_wordWrappingRatios: 0.4
-  m_overflowMode: 0
+  m_overflowMode: 1
   m_linkedTextComponent: {fileID: 0}
   parentLinkedComponent: {fileID: 0}
   m_enableKerning: 0
@@ -31121,7 +31167,7 @@ GameObject:
   - component: {fileID: 1226241550}
   - component: {fileID: 1226241549}
   - component: {fileID: 1226241548}
-  m_Layer: 0
+  m_Layer: 14
   m_Name: Checkpoint_9
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -31136,8 +31182,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1226241546}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 246.0, y: 1.0, z: -114.0}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 246, y: 1, z: -114}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -31155,8 +31201,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8a8ddc71bd8a245a697ea47d31187afb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RespawnController
+  index: 8
+  label: 'Punto de control: Gran Canal'
+  spawnHeightOffset: 0.2
   activatedColor: {r: 0.2, g: 1, b: 0.4, a: 1}
-  checkpointName: "\xA1Punto de control 9: Pasillo de Lava!"
 --- !u!54 &1226241549
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -31273,6 +31321,7 @@ GameObject:
   - component: {fileID: 1232988711}
   - component: {fileID: 1232988713}
   - component: {fileID: 1232988712}
+  - component: {fileID: 1232988714}
   m_Layer: 0
   m_Name: Card_TutorialGuide
   m_TagString: Untagged
@@ -31302,8 +31351,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -25, y: -25}
-  m_SizeDelta: {x: 580, y: 205}
+  m_AnchoredPosition: {x: -22, y: -20}
+  m_SizeDelta: {x: 450, y: 84}
   m_Pivot: {x: 1, y: 1}
 --- !u!114 &1232988712
 MonoBehaviour:
@@ -31318,7 +31367,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 0.05, g: 0.07, b: 0.11, a: 0.92}
+  m_Color: {r: 0.04, g: 0.06, b: 0.1, a: 0.62}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -31343,6 +31392,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1232988710}
   m_CullTransparentMesh: 1
+--- !u!225 &1232988714
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1232988710}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1001 &1233031271
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -31618,8 +31679,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 20, y: -22}
-  m_SizeDelta: {x: -40, y: 32}
+  m_AnchoredPosition: {x: 16, y: -12}
+  m_SizeDelta: {x: -32, y: 26}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &1237757913
 MonoBehaviour:
@@ -31668,8 +31729,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 24
-  m_fontSizeBase: 24
+  m_fontSize: 18
+  m_fontSizeBase: 18
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -31790,7 +31851,7 @@ GameObject:
   - component: {fileID: 1244986402}
   - component: {fileID: 1244986404}
   - component: {fileID: 1244986403}
-  m_Layer: 0
+  m_Layer: 14
   m_Name: Checkpoint_3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -31805,8 +31866,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1244986400}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -10.0, y: 1.0, z: -48.0}
+  m_LocalRotation: {x: -0, y: 0.7071068, z: -0, w: 0.7071068}
+  m_LocalPosition: {x: -10, y: 1, z: -48}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -31824,8 +31885,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8a8ddc71bd8a245a697ea47d31187afb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RespawnController
+  index: 2
+  label: 'Punto de control: Sala de Combate'
+  spawnHeightOffset: 0.2
   activatedColor: {r: 0.2, g: 1, b: 0.4, a: 1}
-  checkpointName: "\xA1Punto de control 3: Sala de Armas!"
 --- !u!54 &1244986403
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -32017,7 +32080,7 @@ Transform:
   m_GameObject: {fileID: 1246855004}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 15, y: 1.2, z: -50}
+  m_LocalPosition: {x: 213.42, y: 7.25, z: -106.87}
   m_LocalScale: {x: 0.75, y: 0.75, z: 0.75}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -32036,6 +32099,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0a95c6a505dbd41989ddfb26721a0131, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::StarController
+  starIndex: 1
   rotationSpeed: 90
   bobHeight: 0.25
   bobFrequency: 2
@@ -52849,7 +52913,7 @@ GameObject:
   - component: {fileID: 1265679854}
   - component: {fileID: 1265679856}
   - component: {fileID: 1265679855}
-  m_Layer: 0
+  m_Layer: 14
   m_Name: Checkpoint_1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -52864,8 +52928,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1265679852}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -12.3, y: 1.0, z: 21.0}
+  m_LocalRotation: {x: -0, y: 1, z: -0, w: -0.00000004371139}
+  m_LocalPosition: {x: -12.3, y: 1, z: 21}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -52883,8 +52947,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8a8ddc71bd8a245a697ea47d31187afb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RespawnController
+  index: 0
+  label: 'Punto de control: Inicio'
+  spawnHeightOffset: 0.2
   activatedColor: {r: 0.2, g: 1, b: 0.4, a: 1}
-  checkpointName: "\xA1Punto de control 1: Spawn Inicial!"
 --- !u!54 &1265679855
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -54393,18 +54459,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0e3f975a7f4bc41d6b168cb05932b95f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PoolableController
-  beingPulled: 0
-  pooller: {fileID: 0}
-  absorptionDuration: 1
-  spiralRadius: 0.5
-  spiralTurns: 2
-  scaleRestoreDuration: 0.2
-  absorptionDistance: 0.2
   impactDamage: 3
+  forceMultiplier: 1
   destroyOnEnemyHit: 1
   debrisCount: 6
   minImpactVelocity: 2
-  isThrown: 0
 --- !u!54 &1312756411
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -54601,8 +54660,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 20, y: -60}
-  m_SizeDelta: {x: -40, y: 28}
+  m_AnchoredPosition: {x: 16, y: -40}
+  m_SizeDelta: {x: -32, y: 24}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &1320330440
 MonoBehaviour:
@@ -54651,8 +54710,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 18
-  m_fontSizeBase: 18
+  m_fontSize: 15.5
+  m_fontSizeBase: 15.5
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -55208,18 +55267,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0e3f975a7f4bc41d6b168cb05932b95f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PoolableController
-  beingPulled: 0
-  pooller: {fileID: 0}
-  absorptionDuration: 1
-  spiralRadius: 0.5
-  spiralTurns: 2
-  scaleRestoreDuration: 0.2
-  absorptionDistance: 0.2
   impactDamage: 3
+  forceMultiplier: 1
   destroyOnEnemyHit: 1
   debrisCount: 6
   minImpactVelocity: 2
-  isThrown: 0
 --- !u!54 &1348748113
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -55684,7 +55736,7 @@ GameObject:
   - component: {fileID: 1368355662}
   - component: {fileID: 1368355661}
   - component: {fileID: 1368355660}
-  m_Layer: 0
+  m_Layer: 14
   m_Name: Checkpoint_6
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -55699,8 +55751,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1368355658}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 56.5, y: 1.0, z: -114.0}
+  m_LocalRotation: {x: -0, y: 0.7071068, z: -0, w: 0.7071068}
+  m_LocalPosition: {x: 56.5, y: 1, z: -114}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -55718,8 +55770,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8a8ddc71bd8a245a697ea47d31187afb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RespawnController
+  index: 5
+  label: 'Punto de control: Abismo Azul'
+  spawnHeightOffset: 0.2
   activatedColor: {r: 0.2, g: 1, b: 0.4, a: 1}
-  checkpointName: "\xA1Punto de control 6: Plataforma de Lava 1!"
 --- !u!54 &1368355661
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -56000,18 +56054,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0e3f975a7f4bc41d6b168cb05932b95f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PoolableController
-  beingPulled: 0
-  pooller: {fileID: 0}
-  absorptionDuration: 1
-  spiralRadius: 0.5
-  spiralTurns: 2
-  scaleRestoreDuration: 0.2
-  absorptionDistance: 0.2
   impactDamage: 3
+  forceMultiplier: 1
   destroyOnEnemyHit: 1
   debrisCount: 6
   minImpactVelocity: 2
-  isThrown: 0
 --- !u!54 &1373005031
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -56900,8 +56947,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 20, y: -126}
-  m_SizeDelta: {x: -40, y: 28}
+  m_AnchoredPosition: {x: 18, y: -44}
+  m_SizeDelta: {x: -36, y: 26}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &1404233633
 MonoBehaviour:
@@ -56951,8 +56998,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 17
-  m_fontSizeBase: 17
+  m_fontSize: 15
+  m_fontSizeBase: 15
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -56968,7 +57015,7 @@ MonoBehaviour:
   m_lineSpacingMax: 0
   m_paragraphSpacing: 0
   m_charWidthMaxAdj: 0
-  m_TextWrappingMode: 1
+  m_TextWrappingMode: 0
   m_wordWrappingRatios: 0.4
   m_overflowMode: 0
   m_linkedTextComponent: {fileID: 0}
@@ -57745,7 +57792,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 3.5}
+  m_SizeDelta: {x: 0, y: 2}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &1442464056
 MonoBehaviour:
@@ -58261,18 +58308,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0e3f975a7f4bc41d6b168cb05932b95f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PoolableController
-  beingPulled: 0
-  pooller: {fileID: 0}
-  absorptionDuration: 1
-  spiralRadius: 0.5
-  spiralTurns: 2
-  scaleRestoreDuration: 0.2
-  absorptionDistance: 0.2
   impactDamage: 3
+  forceMultiplier: 1
   destroyOnEnemyHit: 1
   debrisCount: 6
   minImpactVelocity: 2
-  isThrown: 0
 --- !u!54 &1471290731
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -58768,18 +58808,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0e3f975a7f4bc41d6b168cb05932b95f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PoolableController
-  beingPulled: 0
-  pooller: {fileID: 0}
-  absorptionDuration: 1
-  spiralRadius: 0.5
-  spiralTurns: 2
-  scaleRestoreDuration: 0.2
-  absorptionDistance: 0.2
   impactDamage: 3
+  forceMultiplier: 1
   destroyOnEnemyHit: 1
   debrisCount: 6
   minImpactVelocity: 2
-  isThrown: 0
 --- !u!54 &1479761279
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -60441,7 +60474,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1493289381
 RectTransform:
   m_ObjectHideFlags: 0
@@ -60746,18 +60779,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0e3f975a7f4bc41d6b168cb05932b95f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PoolableController
-  beingPulled: 0
-  pooller: {fileID: 0}
-  absorptionDuration: 1
-  spiralRadius: 0.5
-  spiralTurns: 2
-  scaleRestoreDuration: 0.2
-  absorptionDistance: 0.2
   impactDamage: 3
+  forceMultiplier: 1
   destroyOnEnemyHit: 1
   debrisCount: 6
   minImpactVelocity: 2
-  isThrown: 0
 --- !u!54 &1494299788
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -62531,7 +62557,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1611633302
 RectTransform:
   m_ObjectHideFlags: 0
@@ -63628,18 +63654,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0e3f975a7f4bc41d6b168cb05932b95f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PoolableController
-  beingPulled: 0
-  pooller: {fileID: 0}
-  absorptionDuration: 1
-  spiralRadius: 0.5
-  spiralTurns: 2
-  scaleRestoreDuration: 0.2
-  absorptionDistance: 0.2
   impactDamage: 3
+  forceMultiplier: 1
   destroyOnEnemyHit: 1
   debrisCount: 6
   minImpactVelocity: 2
-  isThrown: 0
 --- !u!54 &1671280155
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -67262,9 +67281,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0659c0eec8f64336beafb56a878e2064, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TutorialDoor
+  targetSceneAsset: {fileID: 0}
+  targetSceneName: OtherDimension
+  portalChannelId: MainPortal
+  isReturnPortal: 0
+  additiveWorldSpatialOffset: {x: -650, y: 120, z: 650}
   doorLight: {fileID: 131967579}
-  victoryColor: {r: 0.2, g: 1, b: 0.4, a: 1}
-  triggerDistance: 4.5
+  portalColor: {r: 0.15, g: 0.85, b: 1, a: 1}
+  frameBodyColor: {r: 0.12, g: 0.16, b: 0.22, a: 1}
 --- !u!65 &1766082636
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -69426,7 +69450,7 @@ GameObject:
   - component: {fileID: 1846154420}
   - component: {fileID: 1846154419}
   - component: {fileID: 1846154418}
-  m_Layer: 0
+  m_Layer: 14
   m_Name: Checkpoint_10
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -69441,8 +69465,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1846154416}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 243.2, y: 1.2, z: 61.0}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 243.2, y: 1.2, z: 61}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -69460,8 +69484,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8a8ddc71bd8a245a697ea47d31187afb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RespawnController
+  index: 9
+  label: 'Punto de control: Plataforma Arena'
+  spawnHeightOffset: 0.2
   activatedColor: {r: 0.2, g: 1, b: 0.4, a: 1}
-  checkpointName: "\xA1Punto de control 10: Arena de la Escalera!"
 --- !u!54 &1846154419
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -70106,7 +70132,7 @@ GameObject:
   - component: {fileID: 1864258961}
   - component: {fileID: 1864258960}
   - component: {fileID: 1864258959}
-  m_Layer: 0
+  m_Layer: 14
   m_Name: Checkpoint_7
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -70121,8 +70147,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1864258957}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 98.0, y: 1.0, z: -114.0}
+  m_LocalRotation: {x: -0, y: 0.7071068, z: -0, w: 0.7071068}
+  m_LocalPosition: {x: 98, y: 1, z: -114}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -70140,8 +70166,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8a8ddc71bd8a245a697ea47d31187afb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RespawnController
+  index: 6
+  label: 'Punto de control: Isla Segura 1'
+  spawnHeightOffset: 0.2
   activatedColor: {r: 0.2, g: 1, b: 0.4, a: 1}
-  checkpointName: "\xA1Punto de control 7: Plataforma de Lava 2!"
 --- !u!54 &1864258960
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -70282,7 +70310,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 3.5}
+  m_SizeDelta: {x: 0, y: 2}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &1867268117
 MonoBehaviour:
@@ -70691,18 +70719,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0e3f975a7f4bc41d6b168cb05932b95f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PoolableController
-  beingPulled: 0
-  pooller: {fileID: 0}
-  absorptionDuration: 1
-  spiralRadius: 0.5
-  spiralTurns: 2
-  scaleRestoreDuration: 0.2
-  absorptionDistance: 0.2
   impactDamage: 3
+  forceMultiplier: 1
   destroyOnEnemyHit: 1
   debrisCount: 6
   minImpactVelocity: 2
-  isThrown: 0
 --- !u!54 &1877257343
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -72142,18 +72163,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0e3f975a7f4bc41d6b168cb05932b95f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PoolableController
-  beingPulled: 0
-  pooller: {fileID: 0}
-  absorptionDuration: 1
-  spiralRadius: 0.5
-  spiralTurns: 2
-  scaleRestoreDuration: 0.2
-  absorptionDistance: 0.2
   impactDamage: 3
+  forceMultiplier: 1
   destroyOnEnemyHit: 1
   debrisCount: 6
   minImpactVelocity: 2
-  isThrown: 0
 --- !u!54 &1918658497
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -72386,38 +72400,13 @@ GameObject:
   - component: {fileID: 1928911221}
   - component: {fileID: 1928911220}
   - component: {fileID: 1928911219}
-  - component: {fileID: 1928911218}
-  m_Layer: 7
+  m_Layer: 0
   m_Name: Poolable_Crate_15
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1928911218
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1928911216}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0e3f975a7f4bc41d6b168cb05932b95f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PoolableController
-  beingPulled: 0
-  pooller: {fileID: 0}
-  absorptionDuration: 1
-  spiralRadius: 0.5
-  spiralTurns: 2
-  scaleRestoreDuration: 0.2
-  absorptionDistance: 0.2
-  impactDamage: 3
-  destroyOnEnemyHit: 1
-  debrisCount: 6
-  minImpactVelocity: 2
-  isThrown: 0
 --- !u!54 &1928911219
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -72440,8 +72429,8 @@ Rigidbody:
     m_Bits: 0
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
-  m_UseGravity: 1
-  m_IsKinematic: 0
+  m_UseGravity: 0
+  m_IsKinematic: 1
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 1
@@ -73379,8 +73368,7 @@ GameObject:
   - component: {fileID: 1958044439}
   - component: {fileID: 1958044438}
   - component: {fileID: 1958044437}
-  - component: {fileID: 1958044436}
-  m_Layer: 7
+  m_Layer: 0
   m_Name: Poolable_Crate_15
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -73402,30 +73390,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 382411780}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1958044436
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1958044433}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0e3f975a7f4bc41d6b168cb05932b95f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PoolableController
-  beingPulled: 0
-  pooller: {fileID: 0}
-  absorptionDuration: 1
-  spiralRadius: 0.5
-  spiralTurns: 2
-  scaleRestoreDuration: 0.2
-  absorptionDistance: 0.2
-  impactDamage: 3
-  destroyOnEnemyHit: 1
-  debrisCount: 6
-  minImpactVelocity: 2
-  isThrown: 0
 --- !u!54 &1958044437
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -73448,8 +73412,8 @@ Rigidbody:
     m_Bits: 0
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
-  m_UseGravity: 1
-  m_IsKinematic: 0
+  m_UseGravity: 0
+  m_IsKinematic: 1
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 1
@@ -73544,38 +73508,13 @@ GameObject:
   - component: {fileID: 1960834776}
   - component: {fileID: 1960834775}
   - component: {fileID: 1960834774}
-  - component: {fileID: 1960834773}
-  m_Layer: 7
+  m_Layer: 0
   m_Name: Poolable_Crate_15 (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1960834773
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1960834771}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0e3f975a7f4bc41d6b168cb05932b95f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PoolableController
-  beingPulled: 0
-  pooller: {fileID: 0}
-  absorptionDuration: 1
-  spiralRadius: 0.5
-  spiralTurns: 2
-  scaleRestoreDuration: 0.2
-  absorptionDistance: 0.2
-  impactDamage: 3
-  destroyOnEnemyHit: 1
-  debrisCount: 6
-  minImpactVelocity: 2
-  isThrown: 0
 --- !u!54 &1960834774
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -73598,8 +73537,8 @@ Rigidbody:
     m_Bits: 0
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
-  m_UseGravity: 1
-  m_IsKinematic: 0
+  m_UseGravity: 0
+  m_IsKinematic: 1
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 1
@@ -74200,18 +74139,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0e3f975a7f4bc41d6b168cb05932b95f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PoolableController
-  beingPulled: 0
-  pooller: {fileID: 0}
-  absorptionDuration: 1
-  spiralRadius: 0.5
-  spiralTurns: 2
-  scaleRestoreDuration: 0.2
-  absorptionDistance: 0.2
   impactDamage: 3
+  forceMultiplier: 1
   destroyOnEnemyHit: 1
   debrisCount: 6
   minImpactVelocity: 2
-  isThrown: 0
 --- !u!54 &1983552531
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -74593,18 +74525,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0e3f975a7f4bc41d6b168cb05932b95f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PoolableController
-  beingPulled: 0
-  pooller: {fileID: 0}
-  absorptionDuration: 1
-  spiralRadius: 0.5
-  spiralTurns: 2
-  scaleRestoreDuration: 0.2
-  absorptionDistance: 0.2
   impactDamage: 3
+  forceMultiplier: 1
   destroyOnEnemyHit: 1
   debrisCount: 6
   minImpactVelocity: 2
-  isThrown: 0
 --- !u!54 &2015682348
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -74912,8 +74837,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::GameController
   maxStars: 3
   scoreText: {fileID: 1493289382}
-  spawnPoint: {x: -12.3, y: 1, z: 21}
-  fallThreshold: -15
   healthText: {fileID: 1237757913}
   toolText: {fileID: 1320330440}
   checkpointNotificationText: {fileID: 674798926}
@@ -74925,8 +74848,11 @@ MonoBehaviour:
   descriptionText: {fileID: 1611633303}
   controlsText: {fileID: 1404233633}
   taskText: {fileID: 1057804241}
+  guideAccent: {fileID: 0}
   winPanel: {fileID: 1105535097}
   winSummaryText: {fileID: 171585870}
+  toastDuration: 2.2
+  hurtFlashDuration: 0.35
 --- !u!4 &2020847115
 Transform:
   m_ObjectHideFlags: 0
@@ -76811,11 +76737,11 @@ RectTransform:
   - {fileID: 674798925}
   m_Father: {fileID: 398399629}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 1}
-  m_AnchorMax: {x: 0.5, y: 1}
-  m_AnchoredPosition: {x: 0, y: -30}
-  m_SizeDelta: {x: 500, y: 60}
-  m_Pivot: {x: 0.5, y: 1}
+  m_AnchorMin: {x: 0.5, y: 0}
+  m_AnchorMax: {x: 0.5, y: 0}
+  m_AnchoredPosition: {x: 0, y: 36}
+  m_SizeDelta: {x: 380, y: 40}
+  m_Pivot: {x: 0.5, y: 0}
 --- !u!114 &2098898117
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -76829,7 +76755,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 0.04, g: 0.12, b: 0.08, a: 0.92}
+  m_Color: {r: 0.04, g: 0.08, b: 0.06, a: 0.68}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -77829,17 +77755,21 @@ PrefabInstance:
       propertyPath: m_Name
       value: Star_1
       objectReference: {fileID: 0}
+    - target: {fileID: 3503190091071693391, guid: df842c63aefb54bb5ae98c28c6a3c728, type: 3}
+      propertyPath: starIndex
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 6618052979346812605, guid: df842c63aefb54bb5ae98c28c6a3c728, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -11.7
+      value: 15
       objectReference: {fileID: 0}
     - target: {fileID: 6618052979346812605, guid: df842c63aefb54bb5ae98c28c6a3c728, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 1.2
+      value: 1.25
       objectReference: {fileID: 0}
     - target: {fileID: 6618052979346812605, guid: df842c63aefb54bb5ae98c28c6a3c728, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 5
+      value: -50
       objectReference: {fileID: 0}
     - target: {fileID: 6618052979346812605, guid: df842c63aefb54bb5ae98c28c6a3c728, type: 3}
       propertyPath: m_LocalRotation.w
@@ -78512,3 +78442,4 @@ SceneRoots:
   - {fileID: 1960834778}
   - {fileID: 1106942321}
   - {fileID: 257283185}
+  - {fileID: 80546946}

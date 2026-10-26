@@ -12,7 +12,7 @@
 | :--- | :--- |
 | Repositorio, estructura de carpetas, ensamblados y validación (Fase 0, Pista A) | Completado |
 | Limpieza de contenido externo, créditos, manual y guía de estilo (Fase 0, Pista B) | Completado |
-| Entrada unificada, bus de eventos, motor del jugador, herramientas, vida y reaparición (Fase 1, Pista A) | Código integrado el 26 de octubre; montaje en el editor y pruebas pendientes de ejecutar |
+| Entrada unificada, bus de eventos, motor del jugador, herramientas, vida y reaparición (Fase 1, Pista A) | Completado el 26 de octubre: compila sin errores, montaje aplicado y 66 pruebas aprobadas |
 
 ---
 
@@ -38,6 +38,7 @@
 | 26 oct | F1-A11 a A13 | `PlayerHealth` (invulnerabilidad, *instakill*, caída letal a ≥ 24 m/s); `PlayerContactDamage` con caché por collider; `KillVolume` sustituye el umbral global y = −15. `RespawnService` reubica en el último checkpoint en 0,8 s sin recargar la escena y reinicia los `IResettable`. Los absorbibles rotos vuelven a su lugar; los enemigos eliminados permanecen así hasta `EnemyBase` (Fase 2). `PoolService` sobre `ObjectPool<T>`: los fragmentos de rotura salen de un pool en lugar de `CreatePrimitive` + `Destroy`. | `Scripts/Gameplay/Player`, `Scripts/Core/Pooling` |
 | 26 oct | F1-A14 y A15 | `GameStateMachine` (escala de tiempo, cursor y mapa de entrada por estado). `GameRoot` vive en `Prefabs/Core/Resources/` y se instancia antes de la primera escena (TDD §3.1 actualizado). SO con los valores del prototipo. La capacidad de la aspiradora (20) y el alcance del gancho (30 m) toman los valores con que se jugaba el Tutorial, que sobrescribía los del prefab (5 y 60 m). | `Data/`, `Prefabs/Core/Resources/GameRoot.prefab` |
 | 26 oct | F1-A16 | Se retiró el controlador monolítico. Su parte visual pasó a `TutorialHudPresenter`, que reutiliza su GUID y conserva las referencias del HUD y solo usa eventos. La reaparición pasó a `RespawnService`. La tabla de coordenadas de checkpoints, la reubicación de estrellas, las islas estáticas y la disposición del HUD se aplican una vez en el editor con *NostalgIA › Fase 1 › Montar todo*. Se retiraron de la escena `TutorialZonePrompt` (5) y `ThrowableDamage` (19, con valores idénticos a los de `Absorbable`). Los rayos finos de puntería (`ToolRayVisual`) se reemplazaron por la retícula de cuatro estados. | `Scripts/Editor/Setup/Phase1Builder.cs` |
+| 26 oct | QA-F1 | Verificación en el editor: los siete ensamblados compilan sin errores (queda una advertencia heredada de `NonEuclideanPortal` por una API obsoleta de URP). *Montar todo* terminó con 0 errores de validación y 1 advertencia (material por defecto de ProBuilder, F1-B02). Test Runner: 61/61 pruebas EditMode y 5/5 PlayMode aprobadas. Prueba manual en modo de juego desde `00_Boot`: carga el Tutorial con el HUD por eventos (vida, estrellas, herramienta y guía 1/7), caminar, saltar y cambiar de herramienta con `F`; el cabeceo de la mirada se aplica al pivote de cámara. | Reporte `Reporte_Validacion_Proyecto.md`; commit del montaje |
 
 ---
 
@@ -59,10 +60,10 @@ El reporte oficial del validador se genera desde el editor con *NostalgIA › Va
 
 | Ensamblado | Pruebas | Qué cubren |
 | :--- | :-: | :--- |
-| `NostalgIA.Tests.EditMode` | 62 | Fase 0 (32): capas, matriz de colisiones, Build y Player Settings, escena de arranque, créditos y validador. Fase 1 (30): bus de eventos (incluida la comprobación de 0 B por publicación), localizador de servicios, registro de reinicio, descripción de daño, asset de acciones contra las tablas del GDD, almacén FIFO, máscara de puntería, ausencia de `RaycastAll` y montaje de la Fase 1 |
+| `NostalgIA.Tests.EditMode` | 61 | Fase 0 (32): capas, matriz de colisiones, Build y Player Settings, escena de arranque, créditos y validador. Fase 1 (29): bus de eventos (incluida la comprobación de 0 B por publicación), localizador de servicios, registro de reinicio, descripción de daño, asset de acciones contra las tablas del GDD, almacén FIFO, máscara de puntería, ausencia de `RaycastAll` y montaje de la Fase 1 |
 | `NostalgIA.Tests.PlayMode` | 5 | Flujo de arranque; vida e invulnerabilidad; *instakill*; reaparición en el checkpoint en ≤ 1 s sin recargar la escena; conservación de la velocidad horizontal en el aire |
 
-Ejecución: *Window › General › Test Runner*, pestañas *EditMode* y *PlayMode*. Resultado: *pendiente de la primera ejecución en el editor*.
+Ejecución: *Window › General › Test Runner*, pestañas *EditMode* y *PlayMode*. Resultado del 26 de octubre: 61/61 EditMode y 5/5 PlayMode aprobadas.
 
 ---
 
@@ -76,6 +77,8 @@ Ejecución: *Window › General › Test Runner*, pestañas *EditMode* y *PlayMo
 | La velocidad máxima del stick derecho heredada del prototipo es 37,5 °/s (2,5 × 15). | Girar 180° con el mando tarda unos 5 s. | Revisar en las pruebas de juego de la Fase 2 (`InputReader.stickMaxSpeedX/Y`) |
 | Los enemigos heredados escriben en consola con cadenas interpoladas en cada golpe y se destruyen al morir. | Asignaciones en combate; un enemigo eliminado no reaparece al reiniciar el checkpoint. | `EnemyBase` con *pooling* e `IResettable` (Fase 2) |
 | `ToolVisualController` y `LavaHazard` aún crean materiales y texturas en tiempo de ejecución. | Asignaciones de carga y lotes fuera del SRP Batcher. | Fase 3 (materiales como assets, TDD §6.5) |
+| Al iniciar el Tutorial mueren por la lava electrónica dos Bugs y el guardia WinRar: el volumen de `Lava (4)` (≈ 55 × 243 m, escalado en la escena) cubre sus posiciones. Ya ocurría en el prototipo: la colocación es de la versión `6c0c22c`. | Enemigos que no llegan a enfrentarse al jugador. | Reubicar los enemigos o ajustar el volumen al rediseñar la Gran Canal (F2, diseño de nivel) |
+| La fuente LiberationSans no tiene el glifo ★ del HUD provisional. | Se muestra un cuadro en su lugar (advertencia de TextMeshPro). | Fuentes e iconos de F1-B03 |
 
 ---
 

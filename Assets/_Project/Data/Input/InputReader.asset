@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e61fc1a587d64644a3680143ef0e8e0a, type: 3}
+  m_Name: InputReader
+  m_EditorClassIdentifier: NostalgIA.Input::NostalgIA.Input.InputReader
+  actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  mouseDegreesPerPixel: 0.75
+  touchDegreesPerScreenHeight: 180
+  stickMaxSpeedX: 37.5
+  stickMaxSpeedY: 37.5
+  stickAcceleration: 3
+  useStickAcceleration: 1
+  stickDeadZone: 0.1
+  stickResponseExponent: 1
+  invertY: 0
