@@ -4,7 +4,8 @@
     "references": [
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
-        "NostalgIA.Core"
+        "NostalgIA.Core",
+        "NostalgIA.Gameplay"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

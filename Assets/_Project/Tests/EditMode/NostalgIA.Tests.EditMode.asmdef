@@ -5,7 +5,10 @@
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
         "NostalgIA.Core",
-        "NostalgIA.Editor"
+        "NostalgIA.Editor",
+        "NostalgIA.Input",
+        "NostalgIA.Gameplay",
+        "Unity.InputSystem"
     ],
     "includePlatforms": [
         "Editor"

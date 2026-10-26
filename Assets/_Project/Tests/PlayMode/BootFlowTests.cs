@@ -22,11 +22,20 @@ namespace NostalgIA.Tests.PlayMode
         /// <summary>Tiempo máximo de espera de la carga, en segundos de tiempo real.</summary>
         private const float LoadTimeoutSeconds = 30f;
 
-        /// <summary>Restablece el manejo de mensajes de consola al terminar.</summary>
-        [TearDown]
-        public void RestablecerRegistro()
+        /// <summary>
+        /// Restablece el manejo de mensajes de consola y descarga el Tutorial, para que su jugador
+        /// (que escucha eventos globales como <c>PlayerDied</c>) no interfiera con las pruebas
+        /// siguientes.
+        /// </summary>
+        [UnityTearDown]
+        public IEnumerator RestablecerRegistro()
         {
             LogAssert.ignoreFailingMessages = false;
+            SceneManager.SetActiveScene(SceneManager.CreateScene("PruebasVacia_" + Time.frameCount));
+            Scene tutorial = SceneManager.GetSceneByName(SceneNames.Tutorial);
+            if (tutorial.isLoaded) yield return SceneManager.UnloadSceneAsync(tutorial);
+            Scene dimension = SceneManager.GetSceneByName(SceneNames.OtherDimension);
+            if (dimension.isLoaded) yield return SceneManager.UnloadSceneAsync(dimension);
         }
 
         /// <summary>
@@ -36,8 +45,8 @@ namespace NostalgIA.Tests.PlayMode
         [UnityTest]
         public IEnumerator Boot_CargaElTutorialYSeDescarga()
         {
-            // El código heredado del Tutorial (Fase 1 lo reemplaza) escribe mensajes en consola que
-            // no forman parte de lo que esta prueba evalúa; se evita que hagan fallar la prueba.
+            // El código heredado del Tutorial (enemigos y portal, que se reescriben en la Fase 2)
+            // escribe mensajes en consola que no forman parte de lo que esta prueba evalúa.
             LogAssert.ignoreFailingMessages = true;
 
             SceneManager.LoadScene(SceneNames.Boot, LoadSceneMode.Single);
