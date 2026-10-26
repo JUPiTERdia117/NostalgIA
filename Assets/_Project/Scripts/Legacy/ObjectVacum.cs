@@ -1,3 +1,4 @@
+using NostalgIA.Core;
 using UnityEngine;
 using UnityEngine.Serialization;
 using System.Collections.Generic;
@@ -8,7 +9,9 @@ using System;
 /// </summary>
 public class ObjectVacum : MonoBehaviour
 {
-    // Filtro de detección de absorción; se construye a partir del nombre de capa Poolable.
+    // Filtro de detección de absorción: solo la capa Absorbable (antes «Poolable»).
+    // Se toma la máscara precalculada de NostalgIA.Core.Layers en lugar de buscar la capa por
+    // nombre, de modo que el renombre de la capa no rompe la absorción.
     LayerMask layerMask;
     private PlayerAim aim;
     private ToolRayVisual rayVisual;
@@ -52,7 +55,7 @@ public class ObjectVacum : MonoBehaviour
     /// </summary>
     void Awake()
     {
-        layerMask = LayerMask.GetMask("Poolable");
+        layerMask = Layers.Masks.Absorbable;
         if (GetComponent<ToolVisualController>() == null)
         {
             gameObject.AddComponent<ToolVisualController>();

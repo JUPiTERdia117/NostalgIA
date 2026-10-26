@@ -1,3 +1,4 @@
+using NostalgIA.Core;
 using UnityEngine;
 using UnityEngine.Serialization;
 
@@ -15,7 +16,7 @@ public class GrapleController : MonoBehaviour
     [Tooltip("Gravedad durante el enganche. Cero usa el 35% de la gravedad del jugador.")]
     [SerializeField, Min(0f)] private float gravity;
     [SerializeField] private EasyPeasyFirstPersonController.FirstPersonController firstPersonController;
-    [Tooltip("Superficies válidas. Si existe la capa Graple, se usa por defecto.")]
+    [Tooltip("Superficies válidas para el anclaje. Si se deja en el valor por defecto, se usa la capa Grapple (antes «Graple»).")]
     [SerializeField] private LayerMask grappleMask = Physics.DefaultRaycastLayers;
     [SerializeField, Min(0f)] private float pullAcceleration = 38f;
     [Tooltip("Límite de velocidad hacia el ancla; conserva la velocidad lateral y el exceso de impulso previo.")]
@@ -58,9 +59,11 @@ public class GrapleController : MonoBehaviour
     {
         if (firstPersonController == null)
             firstPersonController = GetComponentInParent<EasyPeasyFirstPersonController.FirstPersonController>();
-        int layer = LayerMask.NameToLayer("Graple");
-        if (layer >= 0 && grappleMask.value == Physics.DefaultRaycastLayers)
-            grappleMask = 1 << layer;
+        // Si la máscara conserva el valor por defecto, se restringe a la capa Grapple.
+        // Se usa la máscara constante de NostalgIA.Core.Layers (índice 8) en lugar de buscar
+        // la capa por nombre, para que el renombre «Graple» → «Grapple» no afecte al gancho.
+        if (grappleMask.value == Physics.DefaultRaycastLayers)
+            grappleMask = Layers.Masks.Grapple;
     }
 
     void Start()

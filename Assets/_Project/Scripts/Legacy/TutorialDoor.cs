@@ -1,4 +1,5 @@
 using System.Collections;
+using NostalgIA.Core;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
@@ -492,8 +493,8 @@ public class TutorialDoor : MonoBehaviour
         crateMat.color = new Color(1.0f, 0.65f, 0.1f);
         if (crateMat.HasProperty("_BaseColor")) crateMat.SetColor("_BaseColor", new Color(1.0f, 0.65f, 0.1f));
 
-        int poolLayer = LayerMask.NameToLayer("Poolable");
-        if (poolLayer < 0) poolLayer = 7;
+        // Capa Absorbable (antes «Poolable») tomada de las constantes del núcleo.
+        int poolLayer = Layers.Absorbable;
 
         Vector3[] nexusCrates =
         {
