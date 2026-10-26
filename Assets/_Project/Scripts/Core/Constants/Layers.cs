@@ -5,6 +5,8 @@
 // capas físicas definidas en el TDD (§13).
 // -----------------------------------------------------------------------------
 
+using System.Collections.Generic;
+
 namespace NostalgIA.Core
 {
     /// <summary>
@@ -110,10 +112,14 @@ namespace NostalgIA.Core
         /// comprobar la configuración de Tags and Layers.
         /// </summary>
         /// <remarks>
-        /// Se trata de un arreglo estático de solo lectura que se crea una única vez al cargar
-        /// la clase; no se recrea durante el juego.
+        /// El arreglo se crea una única vez al cargar la clase y se expone como
+        /// <see cref="IReadOnlyList{T}"/> para que ningún sistema pueda modificar la tabla por
+        /// accidente. Leerlo a través de la interfaz no genera asignaciones de memoria.
         /// </remarks>
-        public static readonly string[] ExpectedNames = BuildExpectedNames();
+        public static IReadOnlyList<string> ExpectedNames => ExpectedNamesTable;
+
+        /// <summary>Almacenamiento privado de <see cref="ExpectedNames"/>.</summary>
+        private static readonly string[] ExpectedNamesTable = BuildExpectedNames();
 
         /// <summary>
         /// Indica si la capa <paramref name="layer"/> está incluida en <paramref name="mask"/>.

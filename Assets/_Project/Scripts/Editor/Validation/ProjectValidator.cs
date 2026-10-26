@@ -23,7 +23,7 @@ namespace NostalgIA.EditorTools.Validation
     /// Valida el proyecto contra las restricciones de la asignatura y las reglas de arquitectura.
     /// </summary>
     /// <remarks>
-    /// <para>Reglas evaluadas:</para>
+    /// <para>Reglas evaluadas (nombres en <see cref="ValidationRules"/>):</para>
     /// <list type="number">
     /// <item><description><b>Sin Terrain</b> (restricción 1 del curso): ningún componente <c>Terrain</c>/<c>TerrainCollider</c> ni asset <c>TerrainData</c>.</description></item>
     /// <item><description><b>Sin scripts faltantes</b> en escenas y prefabs.</description></item>
@@ -42,6 +42,11 @@ namespace NostalgIA.EditorTools.Validation
     /// <c>--- !u!&lt;idDeClase&gt; &amp;&lt;idLocal&gt;</c>, donde el identificador de clase de Unity es
     /// 218 para <c>Terrain</c>, 154 para <c>TerrainCollider</c> y 156 para <c>TerrainData</c>.
     /// </para>
+    /// <para>
+    /// Cada archivo se lee una sola vez: el texto de las escenas de Estación incluidas en el build se
+    /// conserva en memoria durante la ejecución para reutilizarlo en la regla del material de
+    /// ProBuilder, en lugar de volver a leer del disco archivos de varios megabytes.
+    /// </para>
     /// </remarks>
     public static class ProjectValidator
     {
@@ -53,17 +58,6 @@ namespace NostalgIA.EditorTools.Validation
 
         /// <summary>Nombre del archivo de reporte; se sobrescribe en cada ejecución.</summary>
         public const string ReportFileName = "Reporte_Validacion_Proyecto.md";
-
-        // Nombres de las reglas, tal como aparecen en el reporte.
-        private const string RuleTerrain = "Sin Terrain";
-        private const string RuleMissingScripts = "Sin scripts faltantes";
-        private const string RuleMissingPrefabs = "Sin prefabs faltantes";
-        private const string RuleProBuilderMaterial = "Sin material por defecto de ProBuilder en Estaciones";
-        private const string RuleBuildScenes = "Build Settings";
-        private const string RuleLayers = "Capas físicas (TDD §13)";
-        private const string RuleCollisionMatrix = "Matriz de colisiones (TDD §13)";
-        private const string RuleAssemblies = "Dependencias entre ensamblados (TDD §2.1)";
-        private const string RuleSerialization = "Serialización de texto";
 
         /// <summary>
         /// Mientras la Pista B reemplaza el material por defecto de ProBuilder (tarea F1-B02), su
@@ -131,7 +125,7 @@ namespace NostalgIA.EditorTools.Validation
         }
 
         /// <summary>
-        /// Ejecuta todas las reglas y devuelve el reporte. No modifica ningún activo.
+        /// Ejecuta todas las reglas y devuelve el reporte. No modifica ningún activo ni escribe archivos.
         /// </summary>
         public static ValidationReport Run()
         {
@@ -140,17 +134,19 @@ namespace NostalgIA.EditorTools.Validation
             {
                 CheckSerializationMode(report);
 
-                // Se leen una sola vez todas las escenas y prefabs del proyecto y se reutiliza
-                // el texto en las reglas que lo necesitan.
-                List<string> assetPaths = CollectSceneAndPrefabPaths();
                 var buildScenePaths = new HashSet<string>(StringComparer.Ordinal);
                 foreach (EditorBuildSettingsScene scene in EditorBuildSettings.scenes)
                 {
                     if (scene.enabled) buildScenePaths.Add(scene.path);
                 }
 
-                CheckTerrainAndMissingScripts(report, assetPaths, buildScenePaths);
-                CheckProBuilderDefaultMaterial(report, buildScenePaths);
+                // Se leen una sola vez todas las escenas y prefabs; el texto de las escenas de
+                // Estación del build se guarda para la regla del material de ProBuilder.
+                List<string> assetPaths = CollectSceneAndPrefabPaths();
+                var stationSceneTexts = new Dictionary<string, string>(StringComparer.Ordinal);
+                ScanScenesAndPrefabs(report, assetPaths, buildScenePaths, stationSceneTexts);
+
+                CheckProBuilderDefaultMaterial(report, stationSceneTexts);
                 CheckBuildScenes(report);
                 CheckLayers(report);
                 CheckCollisionMatrix(report);
@@ -201,10 +197,10 @@ namespace NostalgIA.EditorTools.Validation
         {
             if (EditorSettings.serializationMode == SerializationMode.ForceText)
             {
-                report.Pass(RuleSerialization);
+                report.Pass(ValidationRules.Serialization);
                 return;
             }
-            report.Add(ValidationSeverity.Error, RuleSerialization, string.Empty,
+            report.Add(ValidationSeverity.Error, ValidationRules.Serialization, string.Empty,
                 "El proyecto debe usar Asset Serialization = Force Text (Project Settings › Editor).");
         }
 
@@ -225,19 +221,21 @@ namespace NostalgIA.EditorTools.Validation
         }
 
         /// <summary>
-        /// Busca componentes de Terrain y referencias a scripts inexistentes en escenas y prefabs,
-        /// y assets <c>TerrainData</c> en todo el proyecto.
+        /// Recorre escenas y prefabs una sola vez y evalúa las reglas de Terrain, scripts faltantes
+        /// y prefabs faltantes. Además busca assets <c>TerrainData</c> en todo el proyecto.
         /// </summary>
-        /// <remarks>
-        /// Un script se considera faltante cuando su GUID no corresponde a ningún activo del
-        /// proyecto ni de los paquetes. Los resultados de cada GUID se guardan en un diccionario para
-        /// no consultar la base de datos de activos más de una vez por GUID.
-        /// </remarks>
-        private static void CheckTerrainAndMissingScripts(ValidationReport report, List<string> assetPaths, HashSet<string> buildScenePaths)
+        /// <param name="report">Reporte donde se registran los hallazgos.</param>
+        /// <param name="assetPaths">Escenas y prefabs a inspeccionar.</param>
+        /// <param name="buildScenePaths">Escenas habilitadas en el build; sus fallos son errores.</param>
+        /// <param name="stationSceneTexts">Salida: texto de las escenas de Estación del build.</param>
+        private static void ScanScenesAndPrefabs(ValidationReport report, List<string> assetPaths,
+            HashSet<string> buildScenePaths, Dictionary<string, string> stationSceneTexts)
         {
             int terrainFindings = 0;
             int missingScriptFindings = 0;
             int missingPrefabFindings = 0;
+            // Caché GUID → existe: cada GUID se consulta a la base de datos de activos una sola vez,
+            // aunque aparezca cientos de veces (por ejemplo, las 473 cajas del Tutorial).
             var guidExists = new Dictionary<string, bool>(512, StringComparer.Ordinal);
 
             for (int i = 0; i < assetPaths.Count; i++)
@@ -255,86 +253,100 @@ namespace NostalgIA.EditorTools.Validation
                 }
                 catch (IOException exception)
                 {
-                    report.Add(ValidationSeverity.Warning, RuleTerrain, path, $"No se pudo leer el archivo: {exception.Message}");
+                    report.Add(ValidationSeverity.Warning, ValidationRules.AssetReadability, path, $"No se pudo leer el archivo: {exception.Message}");
                     continue;
                 }
 
                 if (!text.StartsWith("%YAML", StringComparison.Ordinal))
                 {
-                    report.Add(ValidationSeverity.Warning, RuleTerrain, path, "El archivo no está serializado como texto; no se pudo inspeccionar.");
+                    report.Add(ValidationSeverity.Warning, ValidationRules.AssetReadability, path, "El archivo no está serializado como texto; no se pudo inspeccionar.");
                     continue;
                 }
 
-                // Regla 1: Terrain.
+                bool inBuild = buildScenePaths.Contains(path);
+                if (inBuild && path.StartsWith(SceneNames.Paths.StationsFolder, StringComparison.Ordinal))
+                {
+                    stationSceneTexts[path] = text;
+                }
+
+                // Regla: Terrain.
                 int terrainCount = TerrainHeaderRegex.Matches(text).Count;
                 if (terrainCount > 0)
                 {
                     terrainFindings++;
-                    report.Add(ValidationSeverity.Error, RuleTerrain, path,
+                    report.Add(ValidationSeverity.Error, ValidationRules.Terrain, path,
                         $"Contiene {terrainCount} componente(s) de Terrain. Está prohibido por la asignatura: sustituir por mallas 3D.");
                 }
 
-                // Regla 2: scripts faltantes. Se marcan como error en escenas del build y en
-                // activos propios; en contenido de terceros, como advertencia.
-                bool critical = buildScenePaths.Contains(path) || path.StartsWith("Assets/_Project/", StringComparison.Ordinal);
-                int missingInFile = 0;
-                foreach (Match match in ScriptReferenceRegex.Matches(text))
-                {
-                    string guid = match.Groups[1].Value;
-                    if (!guidExists.TryGetValue(guid, out bool exists))
-                    {
-                        exists = !string.IsNullOrEmpty(AssetDatabase.GUIDToAssetPath(guid));
-                        guidExists[guid] = exists;
-                    }
-                    if (!exists) missingInFile++;
-                }
-                if (missingInFile > 0)
+                // Reglas de referencias rotas: son error en escenas del build y en activos propios;
+                // en contenido de terceros, advertencia.
+                bool critical = inBuild || path.StartsWith("Assets/_Project/", StringComparison.Ordinal);
+                ValidationSeverity severity = critical ? ValidationSeverity.Error : ValidationSeverity.Warning;
+
+                int missingScripts = CountMissingReferences(ScriptReferenceRegex, text, guidExists);
+                if (missingScripts > 0)
                 {
                     missingScriptFindings++;
-                    report.Add(critical ? ValidationSeverity.Error : ValidationSeverity.Warning, RuleMissingScripts, path,
-                        $"{missingInFile} referencia(s) a scripts que no existen en el proyecto.");
+                    report.Add(severity, ValidationRules.MissingScripts, path,
+                        $"{missingScripts} referencia(s) a scripts que no existen en el proyecto.");
                 }
 
-                // Regla 2b: instancias de prefab cuyo asset de origen ya no existe. Unity las
-                // muestra como «Missing Prefab» y su contenido no se puede editar ni actualizar.
-                int missingPrefabsInFile = 0;
-                foreach (Match match in SourcePrefabRegex.Matches(text))
-                {
-                    string guid = match.Groups[1].Value;
-                    if (!guidExists.TryGetValue(guid, out bool exists))
-                    {
-                        exists = !string.IsNullOrEmpty(AssetDatabase.GUIDToAssetPath(guid));
-                        guidExists[guid] = exists;
-                    }
-                    if (!exists) missingPrefabsInFile++;
-                }
-                if (missingPrefabsInFile > 0)
+                // Unity muestra estas instancias como «Missing Prefab»: su contenido no se puede
+                // editar ni actualizar y no representa al prefab vigente.
+                int missingPrefabs = CountMissingReferences(SourcePrefabRegex, text, guidExists);
+                if (missingPrefabs > 0)
                 {
                     missingPrefabFindings++;
-                    report.Add(critical ? ValidationSeverity.Error : ValidationSeverity.Warning, RuleMissingPrefabs, path,
-                        $"{missingPrefabsInFile} instancia(s) de un prefab que ya no existe (Missing Prefab). Restaurar el prefab o eliminar las instancias.");
+                    report.Add(severity, ValidationRules.MissingPrefabs, path,
+                        $"{missingPrefabs} instancia(s) de un prefab que ya no existe (Missing Prefab). Restaurar el prefab o eliminar las instancias.");
                 }
             }
 
             foreach (string guid in AssetDatabase.FindAssets("t:TerrainData"))
             {
                 terrainFindings++;
-                report.Add(ValidationSeverity.Error, RuleTerrain, AssetDatabase.GUIDToAssetPath(guid),
+                report.Add(ValidationSeverity.Error, ValidationRules.Terrain, AssetDatabase.GUIDToAssetPath(guid),
                     "Asset TerrainData presente en el proyecto. Debe eliminarse.");
             }
 
             if (terrainFindings == 0)
             {
-                report.Pass($"{RuleTerrain}: 0 componentes Terrain/TerrainCollider y 0 assets TerrainData en {assetPaths.Count} escenas y prefabs.");
+                report.Pass($"{ValidationRules.Terrain}: 0 componentes Terrain/TerrainCollider y 0 assets TerrainData en {assetPaths.Count} escenas y prefabs.");
             }
             if (missingScriptFindings == 0)
             {
-                report.Pass($"{RuleMissingScripts}: {assetPaths.Count} escenas y prefabs revisados.");
+                report.Pass($"{ValidationRules.MissingScripts}: {assetPaths.Count} escenas y prefabs revisados.");
             }
             if (missingPrefabFindings == 0)
             {
-                report.Pass($"{RuleMissingPrefabs}: {assetPaths.Count} escenas y prefabs revisados.");
+                report.Pass($"{ValidationRules.MissingPrefabs}: {assetPaths.Count} escenas y prefabs revisados.");
             }
+        }
+
+        /// <summary>
+        /// Cuenta las referencias de <paramref name="text"/> cuyo GUID no corresponde a un activo existente.
+        /// </summary>
+        /// <remarks>
+        /// Se valida la existencia con <see cref="AssetDatabase.GetMainAssetTypeAtPath"/> además de
+        /// <see cref="AssetDatabase.GUIDToAssetPath(string)"/>: la segunda puede seguir devolviendo
+        /// la ruta de un activo recién borrado hasta que la base de datos se actualiza, lo que
+        /// ocultaría una referencia rota.
+        /// </remarks>
+        private static int CountMissingReferences(Regex regex, string text, Dictionary<string, bool> guidExists)
+        {
+            int missing = 0;
+            foreach (Match match in regex.Matches(text))
+            {
+                string guid = match.Groups[1].Value;
+                if (!guidExists.TryGetValue(guid, out bool exists))
+                {
+                    string assetPath = AssetDatabase.GUIDToAssetPath(guid);
+                    exists = !string.IsNullOrEmpty(assetPath) && AssetDatabase.GetMainAssetTypeAtPath(assetPath) != null;
+                    guidExists[guid] = exists;
+                }
+                if (!exists) missing++;
+            }
+            return missing;
         }
 
         /// <summary>
@@ -344,34 +356,31 @@ namespace NostalgIA.EditorTools.Validation
         /// El GUID del material se obtiene del propio paquete de ProBuilder en lugar de escribirlo en
         /// el código, para que la regla siga funcionando si el paquete se actualiza.
         /// </remarks>
-        private static void CheckProBuilderDefaultMaterial(ValidationReport report, HashSet<string> buildScenePaths)
+        private static void CheckProBuilderDefaultMaterial(ValidationReport report, Dictionary<string, string> stationSceneTexts)
         {
             string materialGuid = FindProBuilderDefaultMaterialGuid();
             if (string.IsNullOrEmpty(materialGuid))
             {
-                report.Add(ValidationSeverity.Info, RuleProBuilderMaterial, string.Empty,
+                report.Add(ValidationSeverity.Info, ValidationRules.ProBuilderMaterial, string.Empty,
                     "No se encontró el material por defecto de ProBuilder; la regla no se evaluó.");
                 return;
             }
 
             int offendingScenes = 0;
-            foreach (string scenePath in buildScenePaths)
+            foreach (KeyValuePair<string, string> scene in stationSceneTexts)
             {
-                if (!scenePath.StartsWith(SceneNames.Paths.StationsFolder, StringComparison.Ordinal)) continue;
-                if (!File.Exists(scenePath)) continue;
-
-                int count = CountOccurrences(File.ReadAllText(scenePath), materialGuid);
+                int count = CountOccurrences(scene.Value, materialGuid);
                 if (count == 0) continue;
 
                 offendingScenes++;
                 report.Add(ProBuilderDefaultMaterialIsError ? ValidationSeverity.Error : ValidationSeverity.Warning,
-                    RuleProBuilderMaterial, scenePath,
+                    ValidationRules.ProBuilderMaterial, scene.Key,
                     $"{count} referencia(s) al material gris de prototipo de ProBuilder. Reemplazar por materiales de la Estación (tarea F1-B02).");
             }
 
             if (offendingScenes == 0)
             {
-                report.Pass(RuleProBuilderMaterial);
+                report.Pass(ValidationRules.ProBuilderMaterial);
             }
         }
 
@@ -393,7 +402,7 @@ namespace NostalgIA.EditorTools.Validation
                 if (!exists)
                 {
                     findings++;
-                    report.Add(scene.enabled ? ValidationSeverity.Error : ValidationSeverity.Warning, RuleBuildScenes, scene.path,
+                    report.Add(scene.enabled ? ValidationSeverity.Error : ValidationSeverity.Warning, ValidationRules.BuildScenes, scene.path,
                         "La escena registrada en Build Settings no existe.");
                     continue;
                 }
@@ -404,7 +413,7 @@ namespace NostalgIA.EditorTools.Validation
                 if (scene.path.StartsWith(SceneNames.Paths.SandboxFolder, StringComparison.Ordinal))
                 {
                     findings++;
-                    report.Add(ValidationSeverity.Error, RuleBuildScenes, scene.path,
+                    report.Add(ValidationSeverity.Error, ValidationRules.BuildScenes, scene.path,
                         "Las escenas de prueba (Sandbox) no deben incluirse en el build.");
                 }
             }
@@ -412,13 +421,13 @@ namespace NostalgIA.EditorTools.Validation
             if (firstEnabled != SceneNames.Paths.Boot)
             {
                 findings++;
-                report.Add(ValidationSeverity.Error, RuleBuildScenes, firstEnabled ?? string.Empty,
+                report.Add(ValidationSeverity.Error, ValidationRules.BuildScenes, firstEnabled ?? string.Empty,
                     $"La primera escena habilitada debe ser {SceneNames.Paths.Boot}.");
             }
 
             if (findings == 0)
             {
-                report.Pass($"{RuleBuildScenes}: {scenes.Length} escena(s), {SceneNames.Boot} primero, sin escenas de prueba.");
+                report.Pass($"{ValidationRules.BuildScenes}: {scenes.Length} escena(s), {SceneNames.Boot} primero, sin escenas de prueba.");
             }
         }
 
@@ -426,7 +435,7 @@ namespace NostalgIA.EditorTools.Validation
         private static void CheckLayers(ValidationReport report)
         {
             int findings = 0;
-            for (int layer = 0; layer < Layers.ExpectedNames.Length; layer++)
+            for (int layer = 0; layer < Layers.ExpectedNames.Count; layer++)
             {
                 string expected = Layers.ExpectedNames[layer];
                 if (expected == null) continue;
@@ -435,13 +444,13 @@ namespace NostalgIA.EditorTools.Validation
                 if (actual == expected) continue;
 
                 findings++;
-                report.Add(ValidationSeverity.Error, RuleLayers, "ProjectSettings/TagManager.asset",
+                report.Add(ValidationSeverity.Error, ValidationRules.Layers, "ProjectSettings/TagManager.asset",
                     $"La capa {layer} se llama «{actual}» y debe llamarse «{expected}».");
             }
 
             if (findings == 0)
             {
-                report.Pass(RuleLayers);
+                report.Pass(ValidationRules.Layers);
             }
         }
 
@@ -463,7 +472,7 @@ namespace NostalgIA.EditorTools.Validation
                 if (Physics.GetIgnoreLayerCollision(a, b)) continue;
 
                 findings++;
-                report.Add(ValidationSeverity.Warning, RuleCollisionMatrix, "ProjectSettings/DynamicsManager.asset",
+                report.Add(ValidationSeverity.Warning, ValidationRules.CollisionMatrix, "ProjectSettings/DynamicsManager.asset",
                     $"Las capas {LayerMask.LayerToName(a)} y {LayerMask.LayerToName(b)} deberían ignorar sus colisiones.");
             }
 
@@ -474,7 +483,7 @@ namespace NostalgIA.EditorTools.Validation
                 if (collides == shouldCollide) continue;
 
                 findings++;
-                report.Add(ValidationSeverity.Warning, RuleCollisionMatrix, "ProjectSettings/DynamicsManager.asset",
+                report.Add(ValidationSeverity.Warning, ValidationRules.CollisionMatrix, "ProjectSettings/DynamicsManager.asset",
                     shouldCollide
                         ? "La capa Trigger debe interactuar con Player."
                         : $"La capa Trigger solo debe interactuar con Player, pero también interactúa con la capa {other} ({LayerMask.LayerToName(other)}).");
@@ -482,7 +491,7 @@ namespace NostalgIA.EditorTools.Validation
 
             if (findings == 0)
             {
-                report.Pass(RuleCollisionMatrix);
+                report.Pass(ValidationRules.CollisionMatrix);
             }
         }
 
@@ -509,7 +518,7 @@ namespace NostalgIA.EditorTools.Validation
                 if (!byName.TryGetValue(assemblyName, out CompilationAssembly assembly))
                 {
                     findings++;
-                    report.Add(ValidationSeverity.Error, RuleAssemblies, string.Empty,
+                    report.Add(ValidationSeverity.Error, ValidationRules.Assemblies, string.Empty,
                         $"No se encontró el ensamblado {assemblyName}. Debe existir su .asmdef con al menos un script.");
                     continue;
                 }
@@ -519,14 +528,14 @@ namespace NostalgIA.EditorTools.Validation
                     if (Array.IndexOf(forbidden, reference.name) < 0) continue;
 
                     findings++;
-                    report.Add(ValidationSeverity.Error, RuleAssemblies, assembly.name,
+                    report.Add(ValidationSeverity.Error, ValidationRules.Assemblies, assembly.name,
                         $"{assembly.name} no puede referenciar a {reference.name} (TDD §2.1).");
                 }
             }
 
             if (findings == 0)
             {
-                report.Pass(RuleAssemblies);
+                report.Pass(ValidationRules.Assemblies);
             }
         }
 
@@ -550,8 +559,10 @@ namespace NostalgIA.EditorTools.Validation
         }
 
         /// <summary>Cuenta las apariciones no superpuestas de <paramref name="value"/> en <paramref name="text"/>.</summary>
-        private static int CountOccurrences(string text, string value)
+        public static int CountOccurrences(string text, string value)
         {
+            if (string.IsNullOrEmpty(text) || string.IsNullOrEmpty(value)) return 0;
+
             int count = 0;
             int index = text.IndexOf(value, StringComparison.Ordinal);
             while (index >= 0)
