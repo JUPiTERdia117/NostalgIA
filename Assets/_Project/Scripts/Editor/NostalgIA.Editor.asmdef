@@ -5,7 +5,10 @@
         "NostalgIA.Core",
         "NostalgIA.Input",
         "NostalgIA.Gameplay",
-        "NostalgIA.Presentation"
+        "NostalgIA.Presentation",
+        "Unity.InputSystem",
+        "UnityEngine.UI",
+        "Unity.TextMeshPro"
     ],
     "includePlatforms": [
         "Editor"
