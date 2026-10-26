@@ -112,3 +112,11 @@ InitTestScene*.unity*
 
 # Auto-generated cache in Assets folder
 /[Aa]ssets/[Ss]ceneDependencyCache*
+
+# --- NostalgIA (F0-A01): archivos de sistema operativo, IDE y artefactos de build ---
+.DS_Store
+._*
+.idea/
+.vscode/
+*_BurstDebugInformation_DoNotShip/
+*_BackUpThisFolder_ButDontShipItWithYourGame/
