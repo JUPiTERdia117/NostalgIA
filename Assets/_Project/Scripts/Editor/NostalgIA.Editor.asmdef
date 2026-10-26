@@ -1,0 +1,21 @@
+{
+    "name": "NostalgIA.Editor",
+    "rootNamespace": "NostalgIA.EditorTools",
+    "references": [
+        "NostalgIA.Core",
+        "NostalgIA.Input",
+        "NostalgIA.Gameplay",
+        "NostalgIA.Presentation"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
