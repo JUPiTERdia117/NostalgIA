@@ -1,0 +1,51 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: M_Frutiger_Anchor
+  m_Shader: {fileID: 4800000, guid: ed3398d6bd91c472bb791bd48cb41a96, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
+  m_InvalidKeywords: []
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 1
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs: []
+    m_Ints: []
+    m_Floats:
+    - _CausticScale: 0.45
+    - _CausticStrength: 1.2
+    - _Caustics: 0
+    - _ClearcoatPower: 400
+    - _ClearcoatStrength: 1.5
+    - _EmissionPulse: 0.5
+    - _FlatShading: 0
+    - _Gloss: 0.8
+    - _RimPower: 3
+    - _RimStrength: 0.45
+    - _SlopeSharpness: 4
+    - _SpeckleAmount: 0
+    - _SpeckleDensity: 3
+    - _Wrap: 0.15
+    m_Colors:
+    - _ColorBottom: {r: 1, g: 0.54901963, b: 0.12156863, a: 1}
+    - _ColorTop: {r: 1, g: 0.54901963, b: 0.12156863, a: 1}
+    - _EmissionColor: {r: 0.9, g: 0.49411765, b: 0.10941176, a: 0.9}
+    - _HeightRange: {r: 0, g: 1, b: 0, a: 0}
+    - _RimColor: {r: 0.75, g: 0.93, b: 1, a: 1}
+    - _SideColor: {r: 1, g: 0.54901963, b: 0.12156863, a: 0}
+    - _SpeckleColor: {r: 0, g: 0, b: 0, a: 0}
+  m_BuildTextureStacks: []
+  m_AllowLocking: 1
