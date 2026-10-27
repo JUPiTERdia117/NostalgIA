@@ -1,0 +1,81 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 19b198046f2a942c4b7d7a4e8da216e6, type: 3}
+  m_Name: InputGlyphSet_Default
+  m_EditorClassIdentifier: NostalgIA.Presentation::NostalgIA.Presentation.UI.InputGlyphSet
+  entries:
+  - action: Move
+    displayName: Moverse
+    keyboardMouse: W A S D
+    gamepad: Stick izq.
+    touch: Pad izquierdo
+    touchIcon: {fileID: 0}
+  - action: LookDelta
+    displayName: Mirar
+    keyboardMouse: "Rat\xF3n"
+    gamepad: Stick der.
+    touch: Arrastra a la derecha
+    touchIcon: {fileID: 0}
+  - action: LookStick
+    displayName: Mirar
+    keyboardMouse: "Rat\xF3n"
+    gamepad: Stick der.
+    touch: Arrastra a la derecha
+    touchIcon: {fileID: 0}
+  - action: Jump
+    displayName: Saltar
+    keyboardMouse: Espacio
+    gamepad: A
+    touch: Saltar
+    touchIcon: {fileID: 21300000, guid: eddc6ece89c454ac1bc589f88a061b2b, type: 3}
+  - action: Sprint
+    displayName: Correr
+    keyboardMouse: Shift
+    gamepad: L3
+    touch: "Pad al m\xE1ximo"
+    touchIcon: {fileID: 0}
+  - action: Crouch
+    displayName: Agacharse / deslizar
+    keyboardMouse: C
+    gamepad: R3
+    touch: Agachar
+    touchIcon: {fileID: 21300000, guid: 33d7b9416091549c39dff93cca08e45e, type: 3}
+  - action: SwitchTool
+    displayName: Cambiar herramienta
+    keyboardMouse: F
+    gamepad: Y
+    touch: Cambiar
+    touchIcon: {fileID: 21300000, guid: 2f0e01d68ff5a45d7b2757e04d92fbed, type: 3}
+  - action: Absorb
+    displayName: Absorber
+    keyboardMouse: Clic der.
+    gamepad: LT
+    touch: "Mant\xE9n el pad"
+    touchIcon: {fileID: 21300000, guid: ce50e59184460414b92fadcad941635a, type: 3}
+  - action: Fire
+    displayName: Disparar
+    keyboardMouse: Clic izq.
+    gamepad: RT
+    touch: Toca el pad
+    touchIcon: {fileID: 21300000, guid: ce50e59184460414b92fadcad941635a, type: 3}
+  - action: Grapple
+    displayName: Enganchar (modo gancho)
+    keyboardMouse: Clic der.
+    gamepad: RT
+    touch: Toca el pad
+    touchIcon: {fileID: 21300000, guid: 2085a595b08294b0daf393f061be6108, type: 3}
+  - action: Pause
+    displayName: Pausa
+    keyboardMouse: Esc
+    gamepad: "Men\xFA"
+    touch: Pausa
+    touchIcon: {fileID: 21300000, guid: f949503ccd30d4716bc657fb988c9cf6, type: 3}

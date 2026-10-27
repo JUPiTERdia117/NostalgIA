@@ -833,6 +833,7 @@ MonoBehaviour:
   noneScale: 1
   targetScale: 1.35
   outOfRangeScale: 0.85
+  outOfRangeAngle: 45
 --- !u!1 &8027145712888118257
 GameObject:
   m_ObjectHideFlags: 0

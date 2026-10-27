@@ -35,6 +35,19 @@ namespace NostalgIA.Presentation.UI
     /// llevan con temporizadores en <c>Update</c>, sin corrutinas. La única lectura continua es la
     /// posición del jugador para detectar la zona del tutorial, cada 0,2 s.
     /// </para>
+    /// <para>
+    /// <b>Animaciones sin reconstruir el lienzo.</b> Asignar <see cref="Graphic.color"/> marca la
+    /// malla del gráfico como sucia y obliga a regenerarla. Por eso, en este módulo el color de la
+    /// línea de acento y del destello de daño se escribe solo cuando cambia de estado, y la
+    /// animación por frame modifica únicamente <see cref="CanvasRenderer.SetAlpha"/>, que es un
+    /// multiplicador aplicado al dibujar y no regenera vértices (auditoría QA de la Fase 1).
+    /// </para>
+    /// <para>
+    /// <b>Glifos.</b> La fuente de interfaz actual (Liberation Sans) cubre el conjunto WGL4, pero
+    /// no los símbolos ★, ✓ ni ✦ del prototipo, que se dibujaban como cuadros vacíos. Usamos sus
+    /// equivalentes disponibles: ♦ (estrella), √ (completado) y » (aviso). La fuente monoespaciada
+    /// definitiva de la Guía de estilo §7 llega con el HUD de la Fase 4.
+    /// </para>
     /// </remarks>
     [DisallowMultipleComponent]
     public sealed class TutorialHudPresenter : MonoBehaviour
@@ -136,7 +149,7 @@ namespace NostalgIA.Presentation.UI
 
         private const string StepDoneControls = "<color=#689F80>Acción completada</color>";
         private const string ReturnedMessage = "Regresaste a la dimensión del Tutorial.";
-        private const string GoalMessage = "✦ Otra Dimensión · Cruza el portal para ir y volver";
+        private const string GoalMessage = "» Otra Dimensión · Cruza el portal para ir y volver";
 
         // Cadenas construidas una sola vez en Awake.
         private string[] pendingTitles;
@@ -175,6 +188,15 @@ namespace NostalgIA.Presentation.UI
         private float guideStartAlpha = 1f;
         private float lastCooldownTenths = -1f;
 
+        // Colores fijos de las animaciones (el alfa animado va en el CanvasRenderer).
+        private static readonly Color HurtColor = new Color(1f, 0.08f, 0.08f, 1f);
+        private static readonly Color DeathColor = new Color(0.85f, 0f, 0f, 1f);
+        private static readonly Color AccentPendingColor = new Color(1f, 0.8f, 0.15f, 1f);
+        private static readonly Color AccentDoneColor = new Color(0.22f, 0.9f, 0.35f, 1f);
+        private const float HurtPeakAlpha = 0.45f;
+        private const float DeathAlpha = 0.65f;
+        private const float AccentDoneAlpha = 0.65f;
+
         // ------------------------------------------------------------------ ciclo de vida
         /// <summary>Construye los textos fijos y resuelve referencias auxiliares.</summary>
         private void Awake()
@@ -184,11 +206,11 @@ namespace NostalgIA.Presentation.UI
             for (int i = 0; i < TotalSteps; i++)
             {
                 pendingTitles[i] = $"<color=#FFD166><b>{StepTags[i]}</b></color>  {StepTitles[i]}";
-                doneTitles[i] = $"<color=#38E54D>✓ {StepTags[i]}</color>  <color=#A8D5BA>{StepTitles[i]}</color>";
+                doneTitles[i] = $"<color=#38E54D>√ {StepTags[i]}</color>  <color=#A8D5BA>{StepTitles[i]}</color>";
             }
 
             BuildHealthFormats(heartsMax);
-            starToastFormat = "★ Estrella {0}/" + maxStars;
+            starToastFormat = "♦ Estrella {0}/" + maxStars;
 
             int schemes = SwitchHints.Length;
             vacuumFormats = new string[schemes];
@@ -269,7 +291,7 @@ namespace NostalgIA.Presentation.UI
             if (winPanel != null) winPanel.SetActive(false);
             if (deathOverlay != null) deathOverlay.SetActive(false);
             if (toastContainer != null) toastContainer.SetActive(false);
-            if (hurtOverlay != null) hurtOverlay.color = new Color(1f, 0f, 0f, 0f);
+            SetHurtOverlay(HurtColor, 0f);
 
             RefreshHealth();
             RefreshTool();
@@ -298,8 +320,9 @@ namespace NostalgIA.Presentation.UI
             if (hurtTimer > 0f && hurtOverlay != null)
             {
                 hurtTimer -= dt;
-                float alpha = Mathf.Lerp(0f, 0.45f, Mathf.Clamp01(hurtTimer / hurtFlashDuration));
-                hurtOverlay.color = new Color(1f, 0.08f, 0.08f, alpha);
+                // α(t) = α_pico · t/T: decae linealmente del pico a cero en la duración del destello.
+                float alpha = HurtPeakAlpha * Mathf.Clamp01(hurtTimer / hurtFlashDuration);
+                hurtOverlay.canvasRenderer.SetAlpha(alpha);
             }
 
             if (onCooldown && tool == ToolId.Grapple) RefreshCooldownText();
@@ -312,6 +335,7 @@ namespace NostalgIA.Presentation.UI
             hearts = evt.Current;
             if (evt.Max != heartsMax) BuildHealthFormats(evt.Max);
             RefreshHealth();
+            if (hurtTimer <= 0f) SetHurtOverlay(HurtColor, HurtPeakAlpha); // El color solo se escribe al iniciar el destello.
             hurtTimer = hurtFlashDuration;
         }
 
@@ -320,7 +344,7 @@ namespace NostalgIA.Presentation.UI
             hearts = 0;
             RefreshHealth();
             hurtTimer = 0f;
-            if (hurtOverlay != null) hurtOverlay.color = new Color(0.85f, 0f, 0f, 0.65f);
+            SetHurtOverlay(DeathColor, DeathAlpha);
             if (deathOverlay != null) deathOverlay.SetActive(true);
         }
 
@@ -329,7 +353,19 @@ namespace NostalgIA.Presentation.UI
             hearts = evt.Hearts;
             RefreshHealth();
             if (deathOverlay != null) deathOverlay.SetActive(false);
-            if (hurtOverlay != null) hurtOverlay.color = new Color(1f, 0f, 0f, 0f);
+            hurtTimer = 0f;
+            SetHurtOverlay(HurtColor, 0f);
+        }
+
+        /// <summary>
+        /// Fija el color opaco del destello y su alfa visible. El color se asigna solo si cambió
+        /// (evita reconstruir el lienzo); el alfa va al <see cref="CanvasRenderer"/>.
+        /// </summary>
+        private void SetHurtOverlay(Color color, float alpha)
+        {
+            if (hurtOverlay == null) return;
+            if (hurtOverlay.color != color) hurtOverlay.color = color;
+            hurtOverlay.canvasRenderer.SetAlpha(alpha);
         }
 
         private void OnStarCollected(in StarCollected evt)
@@ -429,7 +465,7 @@ namespace NostalgIA.Presentation.UI
                 string full = new string('♥', hp);
                 string empty = new string('♥', heartsMax - hp);
                 healthFormats[hp] = $"<color=#FF4D6D>{full}<color=#44333A>{empty}</color></color> <size=84%>{hp}/{heartsMax}</size>" +
-                                    "     <color=#FFD166>★</color> <size=88%>{0}/{1}</size>";
+                                    "     <color=#FFD166>♦</color> <size=88%>{0}/{1}</size>";
             }
         }
 
@@ -443,7 +479,7 @@ namespace NostalgIA.Presentation.UI
         private void RefreshScore()
         {
             if (scoreText != null && scoreText.gameObject.activeInHierarchy)
-                scoreText.SetText("★ <color=#FFD166>{0}/{1}</color>", stars, maxStars);
+                scoreText.SetText("♦ <color=#FFD166>{0}/{1}</color>", stars, maxStars);
         }
 
         private void RefreshTool()
@@ -545,7 +581,14 @@ namespace NostalgIA.Presentation.UI
             bool done = stepCompleted[currentStep];
             if (zoneTitleText != null) zoneTitleText.SetText(done ? doneTitles[currentStep] : pendingTitles[currentStep]);
             if (controlsText != null) controlsText.SetText(done ? StepDoneControls : StepControls[currentStep, (int)scheme]);
-            if (guideAccent != null && done) guideAccent.color = new Color(0.22f, 0.9f, 0.35f, 0.65f);
+            if (guideAccent != null)
+            {
+                // Color por estado (una escritura al cambiar de paso); el pulso del paso pendiente
+                // se anima después solo con el alfa del CanvasRenderer.
+                Color accent = done ? AccentDoneColor : AccentPendingColor;
+                if (guideAccent.color != accent) guideAccent.color = accent;
+                guideAccent.canvasRenderer.SetAlpha(done ? AccentDoneAlpha : 1f);
+            }
 
             if (!animate || guidePanel == null) return;
             guidePanel.SetActive(true);
@@ -565,8 +608,9 @@ namespace NostalgIA.Presentation.UI
 
             if (currentStep >= 0 && !stepCompleted[currentStep] && guideAccent != null)
             {
+                // α(t) = 0,65 + 0,35·sin(4,5·t): pulso de ≈ 0,7 Hz sin regenerar la malla.
                 float pulse = 0.65f + 0.35f * Mathf.Sin(Time.unscaledTime * 4.5f);
-                guideAccent.color = new Color(1f, 0.8f, 0.15f, pulse);
+                guideAccent.canvasRenderer.SetAlpha(pulse);
             }
 
             if (guideAnimTime < 0f) return;

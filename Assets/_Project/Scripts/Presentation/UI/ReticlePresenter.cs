@@ -24,6 +24,12 @@ namespace NostalgIA.Presentation.UI
     /// retícula sea legible sin depender solo del color (accesibilidad, TDD §12).
     /// </para>
     /// <para>
+    /// Fuera de alcance la retícula se muestra como <b>cruz en aspa</b> (Guía de estilo §7): en
+    /// lugar de dibujar una segunda figura, giramos 45° la raíz escalada, de modo que las cuatro
+    /// marcas en «+» pasan a formar una «×». Escala y giro se combinan en una sola escritura de
+    /// <see cref="Transform"/>, que no reconstruye la malla del lienzo.
+    /// </para>
+    /// <para>
     /// Los colores se escriben solo cuando cambia el estado, porque asignar
     /// <see cref="Graphic.color"/> marca el lienzo para reconstrucción. El anillo de enfriamiento
     /// lee <see cref="IToolState"/> cada frame únicamente mientras dura el enfriamiento.
@@ -51,6 +57,9 @@ namespace NostalgIA.Presentation.UI
         [SerializeField, Min(0.1f)] private float noneScale = 1f;
         [SerializeField, Min(0.1f)] private float targetScale = 1.35f;
         [SerializeField, Min(0.1f)] private float outOfRangeScale = 0.85f;
+
+        [Tooltip("Giro (grados) de la retícula fuera de alcance: 45° convierte la «+» en una cruz «×».")]
+        [SerializeField, Range(0f, 90f)] private float outOfRangeAngle = 45f;
 
         private IToolState toolState;
         private bool cooldownVisible;
@@ -100,11 +109,12 @@ namespace NostalgIA.Presentation.UI
         {
             Color color;
             float scale;
+            float angle = 0f;
             switch (kind)
             {
                 case AimTargetKind.Absorbable: color = absorbableColor; scale = targetScale; break;
                 case AimTargetKind.Anchor: color = anchorColor; scale = targetScale; break;
-                case AimTargetKind.OutOfRange: color = outOfRangeColor; scale = outOfRangeScale; break;
+                case AimTargetKind.OutOfRange: color = outOfRangeColor; scale = outOfRangeScale; angle = outOfRangeAngle; break;
                 default: color = noneColor; scale = noneScale; break;
             }
 
@@ -112,7 +122,11 @@ namespace NostalgIA.Presentation.UI
             {
                 if (marks[i] != null) marks[i].color = color;
             }
-            if (scaledRoot != null) scaledRoot.localScale = new Vector3(scale, scale, 1f);
+            if (scaledRoot != null)
+            {
+                scaledRoot.localScale = new Vector3(scale, scale, 1f);
+                scaledRoot.localRotation = Quaternion.Euler(0f, 0f, angle); // 0° = «+», 45° = «×».
+            }
         }
     }
 }
