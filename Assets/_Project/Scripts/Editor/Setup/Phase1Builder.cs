@@ -51,6 +51,7 @@ namespace NostalgIA.EditorTools.Setup
     /// <item>Prefabs de interfaz: retícula y controles táctiles.</item>
     /// <item><c>Player.prefab</c>: capas, componentes nuevos y referencias.</item>
     /// <item>Tutorial: checkpoints, estrellas, islas estáticas, volumen de vacío y disposición del HUD.</item>
+    /// <item>Acabado visual con <see cref="Phase1VisualBuilder"/>.</item>
     /// <item>Validación del proyecto y reporte.</item>
     /// </list>
     /// </remarks>
@@ -122,6 +123,7 @@ namespace NostalgIA.EditorTools.Setup
             CreateTouchControlsPrefab();
             ConfigurePlayerPrefab();
             ConfigureTutorialScene();
+            Phase1VisualBuilder.BuildAllWithoutPrompt();   // Acabado visual (Pista B): materiales, VFX, postprocesado.
             AssetDatabase.SaveAssets();
 
             ValidationReport report = ProjectValidator.Run();
@@ -667,8 +669,9 @@ namespace NostalgIA.EditorTools.Setup
         }
 
         // ================================================================== utilidades
+        // Internas (no privadas) para que Phase1VisualBuilder las reutilice sin duplicarlas.
         /// <summary>Crea la carpeta (y sus padres) si no existe.</summary>
-        private static void EnsureFolder(string path)
+        internal static void EnsureFolder(string path)
         {
             if (AssetDatabase.IsValidFolder(path)) return;
             string parent = Path.GetDirectoryName(path).Replace('\\', '/');
@@ -677,7 +680,7 @@ namespace NostalgIA.EditorTools.Setup
         }
 
         /// <summary>Carga un ScriptableObject o lo crea con sus valores por defecto.</summary>
-        private static T LoadOrCreate<T>(string path) where T : ScriptableObject
+        internal static T LoadOrCreate<T>(string path) where T : ScriptableObject
         {
             T asset = AssetDatabase.LoadAssetAtPath<T>(path);
             if (asset != null) return asset;
@@ -687,7 +690,7 @@ namespace NostalgIA.EditorTools.Setup
         }
 
         /// <summary>Asigna una referencia serializada privada.</summary>
-        private static void SetObject(Object target, string property, Object value)
+        internal static void SetObject(Object target, string property, Object value)
         {
             var so = new SerializedObject(target);
             SerializedProperty p = so.FindProperty(property);
@@ -702,7 +705,7 @@ namespace NostalgIA.EditorTools.Setup
         }
 
         /// <summary>Asigna un arreglo serializado de un solo elemento.</summary>
-        private static void SetObjectArray(Object target, string property, Object value)
+        internal static void SetObjectArray(Object target, string property, Object value)
         {
             var so = new SerializedObject(target);
             SerializedProperty p = so.FindProperty(property);
@@ -712,26 +715,26 @@ namespace NostalgIA.EditorTools.Setup
         }
 
         /// <summary>Obtiene un componente o lo agrega.</summary>
-        private static T GetOrAdd<T>(GameObject go) where T : Component
+        internal static T GetOrAdd<T>(GameObject go) where T : Component
         {
             return go.TryGetComponent(out T existing) ? existing : go.AddComponent<T>();
         }
 
         /// <summary>Carga el contenido de un prefab para editarlo, o crea un objeto nuevo.</summary>
-        private static GameObject LoadPrefabForEdit(string path, string rootName, out bool isNew)
+        internal static GameObject LoadPrefabForEdit(string path, string rootName, out bool isNew)
         {
             isNew = AssetDatabase.LoadAssetAtPath<GameObject>(path) == null;
             return isNew ? new GameObject(rootName) : PrefabUtility.LoadPrefabContents(path);
         }
 
         /// <summary>Guarda el prefab editado.</summary>
-        private static void SavePrefab(GameObject root, string path, bool isNew)
+        internal static void SavePrefab(GameObject root, string path, bool isNew)
         {
             PrefabUtility.SaveAsPrefabAsset(root, path);
         }
 
         /// <summary>Libera el contenido cargado o el objeto temporal.</summary>
-        private static void UnloadPrefab(GameObject root, bool isNew)
+        internal static void UnloadPrefab(GameObject root, bool isNew)
         {
             if (root == null) return;
             if (isNew) Object.DestroyImmediate(root);
@@ -739,7 +742,7 @@ namespace NostalgIA.EditorTools.Setup
         }
 
         /// <summary>Busca un hijo directo por nombre o lo crea.</summary>
-        private static Transform GetOrCreateChild(Transform parent, string name)
+        internal static Transform GetOrCreateChild(Transform parent, string name)
         {
             Transform child = parent.Find(name);
             if (child != null) return child;
@@ -749,7 +752,7 @@ namespace NostalgIA.EditorTools.Setup
         }
 
         /// <summary>Busca un hijo de interfaz por nombre o lo crea con <see cref="RectTransform"/>.</summary>
-        private static Transform GetOrCreateUiChild(Transform parent, string name)
+        internal static Transform GetOrCreateUiChild(Transform parent, string name)
         {
             Transform child = parent.Find(name);
             if (child != null) return child;
@@ -760,7 +763,7 @@ namespace NostalgIA.EditorTools.Setup
         }
 
         /// <summary>Crea (o reutiliza) una imagen centrada con tamaño y color.</summary>
-        private static Image GetOrCreateImage(Transform parent, string name, Vector2 position, Vector2 size, Color color)
+        internal static Image GetOrCreateImage(Transform parent, string name, Vector2 position, Vector2 size, Color color)
         {
             Transform t = GetOrCreateUiChild(parent, name);
             Image image = GetOrAdd<Image>(t.gameObject);
@@ -772,7 +775,7 @@ namespace NostalgIA.EditorTools.Setup
         }
 
         /// <summary>Crea un botón táctil redondo con etiqueta, anclado a una esquina.</summary>
-        private static Image CreateTouchButton(Transform parent, string name, Vector2 anchor, Vector2 position, float size, string label, Sprite sprite)
+        internal static Image CreateTouchButton(Transform parent, string name, Vector2 anchor, Vector2 position, float size, string label, Sprite sprite)
         {
             Transform t = GetOrCreateUiChild(parent, name);
             var rect = (RectTransform)t;
@@ -795,7 +798,7 @@ namespace NostalgIA.EditorTools.Setup
         }
 
         /// <summary>Configura un <see cref="OnScreenButton"/> con la ruta del mando virtual.</summary>
-        private static void ConfigureOnScreenButton(Image buttonImage, string controlPath)
+        internal static void ConfigureOnScreenButton(Image buttonImage, string controlPath)
         {
             OnScreenButton button = GetOrAdd<OnScreenButton>(buttonImage.gameObject);
             var so = new SerializedObject(button);
@@ -804,7 +807,7 @@ namespace NostalgIA.EditorTools.Setup
         }
 
         /// <summary>Configura un lienzo superpuesto con escalado de referencia 1920 × 1080.</summary>
-        private static void ConfigureOverlayCanvas(GameObject root, int sortingOrder, bool interactive)
+        internal static void ConfigureOverlayCanvas(GameObject root, int sortingOrder, bool interactive)
         {
             if (root.GetComponent<RectTransform>() == null) root.AddComponent<RectTransform>();
             root.layer = Layers.UI;
@@ -819,7 +822,7 @@ namespace NostalgIA.EditorTools.Setup
         }
 
         /// <summary>Estira un RectTransform entre dos anclas sin márgenes.</summary>
-        private static void Stretch(RectTransform rect, Vector2 min, Vector2 max)
+        internal static void Stretch(RectTransform rect, Vector2 min, Vector2 max)
         {
             rect.anchorMin = min;
             rect.anchorMax = max;
@@ -828,7 +831,7 @@ namespace NostalgIA.EditorTools.Setup
         }
 
         /// <summary>Asigna anclas, pivote, posición y tamaño de un RectTransform.</summary>
-        private static void SetRect(RectTransform rect, Vector2 anchorMin, Vector2 anchorMax, Vector2 pivot, Vector2 position, Vector2 size)
+        internal static void SetRect(RectTransform rect, Vector2 anchorMin, Vector2 anchorMax, Vector2 pivot, Vector2 position, Vector2 size)
         {
             rect.anchorMin = anchorMin;
             rect.anchorMax = anchorMax;
@@ -838,13 +841,13 @@ namespace NostalgIA.EditorTools.Setup
         }
 
         /// <summary>Oculta el texto referenciado por una propiedad del presentador.</summary>
-        private static void HideReferencedText(SerializedObject so, string property)
+        internal static void HideReferencedText(SerializedObject so, string property)
         {
             if (so.FindProperty(property).objectReferenceValue is Component c) c.gameObject.SetActive(false);
         }
 
         /// <summary>Busca un descendiente por nombre (búsqueda en profundidad).</summary>
-        private static Transform FindDeep(Transform parent, string name)
+        internal static Transform FindDeep(Transform parent, string name)
         {
             if (parent.name == name) return parent;
             for (int i = 0; i < parent.childCount; i++)
@@ -856,7 +859,7 @@ namespace NostalgIA.EditorTools.Setup
         }
 
         /// <summary>Busca un objeto por nombre en las escenas abiertas, incluidos los inactivos.</summary>
-        private static GameObject FindInScene(string name)
+        internal static GameObject FindInScene(string name)
         {
             foreach (Transform t in Object.FindObjectsByType<Transform>(FindObjectsInactive.Include, FindObjectsSortMode.None))
                 if (t.name == name) return t.gameObject;
@@ -864,14 +867,14 @@ namespace NostalgIA.EditorTools.Setup
         }
 
         /// <summary>Asigna la capa a un objeto y a todos sus descendientes.</summary>
-        private static void SetLayerRecursively(Transform t, int layer)
+        internal static void SetLayerRecursively(Transform t, int layer)
         {
             t.gameObject.layer = layer;
             for (int i = 0; i < t.childCount; i++) SetLayerRecursively(t.GetChild(i), layer);
         }
 
         /// <summary>Elimina los componentes cuyo script ya no existe.</summary>
-        private static void RemoveMissingScripts(GameObject root)
+        internal static void RemoveMissingScripts(GameObject root)
         {
             foreach (Transform t in root.GetComponentsInChildren<Transform>(true))
                 GameObjectUtility.RemoveMonoBehavioursWithMissingScript(t.gameObject);
@@ -881,7 +884,7 @@ namespace NostalgIA.EditorTools.Setup
         /// Busca un tipo de componente heredado (ensamblado <c>Assembly-CSharp</c>) por su nombre,
         /// con la caché de tipos del editor.
         /// </summary>
-        private static System.Type FindLegacyType(string typeName)
+        internal static System.Type FindLegacyType(string typeName)
         {
             foreach (System.Type type in TypeCache.GetTypesDerivedFrom<MonoBehaviour>())
                 if (type.Name == typeName && type.Namespace == null) return type;
@@ -889,7 +892,7 @@ namespace NostalgIA.EditorTools.Setup
         }
 
         /// <summary>Agrega (si falta) un componente heredado identificado por nombre de tipo.</summary>
-        private static void AddLegacyComponent(GameObject go, string typeName)
+        internal static void AddLegacyComponent(GameObject go, string typeName)
         {
             System.Type type = FindLegacyType(typeName);
             if (type == null)
@@ -901,7 +904,7 @@ namespace NostalgIA.EditorTools.Setup
         }
 
         /// <summary>Agrega una instancia anidada de un prefab si aún no existe un hijo con ese nombre.</summary>
-        private static void EnsureNestedPrefab(Transform parent, GameObject prefab, string name)
+        internal static void EnsureNestedPrefab(Transform parent, GameObject prefab, string name)
         {
             if (prefab == null || parent.Find(name) != null) return;
             var instance = (GameObject)PrefabUtility.InstantiatePrefab(prefab, parent);
