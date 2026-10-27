@@ -222,7 +222,11 @@ public class ToolVisualController : MonoBehaviour
 
         SetupNozzleTip();
         SetupVacuumTubeRenderer();
-        SetupSuctionWindEffect();
+        // Si la herramienta ya tiene el vórtice de partículas de la Fase 1 (SuctionVortexFx, con
+        // material como asset), no creamos el viento heredado: este generaba en ejecución una
+        // textura, dos materiales y seis LineRenderer actualizados cada frame (auditoría QA).
+        if (GetComponentInChildren<NostalgIA.Presentation.VFX.SuctionVortexFx>(true) == null)
+            SetupSuctionWindEffect();
 
         initialized = true;
     }
