@@ -600,4 +600,28 @@ namespace NostalgIA.Core.Events
         /// <summary>Crea el evento.</summary>
         public DimensionalPortalCrossed(bool enteredLinkedDimension) => EnteredLinkedDimension = enteredLinkedDimension;
     }
+
+    // ===================================================================== Entorno (rama experimental Frutiger Aero)
+
+    /// <summary>
+    /// El jugador rebotó en una burbuja trampolín. Publica <c>BounceBubble</c>; lo escucha la
+    /// presentación para deformar la burbuja y emitir partículas.
+    /// </summary>
+    public readonly struct BubbleBounced : IGameEvent
+    {
+        /// <summary>Burbuja que recibió el rebote.</summary>
+        public readonly Transform Source;
+        /// <summary>Punto de contacto aproximado (posición del jugador).</summary>
+        public readonly Vector3 Position;
+        /// <summary>Velocidad vertical aplicada, en m/s.</summary>
+        public readonly float LaunchSpeed;
+
+        /// <summary>Crea el evento.</summary>
+        public BubbleBounced(Transform source, Vector3 position, float launchSpeed)
+        {
+            Source = source;
+            Position = position;
+            LaunchSpeed = launchSpeed;
+        }
+    }
 }

@@ -777,6 +777,26 @@ namespace NostalgIA.Gameplay.Player
             Physics.SyncTransforms();
         }
 
+        /// <summary>
+        /// Impulso externo (burbuja trampolín, resorte): la velocidad vertical pasa a
+        /// <c>max(v_y, verticalSpeed)</c>, se suma el empuje horizontal y el jugador queda en el
+        /// aire. Durante el gancho no hace nada: el cable tiene prioridad sobre el movimiento.
+        /// </summary>
+        /// <param name="verticalSpeed">Velocidad vertical mínima tras el impulso, en m/s.</param>
+        /// <param name="horizontalBoost">Velocidad horizontal que se suma, en m/s (se ignora y).</param>
+        public void Launch(float verticalSpeed, Vector3 horizontalBoost)
+        {
+            if (state == LocomotionState.Grappling) return;
+            if (state == LocomotionState.Sliding) ExitSlide(false, Vector3.zero);
+            velocity.y = Mathf.Max(velocity.y, verticalSpeed);
+            velocity.x += horizontalBoost.x;
+            velocity.z += horizontalBoost.z;
+            isGrounded = false;
+            jumpedSinceGrounded = true;   // Sin salto de "coyote time" después del rebote.
+            jumpBufferTimer = 0f;
+            ChangeState(LocomotionState.Airborne);
+        }
+
         /// <summary>Sustituye la velocidad (por ejemplo, rotada por un portal).</summary>
         public void SetVelocity(Vector3 newVelocity) => velocity = newVelocity;
 
