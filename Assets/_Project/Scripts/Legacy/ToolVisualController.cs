@@ -4,14 +4,30 @@ using UnityEngine;
 using UnityEngine.Rendering;
 
 /// <summary>
-/// Controla todas las animaciones y efectos visuales del modelo 3D de la herramienta (robot.fbx):
-/// 1. Modo Aspirar: Garras completamente retraídas sobre el cañón, efecto de viento con rayas grises
-///    convergiendo hacia la boquilla, e inflado progresivo y muy notorio del compartimiento con onda
-///    peristáltica al tragar cada objeto y vibración de presión según su llenado.
-/// 2. Modo Gancho: Garras desplegadas y activas; al disparar el gancho, el cabezal físico completo (Bone.002)
-///    sale disparado hacia el objetivo estirando dinámicamente el tubo de aspiradora, y se retrae rápido al soltar.
-/// 3. Transición continua, fluida y coherente al alternar de modo con [Q] sin ocultar el arma.
+/// Controla las animaciones procedurales del modelo de la herramienta (robot.fbx).
 /// </summary>
+/// <remarks>
+/// <para>
+/// <b>Recámara.</b> Los tanques (Cylinder y Cylinder.001) y los anillos de entrada se inflan en
+/// función de la capacidad ocupada (<c>almacenados / capacidad</c>). El inflado se aplica a las
+/// mallas y no a los huesos, y se compensa la posición para que cada malla crezca alrededor del
+/// centro de sus propios límites: así la recámara se hincha "en su sitio" y el arma no se
+/// desplaza. El valor visual sigue al objetivo con un resorte subamortiguado
+/// (x'' = k·(objetivo − x) − c·x'), que da el rebote gelatinoso al tragar y al disparar.
+/// </para>
+/// <para>
+/// <b>Garras.</b> Siempre visibles. En modo aspiradora se pliegan hacia el eje (cerradas sobre la
+/// boquilla); en modo gancho se abren hacia fuera con las puntas curvadas, listas para agarrar.
+/// Al anclar se cierran sobre el punto de agarre. La transición interpola tres poses por
+/// articulación, con un pequeño desfase entre base, falange media y punta.
+/// </para>
+/// <para>
+/// Corrección de la Fase 1 (rama experimental): antes el cuerpo "Cube" subía hasta 1,8 m al
+/// llenarse (desplazamiento de 8,5 unidades en el espacio escalado del modelo), por eso el arma
+/// "se levantaba" al absorber; y el cabezal entero se escondía 7 m detrás de la cámara en modo
+/// aspiradora, por eso las garras desaparecían.
+/// </para>
+/// </remarks>
 public class ToolVisualController : MonoBehaviour
 {
     [Header("Referencias")]
@@ -24,8 +40,33 @@ public class ToolVisualController : MonoBehaviour
     [SerializeField] private float modeTransitionSpeed = 3.5f;
     [SerializeField] private float clawLaunchTime = 0.055f;
     [SerializeField] private float clawRetractSpeed = 28f;
-    [SerializeField] private float compartmentInflateSpeed = 9f;
-    [SerializeField] private float maxCompartmentInflation = 2.45f;
+
+    [Header("Recámara (inflado según la capacidad ocupada)")]
+    [Tooltip("Escala radial de los tanques con la aspiradora llena.")]
+    [SerializeField, Range(1f, 2.5f)] private float chamberMaxRadial = 1.75f;
+    [Tooltip("Escala axial de los tanques con la aspiradora llena.")]
+    [SerializeField, Range(1f, 1.5f)] private float chamberMaxAxial = 1.15f;
+    [Tooltip("Escala radial de los anillos de entrada con la aspiradora llena.")]
+    [SerializeField, Range(1f, 1.6f)] private float ringMaxRadial = 1.3f;
+    [Tooltip("Escala del cuerpo (vientre del arma) con la aspiradora llena; crece alrededor de su centro.")]
+    [SerializeField, Range(1f, 1.5f)] private float bodyMaxRadial = 1.18f;
+    [Tooltip("Exponente de la curva de llenado (< 1: el primer objeto ya se nota).")]
+    [SerializeField, Range(0.3f, 1f)] private float fillCurveExponent = 0.6f;
+    [Tooltip("Rigidez del resorte del inflado (k).")]
+    [SerializeField, Min(1f)] private float inflateStiffness = 90f;
+    [Tooltip("Amortiguamiento del resorte del inflado (c). ζ = c / (2·√k) < 1 produce rebote.")]
+    [SerializeField, Min(0f)] private float inflateDamping = 10f;
+    [Tooltip("Impulso de velocidad del resorte al tragar un objeto.")]
+    [SerializeField] private float swallowImpulse = 2.2f;
+    [Tooltip("Impulso (negativo) del resorte al disparar un objeto.")]
+    [SerializeField] private float launchImpulse = -2.6f;
+    [Tooltip("Amplitud de la onda de tragado que recorre anillos y tanques.")]
+    [SerializeField, Range(0f, 0.4f)] private float swallowWaveAmplitude = 0.14f;
+
+    [Header("Garras (grados sobre la bisagra radial; + abre hacia fuera, − cierra hacia el eje)")]
+    [SerializeField] private Vector3 clawClosedAngles = new Vector3(-16f, -22f, -34f);
+    [SerializeField] private Vector3 clawOpenAngles = new Vector3(40f, -8f, -32f);
+    [SerializeField] private Vector3 clawGripAngles = new Vector3(-4f, -20f, -38f);
 
     // Nodos del rig de robot.fbx
     private Transform boneRoot;         // Bone
@@ -54,12 +95,22 @@ public class ToolVisualController : MonoBehaviour
     private Quaternion forearmDefaultLocalRot;
     private Vector3 forearmDefaultLocalScale;
 
-    private Vector3 compADefaultScale;
-    private Vector3 compBDefaultScale;
-    private Vector3 ringADefaultScale;
-    private Vector3 ringBDefaultScale;
-    private Vector3 mainCubeDefaultScale;
-    private Vector3 mainCubeDefaultPos;
+    /// <summary>Pose de reposo de una malla inflable y el centro de sus límites (espacio de malla).</summary>
+    private struct InflatableMesh
+    {
+        public Transform transform;
+        public Vector3 defaultPosition;
+        public Vector3 defaultScale;
+        public Quaternion defaultRotation;
+        public Vector3 boundsCenter;
+    }
+
+    // Mallas de la recámara: tanque trasero, tanque delantero, anillo trasero y anillo de entrada.
+    private InflatableMesh tankRear;
+    private InflatableMesh tankFront;
+    private InflatableMesh ringRear;
+    private InflatableMesh ringFront;
+    private InflatableMesh body;
 
     private Quaternion[] clawBaseDefaultRots;
     private Quaternion[] clawMidDefaultRots;
@@ -80,11 +131,20 @@ public class ToolVisualController : MonoBehaviour
     private Vector3 currentHookWorldPos;
     private Vector3 lastValidAnchorPos;
 
-    // Estado del inflado progresivo del compartimiento
-    private float currentVisualFill = 0f;
-    private float swallowWaveTimer = -1f; // Onda peristáltica que recorre el arma de adelante hacia atrás al tragar
-    private float launchDeflatePulse = 0f;
+    // Estado del inflado: valor del resorte, su velocidad y la onda de tragado (-1 = inactiva).
+    private float inflateValue = 0f;
+    private float inflateVelocity = 0f;
+    private float swallowWaveTimer = -1f;
     private int lastStoredCount = 0;
+
+#if UNITY_EDITOR
+    // Vista previa para ajustar la animación en el editor (−1 = desactivada).
+    [Header("Vista previa (solo editor)")]
+    [Tooltip("Fuerza el llenado visual (0–1) para revisar el inflado sin absorber objetos.")]
+    [SerializeField, Range(-1f, 1f)] private float previewFill = -1f;
+    [Tooltip("Fuerza la mezcla de modo (0 = aspiradora, 1 = gancho).")]
+    [SerializeField, Range(-1f, 1f)] private float previewModeBlend = -1f;
+#endif
 
     // Tubo de aspiradora extensible al lanzar el gancho
     private LineRenderer vacuumTubeRenderer;
@@ -198,15 +258,11 @@ public class ToolVisualController : MonoBehaviour
             forearmDefaultLocalScale = boneForearm.localScale;
         }
 
-        if (boneCompartmentA != null) compADefaultScale = boneCompartmentA.localScale;
-        if (boneCompartmentB != null) compBDefaultScale = boneCompartmentB.localScale;
-        if (tubeRingA != null) ringADefaultScale = tubeRingA.localScale;
-        if (tubeRingB != null) ringBDefaultScale = tubeRingB.localScale;
-        if (mainCube != null)
-        {
-            mainCubeDefaultScale = mainCube.localScale;
-            mainCubeDefaultPos = mainCube.localPosition;
-        }
+        tankRear = CaptureInflatable(FindDeepChild(robotRoot, "Cylinder"));
+        tankFront = CaptureInflatable(FindDeepChild(robotRoot, "Cylinder.001"));
+        ringRear = CaptureInflatable(tubeRingA);
+        ringFront = CaptureInflatable(tubeRingB);
+        body = CaptureInflatable(mainCube);
 
         clawBaseDefaultRots = CaptureRotations(clawBaseBones);
         clawMidDefaultRots = CaptureRotations(clawMidBones);
@@ -250,7 +306,9 @@ public class ToolVisualController : MonoBehaviour
 
             Vector3 hingeInForearm = Vector3.Cross(Vector3.up, radialOut).normalized;
             baseRadialHingeAxes[i] = hingeInForearm;
-            midRadialHingeAxes[i] = (Quaternion.Inverse(baseRot) * hingeInForearm).normalized;
+            // La rotación de cada falange se aplica a la derecha de su rotación de reposo, así que
+            // el eje debe expresarse en el marco propio de esa falange: inversa de la cadena acumulada.
+            midRadialHingeAxes[i] = (Quaternion.Inverse(baseRot * midRot) * hingeInForearm).normalized;
             tipRadialHingeAxes[i] = (Quaternion.Inverse(baseRot * midRot * tipRot) * hingeInForearm).normalized;
         }
 
@@ -492,6 +550,9 @@ public class ToolVisualController : MonoBehaviour
         ToolId currentTool = playerController.ActiveTool;
         float targetBlend = (currentTool == ToolId.Grapple) ? 1f : 0f;
         grappleModeBlend = Mathf.MoveTowards(grappleModeBlend, targetBlend, dt * modeTransitionSpeed);
+#if UNITY_EDITOR
+        if (previewModeBlend >= 0f) grappleModeBlend = previewModeBlend;
+#endif
 
         if (robotRoot != null)
         {
@@ -511,9 +572,46 @@ public class ToolVisualController : MonoBehaviour
         }
     }
 
+    /// <summary>Guarda la pose de reposo de una malla inflable y el centro de sus límites.</summary>
+    private static InflatableMesh CaptureInflatable(Transform t)
+    {
+        var data = new InflatableMesh { transform = t };
+        if (t == null) return data;
+        data.defaultPosition = t.localPosition;
+        data.defaultScale = t.localScale;
+        data.defaultRotation = t.localRotation;
+        MeshFilter filter = t.GetComponent<MeshFilter>();
+        data.boundsCenter = filter != null && filter.sharedMesh != null ? filter.sharedMesh.bounds.center : Vector3.zero;
+        return data;
+    }
+
     /// <summary>
-    /// Infla de manera muy visible y progresiva todos los compartimientos y anillos de la aspiradora
-    /// a medida que absorbe objetos, incluyendo una onda peristáltica ("tragado") y vibración de presión.
+    /// Escala una malla inflable por eje (<paramref name="factors"/>, en el espacio de la malla)
+    /// manteniendo fijo el centro de sus límites. Un vértice v se coloca en p + R·(s∘v); para que
+    /// el centro c no se mueva al pasar de s₀ a s, la posición se corrige con p = p₀ + R·((s₀ − s)∘c).
+    /// </summary>
+    private static void ApplyInflation(in InflatableMesh mesh, Vector3 factors)
+    {
+        if (mesh.transform == null) return;
+        Vector3 s0 = mesh.defaultScale;
+        Vector3 s = Vector3.Scale(s0, factors);
+        Vector3 c = mesh.boundsCenter;
+        Vector3 delta = new Vector3((s0.x - s.x) * c.x, (s0.y - s.y) * c.y, (s0.z - s.z) * c.z);
+        mesh.transform.localScale = s;
+        mesh.transform.localPosition = mesh.defaultPosition + mesh.defaultRotation * delta;
+    }
+
+    /// <summary>Pulso gaussiano de la onda de tragado centrado en <paramref name="center"/>.</summary>
+    private float WavePulse(float center, float width)
+    {
+        if (swallowWaveTimer < 0f) return 0f;
+        float d = (swallowWaveTimer - center) / width;
+        return Mathf.Exp(-d * d) * swallowWaveAmplitude;
+    }
+
+    /// <summary>
+    /// Infla la recámara según la capacidad ocupada, con resorte y onda de tragado que viaja de la
+    /// boquilla (anillo de entrada) al tanque trasero.
     /// </summary>
     private void UpdateCompartmentInflation(float dt)
     {
@@ -522,94 +620,54 @@ public class ToolVisualController : MonoBehaviour
         int stored = vacuum.StoredCount;
         int capacity = Mathf.Max(1, vacuum.Capacity);
 
+        // Impulsos del resorte al cambiar el contenido: rebote al tragar, contracción al disparar.
         if (stored > lastStoredCount)
         {
-            // Iniciar onda de tragado que recorre desde la boquilla hasta el tanque trasero
+            inflateVelocity += swallowImpulse;
             swallowWaveTimer = 0f;
         }
         else if (stored < lastStoredCount)
         {
-            // Impulso elástico de desinflado al disparar un objeto
-            launchDeflatePulse = 1f;
+            inflateVelocity += launchImpulse;
         }
         lastStoredCount = stored;
 
+        // Objetivo: fracción ocupada con curva f^γ (γ < 1 hace visible el primer objeto).
+        float target = Mathf.Pow(Mathf.Clamp01((float)stored / capacity), fillCurveExponent);
+#if UNITY_EDITOR
+        if (previewFill >= 0f) target = Mathf.Pow(previewFill, fillCurveExponent);
+#endif
+
+        // Resorte con Euler semiimplícito; el paso se limita para que sea estable a pocos FPS.
+        float step = Mathf.Min(dt, 1f / 30f);
+        inflateVelocity += (inflateStiffness * (target - inflateValue) - inflateDamping * inflateVelocity) * step;
+        inflateValue += inflateVelocity * step;
+
         if (swallowWaveTimer >= 0f)
         {
-            swallowWaveTimer += dt * 3.8f;
-            if (swallowWaveTimer > 1.3f) swallowWaveTimer = -1f;
-        }
-        launchDeflatePulse = Mathf.MoveTowards(launchDeflatePulse, 0f, dt * 6f);
-
-        // Curva no lineal (exponente 0.55) + escalón inicial para que desde el 1er objeto se note claramente cómo se infla
-        float rawRatio = Mathf.Clamp01((float)stored / capacity);
-        float targetVisualFill = stored > 0
-            ? Mathf.Clamp01(0.18f + 0.82f * Mathf.Pow(rawRatio, 0.58f))
-            : 0f;
-
-        currentVisualFill = Mathf.Lerp(currentVisualFill, targetVisualFill, dt * compartmentInflateSpeed);
-
-        // Vibración elástica de presión interna cuando el tanque contiene objetos
-        float pressureWobble = currentVisualFill > 0.01f
-            ? Mathf.Sin(Time.time * (10f + currentVisualFill * 18f)) * 0.045f * currentVisualFill
-            : 0f;
-
-        float deflateKick = -Mathf.Sin(launchDeflatePulse * Mathf.PI) * 0.18f;
-
-        // Onda peristáltica en 3 etapas: 1) Anillos delanteros -> 2) Cilindro frontal -> 3) Cilindro trasero y Cuerpo Cube
-        float waveFront = swallowWaveTimer >= 0f ? Mathf.Exp(-Mathf.Pow((swallowWaveTimer - 0.18f) * 5.5f, 2f)) * 0.42f : 0f;
-        float waveMid   = swallowWaveTimer >= 0f ? Mathf.Exp(-Mathf.Pow((swallowWaveTimer - 0.52f) * 4.8f, 2f)) * 0.48f : 0f;
-        float waveRear  = swallowWaveTimer >= 0f ? Mathf.Exp(-Mathf.Pow((swallowWaveTimer - 0.88f) * 4.2f, 2f)) * 0.52f : 0f;
-
-        // 1. Anillos de entrada (Cylinder.005 y Cylinder.002)
-        if (tubeRingB != null)
-        {
-            float s = 1f + currentVisualFill * 0.35f + waveFront;
-            tubeRingB.localScale = new Vector3(ringBDefaultScale.x * s, ringBDefaultScale.y * s, ringBDefaultScale.z);
-        }
-        if (tubeRingA != null)
-        {
-            float s = 1f + currentVisualFill * 0.45f + (waveFront * 0.5f + waveMid * 0.5f);
-            tubeRingA.localScale = new Vector3(ringADefaultScale.x * s, ringADefaultScale.y * s, ringADefaultScale.z);
+            swallowWaveTimer += dt;
+            if (swallowWaveTimer > 0.9f) swallowWaveTimer = -1f;
         }
 
-        // 2. Compartimiento delantero (Bone.004 / Cylinder.001)
-        if (boneCompartmentB != null)
-        {
-            float radialB = Mathf.Lerp(1f, maxCompartmentInflation * 0.92f, currentVisualFill) + waveMid + pressureWobble + deflateKick;
-            float axialB = Mathf.Lerp(1f, 1f + (maxCompartmentInflation - 1f) * 0.42f, currentVisualFill) + waveMid * 0.35f;
-            boneCompartmentB.localScale = new Vector3(
-                compBDefaultScale.x * axialB,
-                compBDefaultScale.y * radialB,
-                compBDefaultScale.z * radialB
-            );
-        }
+        // El valor del resorte puede salir de [0, 1] durante el rebote; se limita para no invertir mallas.
+        float fill = Mathf.Clamp(inflateValue, -0.15f, 1.15f);
+        float wobble = fill > 0.02f ? Mathf.Sin(Time.time * (9f + 10f * fill)) * 0.012f * fill : 0f;
 
-        // 3. Compartimiento principal trasero (Bone.003 / Cylinder)
-        if (boneCompartmentA != null)
-        {
-            float radialA = Mathf.Lerp(1f, maxCompartmentInflation, currentVisualFill) + waveRear + pressureWobble + deflateKick;
-            float axialA = Mathf.Lerp(1f, 1f + (maxCompartmentInflation - 1f) * 0.55f, currentVisualFill) + waveRear * 0.4f;
-            boneCompartmentA.localScale = new Vector3(
-                compADefaultScale.x * axialA,
-                compADefaultScale.y * radialA,
-                compADefaultScale.z * radialA
-            );
-        }
+        // Onda: anillo de entrada → anillo trasero → tanque delantero → tanque trasero.
+        float ringFrontRadial = 1f + (ringMaxRadial - 1f) * fill + WavePulse(0.08f, 0.07f);
+        float ringRearRadial = 1f + (ringMaxRadial - 1f) * fill + WavePulse(0.18f, 0.08f);
+        float frontRadial = 1f + (chamberMaxRadial - 1f) * 0.9f * fill + WavePulse(0.32f, 0.1f) + wobble;
+        float rearRadial = 1f + (chamberMaxRadial - 1f) * fill + WavePulse(0.5f, 0.12f) + wobble;
+        float axial = 1f + (chamberMaxAxial - 1f) * fill;
 
-        // 4. Cámara principal / vientre del arma (Cube) — muy visible en primera persona
-        if (mainCube != null)
-        {
-            float bellyRadial = Mathf.Lerp(1f, 1.78f, currentVisualFill) + waveRear * 0.65f + pressureWobble * 1.2f + deflateKick * 0.6f;
-            float bellyLength = Mathf.Lerp(1f, 1.28f, currentVisualFill) + waveRear * 0.25f;
-            mainCube.localScale = new Vector3(
-                mainCubeDefaultScale.x * bellyLength,
-                mainCubeDefaultScale.y * bellyRadial,
-                mainCubeDefaultScale.z * bellyRadial
-            );
-            // Ligero abombamiento superior/lateral al inflarse para que sobresalga claramente en la vista del jugador
-            mainCube.localPosition = mainCubeDefaultPos + new Vector3(0f, currentVisualFill * 8.5f, 0f);
-        }
+        float bodyRadial = 1f + (bodyMaxRadial - 1f) * fill + WavePulse(0.65f, 0.14f) * 0.5f + wobble * 0.5f;
+
+        // Cilindros: ejes x, y radiales y z axial. Cuerpo (Cube): x axial (cañón), y, z radiales.
+        ApplyInflation(ringFront, new Vector3(ringFrontRadial, ringFrontRadial, 1f));
+        ApplyInflation(ringRear, new Vector3(ringRearRadial, ringRearRadial, 1f));
+        ApplyInflation(tankFront, new Vector3(frontRadial, frontRadial, axial));
+        ApplyInflation(tankRear, new Vector3(rearRadial, rearRadial, axial));
+        ApplyInflation(body, new Vector3(1f + (bodyRadial - 1f) * 0.35f, bodyRadial, bodyRadial));
     }
 
     private void UpdateClawsAndGrappleLaunch(float dt)
@@ -626,34 +684,30 @@ public class ToolVisualController : MonoBehaviour
             grappleExtension = Mathf.MoveTowards(grappleExtension, 0f, dt * clawRetractSpeed);
         }
 
-        // Articulación escalonada y continua de las 3 garras al cambiar entre Aspiradora y Gancho
+        // Pose de las garras: cerrada (aspiradora) → abierta (gancho) → agarre (anclado). La base
+        // se mueve primero y la punta al final (desfase de 0,08 y 0,16), lo que da una apertura
+        // escalonada más orgánica que mover las tres articulaciones a la vez.
         float baseBlend = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(grappleModeBlend * 1.15f));
         float midBlend = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01((grappleModeBlend - 0.08f) / 0.92f));
         float tipBlend = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01((grappleModeBlend - 0.16f) / 0.84f));
-        float anchorClamp = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01((grappleExtension - 0.55f) / 0.45f));
+        float gripBlend = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01((grappleExtension - 0.55f) / 0.45f));
+
+        Vector3 modePose = new Vector3(
+            Mathf.Lerp(clawClosedAngles.x, clawOpenAngles.x, baseBlend),
+            Mathf.Lerp(clawClosedAngles.y, clawOpenAngles.y, midBlend),
+            Mathf.Lerp(clawClosedAngles.z, clawOpenAngles.z, tipBlend));
+        Vector3 pose = Vector3.Lerp(modePose, clawGripAngles, gripBlend);
 
         for (int i = 0; i < clawBaseBones.Length; i++)
         {
             if (clawBaseBones[i] != null)
-            {
-                float activeAngle = Mathf.Lerp(0f, -22f, anchorClamp);
-                float baseAngle = Mathf.Lerp(105f, activeAngle, baseBlend);
-                clawBaseBones[i].localRotation = Quaternion.AngleAxis(baseAngle, baseRadialHingeAxes[i]) * clawBaseDefaultRots[i];
-            }
+                clawBaseBones[i].localRotation = Quaternion.AngleAxis(pose.x, baseRadialHingeAxes[i]) * clawBaseDefaultRots[i];
 
             if (i < clawMidBones.Length && clawMidBones[i] != null)
-            {
-                float activeMidAngle = Mathf.Lerp(0f, -15f, anchorClamp);
-                float midAngle = Mathf.Lerp(20f, activeMidAngle, midBlend);
-                clawMidBones[i].localRotation = clawMidDefaultRots[i] * Quaternion.AngleAxis(midAngle, midRadialHingeAxes[i]);
-            }
+                clawMidBones[i].localRotation = clawMidDefaultRots[i] * Quaternion.AngleAxis(pose.y, midRadialHingeAxes[i]);
 
             if (i < clawTipBones.Length && clawTipBones[i] != null)
-            {
-                float activeTipAngle = Mathf.Lerp(0f, -20f, anchorClamp);
-                float tipAngle = Mathf.Lerp(85f, activeTipAngle, tipBlend);
-                clawTipBones[i].localRotation = clawTipDefaultRots[i] * Quaternion.AngleAxis(tipAngle, tipRadialHingeAxes[i]);
-            }
+                clawTipBones[i].localRotation = clawTipDefaultRots[i] * Quaternion.AngleAxis(pose.z, tipRadialHingeAxes[i]);
         }
 
         float vacuumOpen = 1f - Mathf.SmoothStep(0f, 1f, grappleModeBlend);
@@ -670,11 +724,9 @@ public class ToolVisualController : MonoBehaviour
         // Lanzamiento físico del cabezal completo (boneForearm / Bone.002) hacia el objetivo y estiramiento del tubo
         if (boneForearm != null)
         {
-            float slideBlend = Mathf.SmoothStep(0f, 1f, grappleModeBlend);
-            Vector3 retractedLocalPos = forearmDefaultLocalPos + new Vector3(0f, -0.34f, 0f);
-            Vector3 baseModeLocalPos = Vector3.Lerp(retractedLocalPos, forearmDefaultLocalPos, slideBlend);
-
-            boneForearm.localPosition = baseModeLocalPos;
+            // El cabezal permanece en su sitio en ambos modos (las garras siempre se ven); solo
+            // se desplaza durante el lanzamiento del gancho.
+            boneForearm.localPosition = forearmDefaultLocalPos;
             boneForearm.localRotation = forearmDefaultLocalRot;
             boneForearm.localScale = forearmDefaultLocalScale;
 
