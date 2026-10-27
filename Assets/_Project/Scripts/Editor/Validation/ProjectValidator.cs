@@ -28,7 +28,7 @@ namespace NostalgIA.EditorTools.Validation
     /// <item><description><b>Sin Terrain</b> (restricción 1 del curso): ningún componente <c>Terrain</c>/<c>TerrainCollider</c> ni asset <c>TerrainData</c>.</description></item>
     /// <item><description><b>Sin scripts faltantes</b> en escenas y prefabs.</description></item>
     /// <item><description><b>Sin prefabs faltantes</b>: toda instancia de prefab apunta a un asset existente.</description></item>
-    /// <item><description><b>Material por defecto de ProBuilder</b> en escenas de Estación (advertencia hasta que la Pista B lo reemplace).</description></item>
+    /// <item><description><b>Material por defecto de ProBuilder</b> en escenas de Estación (error desde la tarea F1-B02).</description></item>
     /// <item><description><b>Build Settings</b>: escenas existentes, <c>00_Boot</c> primero y sin escenas de prueba.</description></item>
     /// <item><description><b>Capas</b> con los nombres del TDD (§13).</description></item>
     /// <item><description><b>Matriz de colisiones</b> según el TDD (§13).</description></item>
@@ -60,13 +60,13 @@ namespace NostalgIA.EditorTools.Validation
         public const string ReportFileName = "Reporte_Validacion_Proyecto.md";
 
         /// <summary>
-        /// Mientras la Pista B reemplaza el material por defecto de ProBuilder (tarea F1-B02), su
-        /// presencia se reporta como advertencia. Al cerrar la Fase 2 se cambiará a <c>true</c>
-        /// para que bloquee el build.
+        /// La Pista B sustituyó el material por defecto de ProBuilder en el Tutorial (tarea F1-B02,
+        /// <c>Phase1VisualBuilder</c>), así que desde la Fase 1 su presencia en una escena de Estación
+        /// es un <b>error</b> que bloquea el build: evita que una pieza nueva entre sin material.
         /// </summary>
-        /// <remarks>Se declara <c>static readonly</c> y no <c>const</c> para que el compilador no
-        /// marque como inalcanzable la rama de error mientras el valor sea <c>false</c>.</remarks>
-        private static readonly bool ProBuilderDefaultMaterialIsError = false;
+        /// <remarks>Se mantiene como <c>static readonly</c> (y no <c>const</c>) para poder relajar la
+        /// regla temporalmente sin que el compilador marque código inalcanzable.</remarks>
+        private static readonly bool ProBuilderDefaultMaterialIsError = true;
 
         // Cabeceras YAML de los tipos de Terrain. La opción Multiline hace que «^» coincida
         // con el inicio de cada línea del archivo.
