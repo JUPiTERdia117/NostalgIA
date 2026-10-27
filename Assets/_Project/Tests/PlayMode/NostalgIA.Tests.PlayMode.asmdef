@@ -5,7 +5,10 @@
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
         "NostalgIA.Core",
-        "NostalgIA.Gameplay"
+        "NostalgIA.Gameplay",
+        "NostalgIA.Presentation",
+        "Unity.RenderPipelines.Core.Runtime",
+        "UnityEngine.UI"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

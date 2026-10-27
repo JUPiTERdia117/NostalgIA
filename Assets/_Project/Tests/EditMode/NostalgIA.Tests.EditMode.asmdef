@@ -8,7 +8,11 @@
         "NostalgIA.Editor",
         "NostalgIA.Input",
         "NostalgIA.Gameplay",
-        "Unity.InputSystem"
+        "Unity.InputSystem",
+        "NostalgIA.Presentation",
+        "Unity.RenderPipelines.Core.Runtime",
+        "Unity.RenderPipelines.Universal.Runtime",
+        "UnityEngine.UI"
     ],
     "includePlatforms": [
         "Editor"
