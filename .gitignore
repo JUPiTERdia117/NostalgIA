@@ -120,3 +120,8 @@ InitTestScene*.unity*
 .vscode/
 *_BurstDebugInformation_DoNotShip/
 *_BackUpThisFolder_ButDontShipItWithYourGame/
+
+# Documentación del equipo (se guarda fuera del repositorio)
+Docs/
+CLAUDE.md
+.agents/
