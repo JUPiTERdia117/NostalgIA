@@ -873,6 +873,21 @@ namespace NostalgIA.Gameplay.Player
             ChangeState(LocomotionState.Airborne);
         }
 
+        /// <summary>
+        /// Lanza al jugador por un golpe externo (barredoras, pistones): suelta el gancho, sale de
+        /// cualquier estado de suelo y fija la velocidad indicada.
+        /// </summary>
+        /// <param name="launchVelocity">Velocidad resultante del golpe, en m/s.</param>
+        public void ApplyKnockback(Vector3 launchVelocity)
+        {
+            CancelGrapple();
+            if (state == LocomotionState.Sliding) ExitSlide(false, Vector3.zero);
+            velocity = launchVelocity;
+            isGrounded = false;
+            jumpedSinceGrounded = true;
+            ChangeState(LocomotionState.Airborne);
+        }
+
         /// <summary>Sustituye la velocidad (por ejemplo, rotada por un portal).</summary>
         public void SetVelocity(Vector3 newVelocity) => velocity = newVelocity;
 

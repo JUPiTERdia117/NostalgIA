@@ -6,6 +6,12 @@
 // donde s = hash(posición del pez) desfasa cada pez del cardumen. El cuerpo se tiñe con un
 // degradado lomo → vientre, franjas suaves y un tono por pez (rotación de matiz), con
 // especular nítido y borde del cielo. Sin sombras: son pequeños y se mueven rápido.
+//
+// Conexión con FishSchool.cs:
+//   - FishSchool solo gira y sube/baja el Transform raíz del cardumen una vez por frame;
+//     los peces hijos comparten material con GPU Instancing activo y su aleteo lateral más su
+//     variación de color (HueShift) ocurren 100 % en la GPU usando la posición de mundo de
+//     cada instancia como semilla.
 // =============================================================================
 
 Shader "NOS/AeroFish"
@@ -31,6 +37,7 @@ Shader "NOS/AeroFish"
         {
             Name "ForwardFish"
             Tags { "LightMode" = "UniversalForward" }
+            // Cull Off para que las aletas planas se vean por ambos lados.
             Cull Off
 
             HLSLPROGRAM
@@ -43,6 +50,7 @@ Shader "NOS/AeroFish"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
             #include "Assets/_Project/Art/Shaders/Include/NostalgIA_Common.hlsl"
 
+            // Bloque UnityPerMaterial para compatibilidad con SRP Batcher e Instancing.
             CBUFFER_START(UnityPerMaterial)
                 half4 _BackColor;
                 half4 _BellyColor;
@@ -81,7 +89,9 @@ Shader "NOS/AeroFish"
                 UNITY_SETUP_INSTANCE_ID(input);
                 UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(output);
 
+                // Semilla por instancia a partir de la columna de traslación de su matriz M.
                 float seed = NOS_Hash31(floor(UNITY_MATRIX_M._m03_m13_m23 * 3.17));
+                // La cabeza (uv.x < 0,2) queda rígida (w = 0) y la ondulación crece suavemente hacia la cola (uv.x = 1).
                 float w = smoothstep(0.2, 1.0, input.uv.x);
                 float3 p = input.positionOS.xyz;
                 float phase = p.z * _SwimFrequency - _Time.y * _SwimSpeed + seed * NOS_TWO_PI;
@@ -101,6 +111,8 @@ Shader "NOS/AeroFish"
             }
 
             // Rotación de matiz alrededor del eje gris (fórmula de Rodrigues con k = (1,1,1)/√3).
+            // Como el eje (1,1,1)/√3 tiene R = G = B, girar un vector RGB alrededor de él cambia el
+            // matiz conservando su luminancia percibida.
             half3 HueShift(half3 color, half angle)
             {
                 const half3 k = half3(0.57735h, 0.57735h, 0.57735h);
@@ -112,6 +124,7 @@ Shader "NOS/AeroFish"
             half4 FishFragment(Varyings input, bool isFrontFace : SV_IsFrontFace) : SV_Target
             {
                 UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input);
+                // Invierto la normal en las caras traseras de las aletas para que reciban luz correctamente.
                 half3 N = normalize(input.normalWS) * (isFrontFace ? 1.0h : -1.0h);
                 half3 V = (half3)GetWorldSpaceNormalizeViewDir(input.positionWS);
                 Light sun = GetMainLight();

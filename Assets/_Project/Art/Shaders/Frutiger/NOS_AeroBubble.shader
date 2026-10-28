@@ -17,6 +17,13 @@
 // (p = 2·uv − 1, n_vista = (p.x, p.y, √(1 − |p|²))). Cada burbuja cuesta 2 triángulos; la
 // ondulación de la superficie se sustituye por una "respiración" del radio
 // r·(1 + 0,04·sin(ω·t + 20s)) y una leve elipse que gira.
+//
+// Cómo se usa en el nivel:
+//   - M_Frutiger_Bubble (campo de 300 burbujas de BubbleFieldRenderer): activa _IMPOSTOR = 1
+//     sobre un simple Quad para bajar de ~230 000 triángulos a solo 600 triángulos en 1 draw call.
+//   - M_Frutiger_BounceBubble (burbujas trampolín del nivel) y M_Frutiger_BubbleHero: usan la
+//     malla esférica real (_IMPOSTOR = 0) con _DriftAmplitude = 0 en los trampolines para que
+//     el colisionador coincida siempre con la esfera visible.
 // =============================================================================
 
 Shader "NOS/AeroBubble"
@@ -46,6 +53,9 @@ Shader "NOS/AeroBubble"
         {
             Name "ForwardUnlit"
             Tags { "LightMode" = "UniversalForward" }
+            // Mezcla premultiplicada: el color de salida ya viene multiplicado por su alfa, y el
+            // fondo se multiplica por (1 − alfa). Así los reflejos del sol y de ventana brillan
+            // con fuerza incluso en el centro transparente de la burbuja.
             Blend One OneMinusSrcAlpha
             ZWrite Off
             Cull Back
@@ -61,6 +71,8 @@ Shader "NOS/AeroBubble"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
             #include "Assets/_Project/Art/Shaders/Frutiger/FrutigerCommon.hlsl"
 
+            // Bloque UnityPerMaterial para que las burbujas individuales (trampolines y hero)
+            // entren en el SRP Batcher, mientras que el campo masivo usa GPU Instancing.
             CBUFFER_START(UnityPerMaterial)
                 half4 _Tint;
                 half _FilmThickness;
@@ -101,16 +113,19 @@ Shader "NOS/AeroBubble"
                 UNITY_SETUP_INSTANCE_ID(input);
                 UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(output);
 
-                // Centro de la instancia: traslación de su matriz de objeto a mundo.
+                // Centro de la instancia: cuarta columna (_m03, _m13, _m23) de su matriz modelo.
+                // De ahí saco una semilla entre 0 y 1 sin tener que enviar un arreglo extra desde C#.
                 float3 center = UNITY_MATRIX_M._m03_m13_m23;
                 float seed = NOS_Hash31(floor(center * 7.31));
 
+                // Deriva suave en los 3 ejes con frecuencias inconmensurables (0,7; 1,0; 0,6) para
+                // que la trayectoria no dibuje un círculo repetitivo.
                 float t = _Time.y * _DriftSpeed;
                 float3 drift = float3(sin(t * 0.7 + seed * NOS_TWO_PI), 1.4 * sin(t + seed * 12.1), cos(t * 0.6 + seed * 9.3))
                              * _DriftAmplitude * (0.5 + seed);
 
 #if defined(_IMPOSTOR)
-                // Radio = escala de la instancia (la matriz escala el cuadro de 1 m al diámetro).
+                // Radio = mitad de la escala X de la instancia (la longitud de la primera columna de M).
                 float radius = length(UNITY_MATRIX_M._m00_m10_m20) * 0.5;
                 radius *= 1.0 + 0.04 * sin(_Time.y * _WobbleSpeed + seed * 20.0);
                 float2 corner = input.uv * 2.0 - 1.0;
@@ -122,6 +137,8 @@ Shader "NOS/AeroBubble"
                 // La normal de la cara apunta a la cámara; la de la esfera se reconstruye en el fragmento.
                 output.normalWS = (half3)normalize(GetCameraPositionWS() - sphereCenter);
 #else
+                // En malla esférica real deformo los vértices a lo largo de su normal para que la
+                // burbuja tiemble como gelatina al flotar o cuando sirve de trampolín.
                 float wobble = sin(dot(input.positionOS.xyz, float3(3.1, 2.3, 4.7)) * 4.0 + _Time.y * _WobbleSpeed + seed * 20.0) * _WobbleAmount;
                 float3 positionOS = input.positionOS.xyz + input.normalOS * wobble;
                 float3 positionWS = TransformObjectToWorld(positionOS) + drift;
@@ -144,9 +161,12 @@ Shader "NOS/AeroBubble"
                 float angle = _Time.y * 0.7 + input.seed * 6.0;
                 float2 axis = float2(cos(angle), sin(angle));
                 p += axis * dot(p, axis) * 0.05 * sin(_Time.y * _WobbleSpeed * 0.8 + input.seed * 9.0);
+                // Ecuación del círculo unitario: r² = x² + y². Fuera del disco descartamos el píxel
+                // devolviendo (0,0,0,0), y dentro despejamos z = √(1 − r²) de la esfera x² + y² + z² = 1.
                 float r2 = dot(p, p);
                 if (r2 > 1.0) return half4(0, 0, 0, 0);
                 float3 viewNormal = float3(p, sqrt(1.0 - r2));
+                // Paso la normal de espacio de vista a espacio de mundo con la matriz inversa de vista.
                 float3 N = normalize(mul((float3x3)UNITY_MATRIX_I_V, viewNormal));
                 float3 V = (float3)input.normalWS;   // Dirección hacia la cámara desde el centro.
                 half3 viewN = (half3)viewNormal;

@@ -25,6 +25,10 @@ namespace NostalgIA.Core
         public const string OtherDimension = "OtherDimension";
         /// <summary>Estación 2 (Verano), nivel Frutiger Aero; se carga en segundo plano desde el Tutorial.</summary>
         public const string VeranoFrutiger = "20_Verano_Frutiger";
+        /// <summary>Estación 3 (Otoño), nivel Dreamcore / Liminal.</summary>
+        public const string Dreamcore = "dreamcore";
+        /// <summary>Estación 4 (Invierno), laberinto circular de TVs y combate contra la IA.</summary>
+        public const string InviernoIA = "40_Invierno_IA";
 
         /// <summary>Rutas de las escenas dentro del proyecto (solo para herramientas de editor).</summary>
         public static class Paths
@@ -33,6 +37,8 @@ namespace NostalgIA.Core
             public const string Tutorial = "Assets/_Project/Scenes/Stations/Tutorial.unity";
             public const string OtherDimension = "Assets/_Project/Scenes/Stations/OtherDimension.unity";
             public const string VeranoFrutiger = "Assets/_Project/Scenes/Stations/20_Verano_Frutiger.unity";
+            public const string Dreamcore = "Assets/_Project/Scenes/Stations/dreamcore.unity";
+            public const string InviernoIA = "Assets/_Project/Scenes/Stations/40_Invierno_IA.unity";
             /// <summary>Carpeta de escenas de prueba que nunca deben incluirse en el build.</summary>
             public const string SandboxFolder = "Assets/_Project/Scenes/Sandbox/";
             /// <summary>Carpeta de escenas de las Estaciones.</summary>

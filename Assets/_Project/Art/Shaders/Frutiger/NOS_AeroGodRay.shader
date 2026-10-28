@@ -6,6 +6,11 @@
 //             tenue al llegar al suelo, sin borde duro en la base
 //   estrías:  0,55 + 0,45·ruido(ángulo·20, t·0,2) → rayos dentro del haz que cambian lento
 //   cercanía: saturate((distancia − 8) / 20) → se apaga al acercarse o atravesarlo con la cámara
+//
+// Por qué usamos conos aditivos en vez de niebla volumétrica por raymarching:
+//   - El raymarching volumétrico real exige decenas de muestras de sombra por píxel y hunde
+//     los FPS en móvil. Con una malla cónica semiabierta (FR_GodRay) y este producto de 4
+//     máscaras suaves logramos los rayos solares de Frutiger Aero a costo de un solo pase simple.
 // =============================================================================
 
 Shader "NOS/AeroGodRay"
@@ -26,6 +31,7 @@ Shader "NOS/AeroGodRay"
         {
             Name "ForwardAdditive"
             Tags { "LightMode" = "UniversalForward" }
+            // Mezcla aditiva (One One): suma luz pura al fondo y no depende del orden de dibujo.
             Blend One One
             ZWrite Off
             Cull Off
@@ -40,6 +46,7 @@ Shader "NOS/AeroGodRay"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
             #include "Assets/_Project/Art/Shaders/Include/NostalgIA_Common.hlsl"
 
+            // Bloque UnityPerMaterial para compatibilidad con SRP Batcher.
             CBUFFER_START(UnityPerMaterial)
                 half4 _Color;
                 half _Intensity;
@@ -77,12 +84,16 @@ Shader "NOS/AeroGodRay"
                 float3 toCamera = GetCameraPositionWS() - input.positionWS;
                 float distance = length(toCamera);
                 half3 V = (half3)(toCamera / max(distance, 0.001));
+                // Al revés que Fresnel: aquí quiero que el borde de la malla cónica valga 0 para que
+                // nunca se note la arista geométrica del cono. |N·V|² vale 1 en el centro y 0 en el canto.
                 half facing = abs(dot(normalize(input.normalWS), V));
                 facing *= facing;
 
                 half v = (half)input.uv.y;
+                // v^1,5 atenúa hacia abajo (v = 0) y smoothstep(0, 0,15, 1 − v) suaviza el corte superior (v = 1).
                 half height = pow(saturate(v), 1.5h) * smoothstep(0.0h, 0.15h, 1.0h - v);
                 half streaks = (half)(0.55 + 0.45 * NOS_ValueNoise2D(float2(input.uv.x * _StreakScale, _Time.y * _StreakSpeed)));
+                // Entre 28 m y 8 m de la cámara se apaga suavemente para no cegar al jugador si cruza el haz.
                 half nearFade = (half)saturate((distance - 8.0) / 20.0);
 
                 half3 color = _Color.rgb * facing * height * streaks * nearFade * _Intensity;

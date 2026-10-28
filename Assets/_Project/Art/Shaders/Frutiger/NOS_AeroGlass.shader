@@ -10,6 +10,12 @@
 //   - _NOS_REFRACTION (PC): se ve la escena opaca detrás, desplazada por la normal, y
 //     ligeramente esmerilada (cuatro muestras en cruz)
 // Transparente premultiplicado.
+//
+// Adaptación PC vs Móvil:
+//   - En PC (_NOS_REFRACTION activo), muestreo _CameraOpaqueTexture 4 veces en cruz con un
+//     desfase _Frost para lograr el desenfoque esmerilado de Windows Aero y dejo α = 1.
+//   - En móvil (_NOS_REFRACTION apagado), ahorro esas 4 lecturas de textura de pantalla y
+//     compongo directamente con mezcla premultiplicada (Blend One OneMinusSrcAlpha).
 // =============================================================================
 
 Shader "NOS/AeroGlass"
@@ -55,6 +61,7 @@ Shader "NOS/AeroGlass"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DeclareOpaqueTexture.hlsl"
             #include "Assets/_Project/Art/Shaders/Frutiger/FrutigerCommon.hlsl"
 
+            // Bloque UnityPerMaterial para compatibilidad con SRP Batcher.
             CBUFFER_START(UnityPerMaterial)
                 half4 _Tint;
                 half4 _EdgeColor;
@@ -109,6 +116,8 @@ Shader "NOS/AeroGlass"
                 float3 N = normalize((float3)input.normalWS);
                 float3 V = GetWorldSpaceNormalizeViewDir(input.positionWS);
                 float3 L = _MainLightPosition.xyz;
+                // Fresnel cúbico (1 − N·V)³: en el centro del panel N·V ≈ 1 y casi no pesa; en los
+                // cantos N·V → 0 y el cristal se vuelve reflectante y brillante.
                 half NdotV = (half)saturate(dot(N, V));
                 half rim = 1.0h - NdotV;
                 half fresnel = rim * rim * rim;
@@ -116,11 +125,14 @@ Shader "NOS/AeroGlass"
                 half3 sky = NOS_SkyGradient((half3)reflect(-V, N), (half3)L);
                 half sun = (half)pow(saturate(dot(reflect(-V, N), L)), 250.0) * _Specular;
 
-                // Brillo superior Aero: degradado de 0,35 a 0,08 en la mitad alta del UV.
+                // Brillo superior Aero: degradado de 1,0 a 0,25 en la mitad alta del UV (uv.y >= 0,5),
+                // escalado por _TopGloss. Imita la clásica barra de título brillante de Aero Glass.
                 half top = step(0.5h, (half)input.uv.y) * lerp(1.0h, 0.25h, saturate(((half)input.uv.y - 0.5h) * 2.0h)) * _TopGloss;
 
-                // Barrido diagonal en espacio de mundo.
+                // Barrido diagonal en espacio de mundo: proyecto positionWS sobre el vector diagonal
+                // (0,35; 0,6; 0,2) y uso frac para repetir la franja periódicamente.
                 float s = frac(dot(input.positionWS, float3(0.35, 0.6, 0.2)) * _ShineScale - _Time.y * _ShineSpeed);
+                // Pulso simétrico en [0, 2·_ShineWidth] con pico en s = _ShineWidth.
                 half shine = smoothstep(0.0h, _ShineWidth, (half)s) * smoothstep(_ShineWidth * 2.0h, _ShineWidth, (half)s) * _ShineStrength;
 
                 half3 highlights = _EdgeColor.rgb * fresnel * _EdgeStrength + sky * fresnel * _Reflection + (top + shine + sun);

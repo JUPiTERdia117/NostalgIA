@@ -10,6 +10,11 @@
 //   - Banda de bruma clara sobre el horizonte, típica de los fondos Frutiger Aero.
 // Costo: 8 evaluaciones de ruido por píxel solo en la mitad superior (las nubes se
 // omiten con una rama por debajo del horizonte).
+//
+// Sincronización con el resto de la escena:
+//   - FrutigerAtmosphere.cs lee _ZenithColor, _HorizonColor, _GroundColor y _SunColor de este
+//     material y los publica como variables globales _NOS_Sky* para que NOS_SkyGradient en
+//     FrutigerCommon.hlsl pinte exactamente el mismo cielo en los reflejos del agua y las burbujas.
 // =============================================================================
 
 Shader "NOS/AeroSky"
@@ -45,6 +50,7 @@ Shader "NOS/AeroSky"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
             #include "Assets/_Project/Art/Shaders/Include/NostalgIA_Common.hlsl"
 
+            // Bloque UnityPerMaterial con colores en half y escalas/velocidades de nube en float.
             CBUFFER_START(UnityPerMaterial)
                 half4 _ZenithColor;
                 half4 _HorizonColor;
@@ -74,7 +80,8 @@ Shader "NOS/AeroSky"
                 return output;
             }
 
-            // Densidad de nubes en un punto del plano de nubes.
+            // Densidad de nubes en un punto del plano de nubes: 4 octavas de fBm dan forma general
+            // en las primeras 2 octavas y bordes esponjosos en las últimas 2.
             float CloudDensity(float2 uv)
             {
                 return NOS_Fbm2D(uv, 4);
@@ -82,6 +89,8 @@ Shader "NOS/AeroSky"
 
             half4 SkyFragment(Varyings input) : SV_Target
             {
+                // Normalizo por píxel porque interpolar un vector entre los vértices del cubo del
+                // skybox acorta ligeramente su longitud en el centro de cada cara.
                 float3 dir = normalize(input.direction);
                 half3 sunDir = (half3)_MainLightPosition.xyz;
 
@@ -95,6 +104,7 @@ Shader "NOS/AeroSky"
                 color = lerp(color, half3(1.0h, 1.0h, 1.0h), haze);
 
                 // Sol: disco con borde suave y halo de dos lóbulos.
+                // Con _SunSize = 0,004, cos(θ) = 0,996 equivale a un radio angular de ~5,1°.
                 half sunDot = saturate(dot((half3)dir, sunDir));
                 half disk = smoothstep(1.0h - _SunSize, 1.0h - _SunSize * 0.5h, sunDot);
                 half glow = pow(sunDot, 12.0h) * 0.35h + pow(sunDot, 180.0h) * 0.8h;
@@ -103,15 +113,20 @@ Shader "NOS/AeroSky"
                 // Nubes solo por encima del horizonte (rama: ahorra el fBm en la mitad inferior).
                 if (dir.y > 0.0)
                 {
+                    // Proyección en domo plano: divido dir.xz entre (dir.y + 0,2). El +0,2 evita que
+                    // la coordenada explote al infinito justo en el horizonte (dir.y = 0) y curva
+                    // ligeramente el techo de nubes como la atmósfera real.
                     float2 uv = dir.xz / (dir.y + 0.2) * _CloudScale + _Time.y * _CloudSpeed * float2(1.0, 0.35);
                     float density = CloudDensity(uv);
                     half cover = smoothstep(_CloudCoverage, _CloudCoverage + 0.22h, (half)density);
 
-                    // Luz falsa: si la densidad baja al avanzar hacia el sol, ese lado está iluminado.
+                    // Luz falsa (derivada direccional hacia el sol): muestreo la densidad un paso
+                    // (0,06) hacia el sol. Si allá hay menos nube (density > towardSun), este punto
+                    // es la cara soleada del cúmulo; si hay más nube, está en sombra propia.
                     float towardSun = CloudDensity(uv + sunDir.xz * 0.06);
                     half lit = saturate(0.5h + (half)(density - towardSun) * 4.0h);
                     half3 cloud = lerp(_CloudShadow.rgb, _CloudColor.rgb, lit);
-                    // Borde plateado: más brillo cerca del sol donde la nube es delgada.
+                    // Borde plateado (silver lining): más brillo cerca del sol donde la nube es delgada (1 − cover).
                     cloud += _SunColor.rgb * pow(sunDot, 6.0h) * (1.0h - cover) * 0.8h;
 
                     cover *= smoothstep(0.0h, 0.18h, (half)dir.y);   // Se disuelven hacia el horizonte.

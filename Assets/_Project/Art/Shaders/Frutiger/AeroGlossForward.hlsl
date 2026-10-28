@@ -109,20 +109,28 @@ half4 AeroGlossFragment(Varyings input) : SV_Target
     half attenuation = mainLight.shadowAttenuation * mainLight.distanceAttenuation;
     half3 lightColor = mainLight.color * attenuation;
 
+    // Difusa envuelta (Wrap Lighting): con _Wrap > 0 la luz abraza más allá del terminador (N·L = 0)
+    // para que las colinas y las nubes 3D nunca tengan sombras negras duras.
     half NdotL = dot(N, L);
     half wrapped = saturate((NdotL + _Wrap) / (1.0h + _Wrap));
     half3 diffuse = albedo * lightColor * wrapped;
+    // SampleSH evalúa los armónicos esféricos del cielo y de las sondas de luz (Light Probes).
     half3 ambient = albedo * SampleSH(N);
 
+    // Doble capa especular Blinn-Phong: una base ancha controlada por _Gloss y una segunda capa
+    // muy estrecha (_ClearcoatPower) que imita el barniz de plástico pulido Frutiger Aero.
     half3 H = normalize(L + V);
     half NdotH = saturate(dot(N, H));
     half specPower = exp2(_Gloss * 10.0h + 1.0h);                 // 2 … 2048
     half3 specular = lightColor * (pow(NdotH, specPower) * _Gloss + pow(NdotH, _ClearcoatPower) * _ClearcoatStrength);
 
+    // Luz de borde (Fresnel): realza la silueta con el color del cielo, ponderada por (0,55 + 0,45·N.y)
+    // para que brille más en las crestas superiores que en las caras que miran al suelo.
     half NdotV = saturate(dot(N, V));
     half rim = pow(1.0h - NdotV, _RimPower) * _RimStrength * (0.55h + 0.45h * saturate(N.y));
     half3 rimColor = _RimColor.rgb * rim;
 
+    // Pulso senoidal opcional para checkpoints, plataformas de salto y dispensadores.
     half pulse = _EmissionPulse > 0.0h ? (0.65h + 0.35h * sin(_Time.y * NOS_TWO_PI * _EmissionPulse)) : 1.0h;
     half3 emission = _EmissionColor.rgb * pulse;
 

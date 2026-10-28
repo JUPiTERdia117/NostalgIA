@@ -23,6 +23,7 @@ public class StarController : MonoBehaviour
     [SerializeField] private float bobFrequency = 2f;
 
     private Vector3 startPosition;
+    private float startLocalY;
     private bool collected;
 
     /// <summary>Índice de la estrella.</summary>
@@ -35,6 +36,7 @@ public class StarController : MonoBehaviour
     private void Awake()
     {
         startPosition = transform.position;
+        startLocalY = transform.localPosition.y;
     }
 
     private void OnEnable()
@@ -42,14 +44,25 @@ public class StarController : MonoBehaviour
         // Si la estrella se suelta en la posición donde murió un enemigo antes de activarse,
         // actualizo su altura base para que flote exactamente en ese punto.
         startPosition = transform.position;
+        startLocalY = transform.localPosition.y;
     }
 
     private void Update()
     {
         // Rotación continua y flotación senoidal: y = y0 + A·sin(ω·t)
         transform.Rotate(Vector3.up, rotationSpeed * Time.deltaTime, Space.World);
-        float newY = startPosition.y + Mathf.Sin(Time.time * bobFrequency) * bobHeight;
-        transform.position = new Vector3(transform.position.x, newY, transform.position.z);
+        float offset = Mathf.Sin(Time.time * bobFrequency) * bobHeight;
+        if (transform.parent != null)
+        {
+            Vector3 local = transform.localPosition;
+            local.y = startLocalY + offset;
+            transform.localPosition = local;
+        }
+        else
+        {
+            float newY = startPosition.y + offset;
+            transform.position = new Vector3(transform.position.x, newY, transform.position.z);
+        }
     }
 
     private void OnTriggerEnter(Collider col)

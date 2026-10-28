@@ -3,6 +3,14 @@
 // Superficie de plástico brillante Frutiger Aero (detalle en AeroGlossForward.hlsl).
 // Compatible con SRP Batcher (mismo UnityPerMaterial en los cuatro pases) y con GPU
 // Instancing. Proyecta y recibe sombras de la luz principal.
+//
+// Estructura en 3 archivos:
+//   - NOS_AeroGloss.shader: propiedades del Inspector y los 4 pases de URP (ForwardLit,
+//     ShadowCaster, DepthOnly y DepthNormals).
+//   - AeroGlossInput.hlsl: el bloque CBUFFER_START(UnityPerMaterial) único que incluyen
+//     los 4 pases para que el SRP Batcher nunca pierda compatibilidad.
+//   - AeroGlossForward.hlsl: toda la matemática de color, pendientes, motas, iluminación
+//     envuelta, doble especular Blinn-Phong + Clearcoat, rim Fresnel y cáusticas.
 // =============================================================================
 
 Shader "NOS/AeroGloss"
@@ -44,6 +52,7 @@ Shader "NOS/AeroGloss"
         Tags { "RenderType" = "Opaque" "RenderPipeline" = "UniversalPipeline" "Queue" = "Geometry" "IgnoreProjector" = "True" }
         LOD 300
 
+        // Pase 1: dibujo principal con sol, armónicos esféricos, brillos y cáusticas.
         Pass
         {
             Name "ForwardLit"
@@ -68,6 +77,7 @@ Shader "NOS/AeroGloss"
             ENDHLSL
         }
 
+        // Pase 2: proyecta sombras de las islas y edificios en el mapa de sombras del sol.
         Pass
         {
             Name "ShadowCaster"
@@ -88,6 +98,7 @@ Shader "NOS/AeroGloss"
             ENDHLSL
         }
 
+        // Pase 3: llena _CameraDepthTexture para que NOS/AeroWater calcule la profundidad del agua y la espuma.
         Pass
         {
             Name "DepthOnly"
@@ -106,6 +117,7 @@ Shader "NOS/AeroGloss"
             ENDHLSL
         }
 
+        // Pase 4: llena profundidad y normales si algún efecto de cámara (SSAO) lo solicita en PC.
         Pass
         {
             Name "DepthNormals"

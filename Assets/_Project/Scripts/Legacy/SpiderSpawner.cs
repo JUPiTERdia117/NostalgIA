@@ -94,6 +94,7 @@ public class SpiderSpawner : MonoBehaviour
         Quaternion rot = spawnPoint != null ? spawnPoint.rotation : transform.rotation;
 
         GameObject newSpider = Instantiate(spiderPrefab, pos, rot);
+        if (transform.parent != null) newSpider.transform.SetParent(transform.parent, true);
         newSpider.name = $"Spider_Spawned_{activeSpiders.Count + 1}";
         activeSpiders.Add(newSpider);
 

@@ -30,6 +30,7 @@ Shader "NOS/AeroRibbon"
         {
             Name "ForwardAdditive"
             Tags { "LightMode" = "UniversalForward" }
+            // Mezcla aditiva (One One): dos cintas que se cruzan suman sus colores sin problemas de orden.
             Blend One One
             ZWrite Off
             Cull Off
@@ -44,6 +45,7 @@ Shader "NOS/AeroRibbon"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
             #include "Assets/_Project/Art/Shaders/Include/NostalgIA_Common.hlsl"
 
+            // Bloque UnityPerMaterial para que las tres variantes de cinta (RibbonA, B y C) entren al SRP Batcher.
             CBUFFER_START(UnityPerMaterial)
                 half4 _ColorA;
                 half4 _ColorB;
@@ -72,14 +74,18 @@ Shader "NOS/AeroRibbon"
                 UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input);
                 float u = input.uv.x;
                 float v = input.uv.y;
+                // Perfil transversal: v = 0,5 es el eje central de la cinta (across = 1) y los bordes v = 0 o 1 caen a 0.
                 half across = (half)(1.0 - abs(v * 2.0 - 1.0));
                 across *= across;
+                // Desvanecimiento longitudinal en el primer y último 10 % de la tira para que no se vea cortada.
                 half along = (half)(smoothstep(0.0, 0.1, u) * smoothstep(1.0, 0.9, u));
                 float flow = u * _Repeat - _Time.y * _FlowSpeed;
                 half shimmer = (half)(0.6 + 0.4 * sin(NOS_TWO_PI * flow + v * 3.0));
+                // 40v crea ~12 crestas a lo ancho; elevar |sin| a la 24ª potencia las adelgaza hasta volverlas hilos de fibra óptica.
                 half filaments = (half)pow(abs(sin(v * 40.0 + flow * 3.0)), 24.0) * _Filaments;
 
                 half3 gradient = lerp(_ColorA.rgb, _ColorB.rgb, (half)u);
+                // Núcleo blanco en el centro de la cinta (across^4) para dar aspecto luminoso Aero.
                 gradient = lerp(gradient, half3(1, 1, 1), (half)(0.35 * pow(across, 4.0h)));
                 half3 color = gradient * (across * shimmer + filaments * across) * along * _Intensity;
                 // En aditivo, la niebla atenúa la contribución hacia negro.

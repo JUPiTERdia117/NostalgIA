@@ -7,6 +7,11 @@
 // Luego aplica el mismo NOS_BubbleShade que las burbujas de malla. El tamaño, el color y
 // el desvanecimiento vienen del sistema de partículas (color por vértice).
 // StableRandom.x llega en TEXCOORD0.z (custom vertex stream) para desfasar la película.
+//
+// Diferencia frente a NOS/AeroBubble en modo _IMPOSTOR:
+//   - Aquí el ParticleSystem ya orienta los cuadros hacia la cámara en la CPU/GPU y anima
+//     su posición, tamaño y alfa de vida en el color de vértice (input.color).
+//   - Por eso el vertex shader solo transforma la posición y pasa TEXCOORD0.z como semilla.
 // =============================================================================
 
 Shader "NOS/AeroBubbleSprite"
@@ -44,6 +49,7 @@ Shader "NOS/AeroBubbleSprite"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
             #include "Assets/_Project/Art/Shaders/Frutiger/FrutigerCommon.hlsl"
 
+            // Bloque UnityPerMaterial para compatibilidad con SRP Batcher.
             CBUFFER_START(UnityPerMaterial)
                 half _FilmThickness;
                 half _Iridescence;
@@ -88,6 +94,7 @@ Shader "NOS/AeroBubbleSprite"
             half4 SpriteFragment(Varyings input) : SV_Target
             {
                 UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input);
+                // Mapeo UV [0, 1] al cuadrado [−1, 1] para evaluar la ecuación del disco r² = x² + y².
                 float2 p = input.uvSeed.xy * 2.0 - 1.0;
                 float r2 = dot(p, p);
                 if (r2 > 1.0) return half4(0, 0, 0, 0);   // Fuera del disco: transparente.
@@ -98,6 +105,7 @@ Shader "NOS/AeroBubbleSprite"
                 float3 V = GetWorldSpaceNormalizeViewDir(input.positionWS);
                 float3 L = _MainLightPosition.xyz;
 
+                // Reutilizo exactamente el mismo sombreado físico-estilizado de NOS_BubbleShade.
                 half4 color = NOS_BubbleShade(N, V, L, (half3)viewN, input.uvSeed.z,
                                               _FilmThickness, _Iridescence, _Reflection,
                                               _BaseAlpha, _EdgeAlpha, _Specular, _WindowHighlight, input.color.rgb);

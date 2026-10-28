@@ -302,10 +302,22 @@ namespace NostalgIA.Presentation.UI
             if (toastContainer != null) toastContainer.SetActive(false);
             SetHurtOverlay(HurtColor, 0f);
 
+            string activeSceneName = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
+            if (!string.IsNullOrEmpty(activeSceneName) && activeSceneName != NostalgIA.Core.SceneNames.Tutorial)
+            {
+                tutorialLeft = true;
+                if (guidePanel != null) guidePanel.SetActive(false);
+                if (activeSceneName == NostalgIA.Core.SceneNames.InviernoIA && maxStars < 5)
+                {
+                    maxStars = 5;
+                    starToastFormat = "♦ Estrella {0}/" + maxStars;
+                }
+            }
+
             RefreshHealth();
             RefreshTool();
             RefreshScore();
-            EvaluateZone(true);
+            if (!tutorialLeft) EvaluateZone(true);
         }
 
         /// <summary>Temporizadores de animación y sondeo de zona.</summary>
@@ -408,6 +420,18 @@ namespace NostalgIA.Presentation.UI
         {
             tutorialLeft = true;
             if (guidePanel != null) guidePanel.SetActive(false);
+            stars = 0;
+            if (evt.Destination.IsValid() && evt.Destination.name == NostalgIA.Core.SceneNames.InviernoIA)
+            {
+                maxStars = 5;
+            }
+            else
+            {
+                maxStars = 3;
+            }
+            starToastFormat = "♦ Estrella {0}/" + maxStars;
+            RefreshHealth();
+            RefreshScore();
         }
 
         private void OnSchemeChanged(in InputSchemeChanged evt)
