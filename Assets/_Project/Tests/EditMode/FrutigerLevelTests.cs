@@ -1,8 +1,10 @@
 // -----------------------------------------------------------------------------
 // NostalgIA — Pruebas de editor (NostalgIA.Tests.EditMode)
 // Archivo: FrutigerLevelTests.cs
-// Propósito: verificar el nivel experimental Frutiger Aero: shaders, materiales
-// y montaje jugable de la escena generada (rama experimental/frutiger-aero).
+// Propósito: verifico que el Nivel 2 (Verano — Frutiger Aero) tenga sus shaders
+// compatibles con SRP Batcher, océano poco profundo caminable, plataformas
+// móviles, aspas giratorias, desbloqueos por combate, puerta de meta mirando
+// hacia arriba, ranuras de audio preparadas y 0 % Terrain.
 // -----------------------------------------------------------------------------
 
 using System.IO;
@@ -12,6 +14,7 @@ using NostalgIA.EditorTools.Experimental;
 using NostalgIA.Gameplay.Level;
 using NostalgIA.Gameplay.Player;
 using NostalgIA.Gameplay.Tools;
+using NostalgIA.Presentation.Audio;
 using NostalgIA.Presentation.Environment;
 using NUnit.Framework;
 using UnityEditor;
@@ -75,8 +78,10 @@ namespace NostalgIA.Tests.EditMode
         }
 
         /// <summary>
-        /// La escena es jugable: jugador, checkpoints indexados en orden, volumen letal,
-        /// trampolines, anclajes en la capa Grapple, absorbibles y ambiente.
+        /// La escena del Nivel 2 es jugable de principio a fin: jugador, entrada desde Tutorial,
+        /// océano poco profundo sin daño por caída, plataformas móviles, aspas giratorias,
+        /// desbloqueo del muro central y de la meta, puerta mirando hacia arriba, trampolines
+        /// burbuja en el agua y ranuras de audio listas para el equipo.
         /// </summary>
         [Test]
         public void Escena_RecorridoJugableCompleto()
@@ -84,7 +89,9 @@ namespace NostalgIA.Tests.EditMode
             WithScene(() =>
             {
                 Assert.IsNotNull(Object.FindFirstObjectByType<PlayerMotor>(FindObjectsInactive.Include), "Falta el jugador (contenido independiente).");
-                Assert.IsNotNull(Object.FindFirstObjectByType<KillVolume>(), "Falta el volumen letal del agua.");
+                Assert.IsNotNull(Object.FindFirstObjectByType<LevelEntrance>(), "Falta LevelEntrance para recibir al jugador desde Tutorial.");
+                Assert.IsNotNull(Object.FindFirstObjectByType<WaterFallCushion>(), "Falta el amortiguador de caída al agua poco profunda.");
+                Assert.IsNotNull(Object.FindFirstObjectByType<KillVolume>(), "Falta la red de seguridad fuera de límites.");
                 Assert.IsNotNull(Object.FindFirstObjectByType<FrutigerAtmosphere>(), "Falta FrutigerAtmosphere.");
 
                 Checkpoint[] checkpoints = Object.FindObjectsByType<Checkpoint>(FindObjectsSortMode.None)
@@ -96,10 +103,28 @@ namespace NostalgIA.Tests.EditMode
                     Assert.AreEqual(Layers.Trigger, checkpoints[i].gameObject.layer);
                 }
 
-                Assert.GreaterOrEqual(Object.FindObjectsByType<BounceBubble>(FindObjectsSortMode.None).Length, 2);
+                Assert.GreaterOrEqual(Object.FindObjectsByType<BounceBubble>(FindObjectsSortMode.None).Length, 6,
+                    "Faltan burbujas trampolín para volver a subir desde el agua poco profunda.");
+                Assert.GreaterOrEqual(Object.FindObjectsByType<MovingPlatform>(FindObjectsSortMode.None).Length, 2,
+                    "Faltan las dos plataformas desplazables antes del lote de edificios.");
+                Assert.GreaterOrEqual(Object.FindObjectsByType<RotatingHazardObstacle>(FindObjectsSortMode.None).Length, 1,
+                    "Faltan las aspas giratorias dañinas.");
+                Assert.GreaterOrEqual(Object.FindObjectsByType<DefeatUnlockController>(FindObjectsSortMode.None).Length, 1,
+                    "Falta el controlador que baja el muro central y suelta la estrella al derrotar al Spawner.");
+                Assert.GreaterOrEqual(Object.FindObjectsByType<LevelAudioSlot>(FindObjectsSortMode.None).Length, 4,
+                    "Faltan las ranuras de audio preparadas a prueba de null.");
+
+                LevelGate goalGate = Object.FindFirstObjectByType<LevelGate>();
+                Assert.IsNotNull(goalGate, "Falta la puerta de meta del Nivel 2.");
+                Assert.Greater(Vector3.Dot(goalGate.transform.forward, Vector3.up), 0.98f,
+                    "La puerta de meta debe mirar hacia arriba para caer dentro de ella.");
+                Assert.AreEqual(SceneNames.OtherDimension, new SerializedObject(goalGate).FindProperty("destinationSceneName").stringValue,
+                    "La puerta de meta debe apuntar a OtherDimension mientras se define el Nivel 3.");
 
                 Collider[] colliders = Object.FindObjectsByType<Collider>(FindObjectsSortMode.None);
-                Assert.GreaterOrEqual(colliders.Count(c => c.gameObject.layer == Layers.Grapple), 2, "Faltan anclajes del gancho.");
+                Assert.IsTrue(colliders.Any(c => c.gameObject.name == "LechoMarino_Caminable" && !c.isTrigger),
+                    "Falta el colisionador sólido del lecho marino poco profundo.");
+                Assert.GreaterOrEqual(colliders.Count(c => c.gameObject.layer == Layers.Grapple), 10, "Faltan esferas/edificios de enganche.");
                 Absorbable[] absorbables = Object.FindObjectsByType<Absorbable>(FindObjectsSortMode.None);
                 Assert.Greater(absorbables.Length, 0);
                 Assert.IsTrue(absorbables.All(a => a.gameObject.layer == Layers.Absorbable), "Absorbibles fuera de su capa.");
@@ -127,7 +152,7 @@ namespace NostalgIA.Tests.EditMode
         /// <summary>Abre la escena del nivel de forma aditiva, ejecuta la prueba y la cierra.</summary>
         private static void WithScene(System.Action test)
         {
-            Assume.That(File.Exists(FrutigerLevelBuilder.ScenePath), "Ejecutar antes NostalgIA › Experimental › Construir nivel Frutiger Aero.");
+            Assume.That(File.Exists(FrutigerLevelBuilder.ScenePath), "Ejecutar antes NostalgIA › Niveles › Construir Nivel 2 — Verano (Frutiger Aero).");
             Scene scene = EditorSceneManager.OpenScene(FrutigerLevelBuilder.ScenePath, OpenSceneMode.Additive);
             try
             {

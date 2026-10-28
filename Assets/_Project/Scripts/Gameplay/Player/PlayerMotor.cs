@@ -16,6 +16,7 @@ using NostalgIA.Core;
 using NostalgIA.Core.Events;
 using NostalgIA.Core.Services;
 using NostalgIA.Core.State;
+using NostalgIA.Gameplay.Level;
 using NostalgIA.Input;
 using UnityEngine;
 
@@ -120,6 +121,12 @@ namespace NostalgIA.Gameplay.Player
 
         /// <summary>Si es verdadero, los choques eliminan la componente de la velocidad contra la superficie.</summary>
         private bool projectCollisions;
+
+        // Soporte sin asignaciones para plataformas móviles: guardo el último collider del piso para no
+        // llamar a GetComponentInParent cada frame mientras sigo sobre la misma superficie.
+        private readonly Collider[] groundProbeHits = new Collider[4];
+        private int cachedGroundColliderId;
+        private MovingPlatform activeMovingPlatform;
 
         // ------------------------------------------------------------------ propiedades públicas
         /// <summary>Parámetros activos.</summary>
@@ -227,6 +234,7 @@ namespace NostalgIA.Gameplay.Player
 
             ReadFrameInput();
             RefreshGrounded();
+            ApplyMovingPlatformCarry();
             ApplyLook();
 
             switch (state)
@@ -280,13 +288,73 @@ namespace NostalgIA.Gameplay.Player
         /// </summary>
         private void RefreshGrounded()
         {
-            isGrounded = controller.isGrounded ||
-                         (groundCheck != null && Physics.CheckSphere(groundCheck.position, controller.radius * 0.9f,
-                             groundMask, QueryTriggerInteraction.Ignore));
+            Vector3 probeOrigin = groundCheck != null
+                ? groundCheck.position
+                : transform.position + Vector3.up * (controller.radius * 0.85f);
+            int overlapCount = Physics.OverlapSphereNonAlloc(
+                probeOrigin,
+                controller.radius * 0.92f,
+                groundProbeHits,
+                groundMask,
+                QueryTriggerInteraction.Ignore);
+
+            isGrounded = controller.isGrounded || overlapCount > 0;
+            UpdateMovingPlatformReference(overlapCount);
+
             if (isGrounded && state != LocomotionState.Grappling)
             {
                 lastGroundedTime = Time.time;
                 if (velocity.y <= 0f) jumpedSinceGrounded = false;
+            }
+        }
+
+        /// <summary>
+        /// Identifica si bajo los pies hay una <see cref="MovingPlatform"/> reutilizando el último
+        /// <c>instanceID</c> para evitar búsquedas repetidas en la jerarquía.
+        /// </summary>
+        private void UpdateMovingPlatformReference(int overlapCount)
+        {
+            if (!isGrounded || state == LocomotionState.Grappling || overlapCount <= 0)
+            {
+                if (!isGrounded || state == LocomotionState.Grappling)
+                {
+                    activeMovingPlatform = null;
+                    cachedGroundColliderId = 0;
+                }
+                return;
+            }
+
+            for (int i = 0; i < overlapCount; i++)
+            {
+                Collider col = groundProbeHits[i];
+                if (col == null) continue;
+                int id = col.GetInstanceID();
+                if (id == cachedGroundColliderId) return;
+
+                MovingPlatform platform = col.GetComponentInParent<MovingPlatform>();
+                if (platform != null)
+                {
+                    cachedGroundColliderId = id;
+                    activeMovingPlatform = platform;
+                    return;
+                }
+            }
+
+            activeMovingPlatform = null;
+            cachedGroundColliderId = 0;
+        }
+
+        /// <summary>
+        /// Arrastra la cápsula con el desplazamiento exacto de la plataforma móvil antes de integrar
+        /// la locomoción propia del frame.
+        /// </summary>
+        private void ApplyMovingPlatformCarry()
+        {
+            if (activeMovingPlatform == null || !isGrounded || state == LocomotionState.Grappling) return;
+            Vector3 delta = activeMovingPlatform.FrameDelta;
+            if (delta.sqrMagnitude > 1e-8f)
+            {
+                controller.Move(delta);
             }
         }
 
@@ -382,11 +450,19 @@ namespace NostalgIA.Gameplay.Player
             controller.Move(new Vector3(horizontal.x, -stickSpeed, horizontal.z) * dt);
         }
 
-        /// <summary>Inicia el salto conservando la velocidad horizontal actual.</summary>
+        /// <summary>Inicia el salto conservando la velocidad horizontal actual (y la de la plataforma móvil bajo los pies).</summary>
         private void DoJump()
         {
             jumpBufferTimer = 0f;
             jumpedSinceGrounded = true;
+            if (activeMovingPlatform != null)
+            {
+                Vector3 platVel = activeMovingPlatform.CurrentVelocity;
+                velocity.x += platVel.x;
+                velocity.z += platVel.z;
+                activeMovingPlatform = null;
+                cachedGroundColliderId = 0;
+            }
             velocity.y = settings.jumpSpeed;
             isGrounded = false;
             EventBus<PlayerJumped>.Raise(new PlayerJumped(transform.position, velocity));

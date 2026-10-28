@@ -37,6 +37,13 @@ public class StarController : MonoBehaviour
         startPosition = transform.position;
     }
 
+    private void OnEnable()
+    {
+        // Si la estrella se suelta en la posición donde murió un enemigo antes de activarse,
+        // actualizo su altura base para que flote exactamente en ese punto.
+        startPosition = transform.position;
+    }
+
     private void Update()
     {
         // Rotación continua y flotación senoidal: y = y0 + A·sin(ω·t)

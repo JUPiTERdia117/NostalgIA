@@ -88,6 +88,14 @@ namespace NostalgIA.Gameplay.Level
         [Tooltip("Duración de la disolución del nivel anterior tras cruzar, en s. Después se descarga.")]
         [SerializeField, Range(0.3f, 6f)] private float fadeDuration = 1.8f;
 
+        [Header("Meta pendiente de enlazar al siguiente nivel")]
+        [Tooltip("Índice de esta estación cuando el siguiente nivel aún no existe (1 = Verano).")]
+        [SerializeField] private int pendingStationIndex = 1;
+        [Tooltip("Punto seguro al que regresa el jugador tras caer en una puerta cuyo nivel destino aún no se construye.")]
+        [SerializeField] private Transform pendingNextLevelReturnPoint;
+        [Tooltip("Mensaje en el HUD al cruzar la meta mientras el siguiente nivel está pendiente.")]
+        [SerializeField] private string pendingCompletionMessage = "» ¡Estación Verano superada! Puerta lista para el siguiente nivel.";
+
         private Phase phase = Phase.Idle;
         private Scene source;
         private Scene destination;
@@ -136,6 +144,26 @@ namespace NostalgIA.Gameplay.Level
             destinationScenePath = scenePath;
             aperture = newAperture;
         }
+
+        /// <summary>
+        /// Deja lista la puerta de meta cuando el siguiente nivel todavía no se construye: detecta el
+        /// cruce (por ejemplo, cayendo dentro de una puerta horizontal mirando hacia arriba), avisa
+        /// que se completó la estación y devuelve al jugador a un punto seguro.
+        /// </summary>
+        public void ConfigurePendingGoal(Vector2 newAperture, int stationIndex, Transform safeReturnPoint, string message)
+        {
+            destinationSceneName = string.Empty;
+            destinationScenePath = string.Empty;
+            aperture = newAperture;
+            pendingStationIndex = stationIndex;
+            pendingNextLevelReturnPoint = safeReturnPoint;
+            if (!string.IsNullOrEmpty(message)) pendingCompletionMessage = message;
+        }
+
+        private bool IsPendingGoalOnly =>
+            string.IsNullOrEmpty(destinationSceneName) &&
+            string.IsNullOrEmpty(destinationScenePath) &&
+            pendingNextLevelReturnPoint != null;
 
         // ------------------------------------------------------------------ ciclo de vida
         /// <summary>Cachea referencias (búsquedas solo en la inicialización) y programa la precarga.</summary>
@@ -210,11 +238,25 @@ namespace NostalgIA.Gameplay.Level
         /// </summary>
         private void LateUpdate()
         {
-            if (viewer == null || exit == null) return;
+            if (viewer == null) return;
+
+            if (IsPendingGoalOnly)
+            {
+                EvaluatePendingGoalCrossing();
+                return;
+            }
+
+            if (exit == null) return;
             if (phase != Phase.Awake && phase != Phase.Waking && phase != Phase.Sleeping) return;
 
             Vector3 local = transform.InverseTransformPoint(viewer.position);
-            bool inside = PortalMath.InsideAperture(local, aperture, 0.05f) && Mathf.Abs(local.z) < 2f;
+            // Cuando la puerta está acostada mirando hacia arriba (forward ≈ +Y) y el jugador cae en ella
+            // desde una plataforma superior, doy algo más de margen en los bordes y en profundidad para
+            // no perder el cruce por la velocidad vertical de caída.
+            bool upwardGate = Mathf.Abs(transform.forward.y) > 0.5f;
+            float margin = upwardGate ? 0.55f : 0.05f;
+            float depthRange = upwardGate ? 3.8f : 2.4f;
+            bool inside = PortalMath.InsideAperture(local, aperture, margin) && Mathf.Abs(local.z) < depthRange;
             if (!inside)
             {
                 hasPreviousSide = false;
@@ -223,7 +265,7 @@ namespace NostalgIA.Gameplay.Level
 
             // Si el jugador llega antes de que termine el despertar por partes, se completa de golpe:
             // nunca se cruza hacia un nivel a medio activar.
-            if (phase != Phase.Awake && local.z < 1.2f)
+            if (phase != Phase.Awake && local.z < (upwardGate ? 2.4f : 1.2f))
             {
                 StartSlicing(Phase.Waking);
                 FinishSlicing(true);
@@ -236,6 +278,40 @@ namespace NostalgIA.Gameplay.Level
                 Cross();
                 return;
             }
+            previousSide = local.z;
+            hasPreviousSide = true;
+        }
+
+        /// <summary>
+        /// Evalúa el cruce cuando la puerta actúa como meta de fin de sesión antes de crear el
+        /// siguiente nivel. Amplío el margen en Z a 3,2 m para no perder cruces rápidos en caída libre.
+        /// </summary>
+        private void EvaluatePendingGoalCrossing()
+        {
+            Vector3 local = transform.InverseTransformPoint(viewer.position);
+            bool inside = PortalMath.InsideAperture(local, aperture, 0.15f) && Mathf.Abs(local.z) < 3.2f;
+            if (!inside)
+            {
+                hasPreviousSide = false;
+                return;
+            }
+
+            if (hasPreviousSide && previousSide > 0f && local.z <= 0f)
+            {
+                hasPreviousSide = false;
+                if (motor != null && pendingNextLevelReturnPoint != null)
+                {
+                    motor.Teleport(pendingNextLevelReturnPoint.position, pendingNextLevelReturnPoint.rotation);
+                    motor.SetVelocity(Vector3.zero);
+                }
+                EventBus<StationCompleted>.Raise(new StationCompleted(pendingStationIndex, 1, Time.timeSinceLevelLoad));
+                if (!string.IsNullOrEmpty(pendingCompletionMessage))
+                {
+                    EventBus<HudMessageRequested>.Raise(new HudMessageRequested(pendingCompletionMessage));
+                }
+                return;
+            }
+
             previousSide = local.z;
             hasPreviousSide = true;
         }
@@ -362,8 +438,14 @@ namespace NostalgIA.Gameplay.Level
             }
             if (fallback != null) return fallback;
 
-            Debug.LogWarning($"[LevelGate] La escena '{scene.name}' no tiene LevelEntrance; se usa su primera raíz como llegada.");
-            return rootBuffer.Count > 0 ? rootBuffer[0].transform : transform;
+            // Si la escena destino (por ejemplo OtherDimension heredada) aún no tenía LevelEntrance,
+            // creo un anclaje con escala (1, 1, 1) sobre el suelo para no usar por error una malla de piso escalada.
+            var autoEntranceGo = new GameObject("LevelEntrance_Auto");
+            SceneManager.MoveGameObjectToScene(autoEntranceGo, scene);
+            autoEntranceGo.transform.SetPositionAndRotation(new Vector3(0f, 0.05f, 4.0f), Quaternion.identity);
+            LevelEntrance autoEntrance = autoEntranceGo.AddComponent<LevelEntrance>();
+            autoEntrance.Configure(string.Empty, aperture);
+            return autoEntranceGo.transform;
         }
 
         // ------------------------------------------------------------------ despertar por partes
@@ -429,14 +511,35 @@ namespace NostalgIA.Gameplay.Level
         {
             if (motor == null || exit == null) return;
 
-            Matrix4x4 transfer = PortalMath.Transfer(transform, exit);
-            Transform player = motor.transform;
-            Vector3 newPosition = transfer.MultiplyPoint3x4(player.position);
-            Quaternion newRotation = PortalMath.TransferRotation(transform, exit, player.rotation);
-            Vector3 newVelocity = transfer.MultiplyVector(motor.RawVelocity);
+            Vector3 spawnPosition = exit.position + exit.forward * 2f + Vector3.up * 0.1f;
+            Quaternion spawnRotation = Quaternion.LookRotation(Vector3.ProjectOnPlane(exit.forward, Vector3.up), Vector3.up);
+            if (exit.TryGetComponent(out LevelEntrance entrance))
+            {
+                spawnPosition = entrance.SpawnPosition;
+                spawnRotation = entrance.SpawnRotation;
+            }
 
-            motor.Teleport(newPosition, newRotation);
-            motor.SetVelocity(newVelocity);
+            Transform player = motor.transform;
+            bool differentInclination = Mathf.Abs(transform.forward.y - exit.forward.y) > 0.5f;
+            if (differentInclination)
+            {
+                // Si el jugador entra cayendo verticalmente en una puerta acostada mirando hacia arriba
+                // y la salida en la escena siguiente es vertical sobre el piso, lo aterrizo de pie en la
+                // entrada con impulso frontal suave para que no salga disparado a velocidad de caída libre.
+                float forwardSpeed = Mathf.Clamp(motor.RawVelocity.magnitude * 0.25f, 2f, 4.5f);
+                motor.Teleport(spawnPosition, spawnRotation);
+                motor.SetVelocity(spawnRotation * Vector3.forward * forwardSpeed);
+            }
+            else
+            {
+                Matrix4x4 transfer = PortalMath.Transfer(transform, exit);
+                Vector3 newPosition = transfer.MultiplyPoint3x4(player.position);
+                Quaternion newRotation = PortalMath.TransferRotation(transform, exit, player.rotation);
+                Vector3 newVelocity = transfer.MultiplyVector(motor.RawVelocity);
+
+                motor.Teleport(newPosition, newRotation);
+                motor.SetVelocity(newVelocity);
+            }
 
             // El jugador, los objetos marcados y lo que lleva la aspiradora pasan a la escena nueva
             // antes de que la anterior se descargue.
@@ -455,14 +558,6 @@ namespace NostalgIA.Gameplay.Level
             phase = Phase.Crossed;
             timer = fadeDuration;
             hasPreviousSide = false;
-
-            Vector3 spawnPosition = exit.position + exit.forward * 2f + Vector3.up * 0.1f;
-            Quaternion spawnRotation = Quaternion.LookRotation(Vector3.ProjectOnPlane(exit.forward, Vector3.up), Vector3.up);
-            if (exit.TryGetComponent(out LevelEntrance entrance))
-            {
-                spawnPosition = entrance.SpawnPosition;
-                spawnRotation = entrance.SpawnRotation;
-            }
 
             EventBus<DimensionalPortalCrossed>.Raise(new DimensionalPortalCrossed(true));
             EventBus<LevelGateCrossed>.Raise(new LevelGateCrossed(transform, exit, source, destination,

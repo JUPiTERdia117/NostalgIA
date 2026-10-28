@@ -29,10 +29,10 @@ Material:
     - _CausticStrength: 1.2
     - _Caustics: 0
     - _ClearcoatPower: 400
-    - _ClearcoatStrength: 1.6
+    - _ClearcoatStrength: 1.7
     - _EmissionPulse: 0
     - _FlatShading: 0
-    - _Gloss: 0.9
+    - _Gloss: 0.92
     - _RimPower: 3
     - _RimStrength: 0.45
     - _SlopeSharpness: 4
@@ -41,8 +41,8 @@ Material:
     - _Wrap: 0.15
     m_Colors:
     - _ColorBottom: {r: 0.24705882, g: 0.8784314, b: 1, a: 1}
-    - _ColorTop: {r: 0.24705882, g: 0.8784314, b: 1, a: 1}
-    - _EmissionColor: {r: 0.061764706, g: 0.21960784, b: 0.25, a: 0.25}
+    - _ColorTop: {r: 0.32156864, g: 0.9490196, b: 0.5882353, a: 1}
+    - _EmissionColor: {r: 0.08647059, g: 0.3362745, b: 0.25254902, a: 0.35}
     - _HeightRange: {r: 0, g: 1, b: 0, a: 0}
     - _RimColor: {r: 0.75, g: 0.93, b: 1, a: 1}
     - _SideColor: {r: 0.24705882, g: 0.8784314, b: 1, a: 0}

@@ -11,21 +11,22 @@ using UnityEngine.Rendering;
 namespace NostalgIA.Presentation.VFX
 {
     /// <summary>
-    /// Sustituye el perfil del <see cref="Volume"/> de la Estación por su variante LDR cuando el
-    /// pipeline activo no admite HDR.
+    /// Cambia el perfil de postprocesado del <see cref="Volume"/> de la Estación por su versión LDR
+    /// cuando la calidad activa no usa HDR.
     /// </summary>
     /// <remarks>
     /// <para>
-    /// El Bloom extrae los píxeles cuyo brillo supera el umbral t con una rodilla suave k:
-    /// b' = max(b − t, rodilla(b)), donde b = max(R, G, B). Con HDR, la emisión de los absorbibles
-    /// y de las líneas de neón vale muchas veces 1 y el halo es amplio con t = 0,9. Sin HDR el búfer
-    /// se recorta a 1, así que b − t ≤ 0,1 y el halo prácticamente desaparece. La variante LDR baja
-    /// el umbral y sube la intensidad para que el exceso extraído (≈ 1 − 0,55) se parezca al que
-    /// se obtiene con HDR, sin tocar el perfil de PC.
+    /// El Bloom primero decide qué partes de la imagen brillan: toma b = max(R, G, B) de cada píxel
+    /// y se queda con lo que pasa del umbral t, b − t (con una "rodilla" suave para que no haya un
+    /// corte duro). Con HDR, la emisión de los absorbibles y de las líneas de neón vale varias veces 1,
+    /// así que con t = 0,9 sobra brillo para un halo grande. Sin HDR la imagen está recortada a 1,
+    /// entonces lo que sobra es como mucho 1 − t, casi nada, y el halo desaparece.
     /// </para>
     /// <para>
-    /// El cambio se hace una sola vez en <c>Awake</c> sobre <see cref="Volume.sharedProfile"/>
-    /// (los dos perfiles son assets), por lo que no se crea ningún perfil en ejecución.
+    /// VP_Primavera_LDR es una copia del perfil de Primavera con el Bloom ajustado para ese caso:
+    /// umbral 0,55 (en vez de 0,9), intensidad 1,1 (en vez de 0,6) y dispersión 0,7 (en vez de 0,65).
+    /// El perfil de PC no se toca. Hago el cambio una sola vez en <c>Awake</c> sobre
+    /// <see cref="Volume.sharedProfile"/>; los dos perfiles son assets, así que no creo nada en ejecución.
     /// </para>
     /// </remarks>
     [DisallowMultipleComponent]
@@ -35,7 +36,7 @@ namespace NostalgIA.Presentation.VFX
         [Tooltip("Perfil ajustado para pipelines sin HDR (umbral de Bloom más bajo).")]
         [SerializeField] private VolumeProfile ldrProfile;
 
-        /// <summary>Aplica el perfil LDR si corresponde.</summary>
+        /// <summary>Si la calidad actual no tiene HDR y hay un perfil LDR asignado, lo pongo en el Volume.</summary>
         private void Awake()
         {
             if (ldrProfile == null || !LdrEmissionFallback.PipelineIsLdr()) return;

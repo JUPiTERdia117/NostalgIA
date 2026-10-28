@@ -45,7 +45,7 @@ Material:
     - _ColorBottom: {r: 1, g: 0.9137255, b: 0.65882355, a: 1}
     - _ColorTop: {r: 0.49411765, g: 0.8509804, b: 0.34117648, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
-    - _HeightRange: {r: 0.2, g: 1.8, b: 0, a: 0}
+    - _HeightRange: {r: 0.15, g: 1.75, b: 0, a: 0}
     - _RimColor: {r: 0.75, g: 0.93, b: 1, a: 1}
     - _SideColor: {r: 0.92156863, g: 0.8509804, b: 0.6509804, a: 0.55}
     - _SpeckleColor: {r: 1, g: 0.97, b: 0.78, a: 1}

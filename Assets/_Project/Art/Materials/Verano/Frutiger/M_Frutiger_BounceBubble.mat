@@ -25,19 +25,19 @@ Material:
     m_TexEnvs: []
     m_Ints: []
     m_Floats:
-    - _BaseAlpha: 0.08
+    - _BaseAlpha: 0.1
     - _DriftAmplitude: 0
     - _DriftSpeed: 0.5
-    - _EdgeAlpha: 0.9
+    - _EdgeAlpha: 0.92
     - _FilmThickness: 0.55
     - _Impostor: 0
-    - _Iridescence: 2
+    - _Iridescence: 2.1
     - _Reflection: 0.9
     - _Specular: 2
     - _WindowHighlight: 0.9
-    - _WobbleAmount: 0.04
+    - _WobbleAmount: 0.045
     - _WobbleSpeed: 3
     m_Colors:
-    - _Tint: {r: 1, g: 0.92, b: 1, a: 1}
+    - _Tint: {r: 0.92, g: 0.98, b: 1, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

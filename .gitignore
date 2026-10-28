@@ -121,7 +121,10 @@ InitTestScene*.unity*
 *_BurstDebugInformation_DoNotShip/
 *_BackUpThisFolder_ButDontShipItWithYourGame/
 
-# Documentación del equipo (se guarda fuera del repositorio)
+# Documentación del equipo y artefactos auxiliares (se ignoran en git)
+documentos/
 Docs/
 CLAUDE.md
+.claude/
 .agents/
+NostalgIA_repo_*/

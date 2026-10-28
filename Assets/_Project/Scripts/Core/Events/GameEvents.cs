@@ -626,6 +626,61 @@ namespace NostalgIA.Core.Events
         }
     }
 
+    /// <summary>
+    /// Un obstáculo dinámico (como las aspas giratorias de Verano) golpeó y empujó al jugador.
+    /// Lo escucha la capa de presentación para disparar sonido y efectos sin acoplar ensamblados.
+    /// </summary>
+    public readonly struct HazardTriggered : IGameEvent
+    {
+        /// <summary>Transform del obstáculo que produjo el golpe.</summary>
+        public readonly Transform Source;
+        /// <summary>Punto de impacto aproximado en el mundo.</summary>
+        public readonly Vector3 Position;
+
+        /// <summary>Crea el evento.</summary>
+        public HazardTriggered(Transform source, Vector3 position)
+        {
+            Source = source;
+            Position = position;
+        }
+    }
+
+    /// <summary>
+    /// Se abrió una barrera del nivel tras derrotar a los enemigos requeridos (ej. el muro central de Verano).
+    /// </summary>
+    public readonly struct ArenaGateOpened : IGameEvent
+    {
+        /// <summary>Transform del controlador o barrera desbloqueada.</summary>
+        public readonly Transform Source;
+        /// <summary>Posición del muro o recompensa liberada.</summary>
+        public readonly Vector3 Position;
+
+        /// <summary>Crea el evento.</summary>
+        public ArenaGateOpened(Transform source, Vector3 position)
+        {
+            Source = source;
+            Position = position;
+        }
+    }
+
+    /// <summary>
+    /// El jugador entró al agua poco profunda desde el aire. Sirve para disparar salpicadura y sonido.
+    /// </summary>
+    public readonly struct ShallowWaterEntered : IGameEvent
+    {
+        /// <summary>Punto de entrada sobre la superficie del agua.</summary>
+        public readonly Vector3 Position;
+        /// <summary>Rapidez vertical previa al amortiguamiento, en m/s.</summary>
+        public readonly float ImpactSpeed;
+
+        /// <summary>Crea el evento.</summary>
+        public ShallowWaterEntered(Vector3 position, float impactSpeed)
+        {
+            Position = position;
+            ImpactSpeed = impactSpeed;
+        }
+    }
+
     // ===================================================================== Puertas entre niveles
 
     /// <summary>

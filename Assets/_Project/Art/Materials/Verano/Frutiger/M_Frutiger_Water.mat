@@ -39,8 +39,8 @@ Material:
     - _DeepColor: {r: 0, g: 0.46666667, b: 0.8509804, a: 1}
     - _FoamColor: {r: 1, g: 1, b: 1, a: 1}
     - _ShallowColor: {r: 0.24313726, g: 0.9019608, b: 0.8235294, a: 1}
-    - _WaveA: {r: 1, g: 0.3, b: 0.08, a: 18}
-    - _WaveB: {r: -0.4, g: 1, b: 0.07, a: 12}
-    - _WaveC: {r: 0.7, g: -0.6, b: 0.05, a: 9}
+    - _WaveA: {r: 1, g: 0.3, b: 0.045, a: 18}
+    - _WaveB: {r: -0.4, g: 1, b: 0.035, a: 12}
+    - _WaveC: {r: 0.7, g: -0.6, b: 0.025, a: 9}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
