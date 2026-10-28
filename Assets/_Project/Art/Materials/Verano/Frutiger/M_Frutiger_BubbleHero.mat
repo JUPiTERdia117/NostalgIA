@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: M_Frutiger_BubbleHero
+  m_Shader: {fileID: 4800000, guid: 80aa700b2e0fc4f4da05ca8b1e5a2208, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
+  m_InvalidKeywords: []
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 1
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs: []
+    m_Ints: []
+    m_Floats:
+    - _BaseAlpha: 0.04
+    - _DriftAmplitude: 2.5
+    - _DriftSpeed: 0.18
+    - _EdgeAlpha: 0.75
+    - _FilmThickness: 0.75
+    - _Impostor: 0
+    - _Iridescence: 1.6
+    - _Reflection: 0.9
+    - _Specular: 2
+    - _WindowHighlight: 0.9
+    - _WobbleAmount: 0.015
+    - _WobbleSpeed: 3
+    m_Colors:
+    - _Tint: {r: 0.85, g: 0.96999997, b: 1, a: 1}
+  m_BuildTextureStacks: []
+  m_AllowLocking: 1

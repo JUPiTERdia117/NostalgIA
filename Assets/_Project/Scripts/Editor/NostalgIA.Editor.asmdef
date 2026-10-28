@@ -1,0 +1,26 @@
+{
+    "name": "NostalgIA.Editor",
+    "rootNamespace": "NostalgIA.EditorTools",
+    "references": [
+        "NostalgIA.Core",
+        "NostalgIA.Input",
+        "NostalgIA.Gameplay",
+        "NostalgIA.Presentation",
+        "Unity.InputSystem",
+        "UnityEngine.UI",
+        "Unity.TextMeshPro",
+        "Unity.RenderPipelines.Core.Runtime",
+        "Unity.RenderPipelines.Universal.Runtime"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
