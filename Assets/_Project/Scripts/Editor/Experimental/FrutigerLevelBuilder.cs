@@ -9,6 +9,7 @@
 using System.Collections.Generic;
 using System.IO;
 using NostalgIA.Core;
+using NostalgIA.EditorTools.Levels;
 using NostalgIA.EditorTools.Setup;
 using NostalgIA.Gameplay.Level;
 using NostalgIA.Gameplay.Player;
@@ -52,6 +53,14 @@ namespace NostalgIA.EditorTools.Experimental
     {
         private const string MenuRoot = "NostalgIA/Experimental/";
         public const string ScenePath = "Assets/_Project/Scenes/Stations/20_Verano_Frutiger.unity";
+
+        /// <summary>
+        /// Origen de la región del mundo que ocupa este nivel. Se construye alrededor de (0, 0, 0) y
+        /// al final se desplaza aquí, a 3 km del Tutorial: así ambos niveles pueden estar cargados a
+        /// la vez (puerta de nivel) sin encimarse ni verse. Solo se desplaza en X y Z para que las
+        /// alturas (nivel del agua, degradados por altura) no cambien.
+        /// </summary>
+        public static readonly Vector3 RegionOrigin = new Vector3(3000f, 0f, 0f);
         private const string MaterialsRoot = "Assets/_Project/Art/Materials/Verano/Frutiger";
         private const string MeshesRoot = "Assets/_Project/Art/Meshes/Frutiger";
         public const string VolumePath = "Assets/_Project/Rendering/Volumes/VP_Verano.asset";
@@ -109,10 +118,13 @@ namespace NostalgIA.EditorTools.Experimental
             BuildIslandsAndRoute();
             BuildDecor();
             BuildPlayerAndSystems();
+            BuildEntrance();
+            LevelRegionTools.ShiftSceneRoots(scene, RegionOrigin);
 
             Physics.SyncTransforms();
             EditorSceneManager.SaveScene(scene, ScenePath);
             AssetDatabase.SaveAssets();
+            LevelGateBuilder.EnsureInBuild(ScenePath);
             Debug.Log("[Frutiger] Nivel construido en " + ScenePath);
         }
 
@@ -170,7 +182,7 @@ namespace NostalgIA.EditorTools.Experimental
             {
                 foreach ((string name, Vector3 eye, Vector3 target) in Views)
                 {
-                    go.transform.SetPositionAndRotation(eye, Quaternion.LookRotation(target - eye));
+                    go.transform.SetPositionAndRotation(eye + RegionOrigin, Quaternion.LookRotation(target - eye));
                     cam.targetTexture = rt;
                     cam.Render();
                     RenderTexture.active = rt;
@@ -865,17 +877,39 @@ namespace NostalgIA.EditorTools.Experimental
         // ================================================================== jugador y sistemas
         private static void BuildPlayerAndSystems()
         {
+            // El jugador y el EventSystem propios solo se usan al abrir el nivel por sí mismo; al
+            // llegar por una puerta de nivel ya existen los del nivel anterior. Se guardan en un grupo
+            // inactivo que StandaloneLevelContent enciende cuando hace falta.
+            var standalone = new GameObject("--- STANDALONE ---");
+            var bootstrap = new GameObject("LevelBootstrap");
+            bootstrap.AddComponent<StandaloneLevelContent>().Configure(standalone);
+
             var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(Phase1Builder.Paths.Player);
             if (prefab != null)
             {
                 var player = (GameObject)PrefabUtility.InstantiatePrefab(prefab, scene);
                 Vector3 spawn = Ground(0f, -6f) + Vector3.up * 0.15f;
                 player.transform.SetPositionAndRotation(spawn, Quaternion.identity);
+                player.transform.SetParent(standalone.transform, true);
             }
 
             var eventSystem = new GameObject("EventSystem");
             eventSystem.AddComponent<EventSystem>();
             eventSystem.AddComponent<InputSystemUIInputModule>();
+            eventSystem.transform.SetParent(standalone.transform, false);
+            standalone.SetActive(false);
+        }
+
+        /// <summary>
+        /// Marco de llegada para las puertas de nivel: en el punto de inicio, mirando hacia el
+        /// recorrido (+Z). Al cruzar la puerta del Tutorial el jugador aparece aquí.
+        /// </summary>
+        private static void BuildEntrance()
+        {
+            var entrance = new GameObject("LevelEntrance");
+            entrance.transform.SetParent(root, false);
+            entrance.transform.SetPositionAndRotation(Ground(0f, -6.5f), Quaternion.identity);
+            entrance.AddComponent<LevelEntrance>().Configure(string.Empty, new Vector2(3.2f, 4.4f));
         }
 
         // ================================================================== utilidades

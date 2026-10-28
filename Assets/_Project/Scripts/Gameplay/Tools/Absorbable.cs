@@ -10,6 +10,7 @@ using NostalgIA.Core.Damage;
 using NostalgIA.Core.Events;
 using NostalgIA.Core.Lifecycle;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace NostalgIA.Gameplay.Tools
 {
@@ -170,6 +171,21 @@ namespace NostalgIA.Gameplay.Tools
 
         /// <summary>Retira el registro.</summary>
         private void OnDestroy() => ResettableRegistry.Unregister(this);
+
+        /// <summary>
+        /// Saca el objeto almacenado de su nivel de origen y lo pasa a <paramref name="scene"/>.
+        /// Se separa de su padre (<see cref="SceneManager.MoveGameObjectToScene"/> solo acepta
+        /// raíces) y se retira del registro de reinicio: su posición inicial pertenece a un nivel
+        /// que ya no existe, por lo que no debe volver a ella al reaparecer.
+        /// </summary>
+        /// <param name="scene">Escena del nivel nuevo.</param>
+        internal void DetachToScene(Scene scene)
+        {
+            if (gameObject.scene == scene) return;
+            transform.SetParent(null, true);
+            SceneManager.MoveGameObjectToScene(gameObject, scene);
+            ResettableRegistry.Unregister(this);
+        }
 
         /// <summary>Restablece el estado transitorio al desactivarse (almacenado o roto).</summary>
         private void OnDisable()

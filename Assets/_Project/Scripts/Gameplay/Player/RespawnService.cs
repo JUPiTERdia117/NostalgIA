@@ -76,6 +76,7 @@ namespace NostalgIA.Gameplay.Player
             ServiceLocator.Register(this);
             EventBus<PlayerDied>.Subscribe(OnPlayerDied);
             EventBus<CheckpointActivated>.Subscribe(OnCheckpointActivated);
+            EventBus<LevelGateCrossed>.Subscribe(OnLevelGateCrossed);
         }
 
         /// <summary>Cancela suscripciones.</summary>
@@ -83,7 +84,20 @@ namespace NostalgIA.Gameplay.Player
         {
             EventBus<PlayerDied>.Unsubscribe(OnPlayerDied);
             EventBus<CheckpointActivated>.Unsubscribe(OnCheckpointActivated);
+            EventBus<LevelGateCrossed>.Unsubscribe(OnLevelGateCrossed);
             ServiceLocator.Unregister(this);
+        }
+
+        /// <summary>
+        /// Al entrar a un nivel nuevo por una puerta, su entrada pasa a ser el punto de reaparición
+        /// hasta que se active el primer checkpoint del nivel. El índice −1 indica que no es un
+        /// checkpoint numerado.
+        /// </summary>
+        private void OnLevelGateCrossed(in LevelGateCrossed evt)
+        {
+            spawnPosition = evt.SpawnPosition;
+            spawnRotation = evt.SpawnRotation;
+            spawnCheckpointIndex = -1;
         }
 
         /// <summary>Actualiza el punto de reaparición.</summary>

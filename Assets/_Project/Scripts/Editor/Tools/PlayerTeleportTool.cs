@@ -5,6 +5,7 @@
 // con un manipulador colocado exactamente sobre la cápsula del jugador.
 // -----------------------------------------------------------------------------
 using NostalgIA.Core;
+using NostalgIA.Gameplay.Level;
 using NostalgIA.Gameplay.Player;
 using UnityEditor;
 using UnityEngine;
@@ -83,13 +84,26 @@ namespace NostalgIA.EditorTools.Tools
         private static bool BringValidate() => Application.isPlaying;
 
         /// <summary>
-        /// Coloca al jugador 4 m delante del portal de salida de la escena activa, mirándolo, para
-        /// probar el cruce entre escenas sin recorrer el nivel.
+        /// Coloca al jugador delante de la puerta de salida de la escena activa (puerta de nivel o,
+        /// si no hay, portal dimensional), mirándola, para probar el cruce sin recorrer el nivel.
         /// </summary>
         [MenuItem("NostalgIA/Depuración/Llevar jugador al portal (juego)", priority = 912)]
         private static void BringPlayerToPortal()
         {
             if (!Application.isPlaying || !FindMotor()) return;
+
+            // Puerta de nivel: el frente (eje forward) es el lado de aproximación.
+            foreach (LevelGate gate in Object.FindObjectsByType<LevelGate>(FindObjectsSortMode.None))
+            {
+                if (gate.gameObject.scene != motor.gameObject.scene) continue;
+                Vector3 forward = Vector3.ProjectOnPlane(gate.transform.forward, Vector3.up).normalized;
+                Vector3 front = gate.transform.position + forward * 7f;
+                if (Physics.Raycast(front + Vector3.up * 3f, Vector3.down, out RaycastHit floorHit, 20f, SolidMask, QueryTriggerInteraction.Ignore))
+                    front = floorHit.point;
+                TeleportTo(front, -forward);
+                return;
+            }
+
             foreach (MonoBehaviour mb in Object.FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None))
             {
                 if (mb == null || mb.GetType().Name != "TutorialDoor" || mb.gameObject.scene != motor.gameObject.scene) continue;

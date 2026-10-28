@@ -83,7 +83,7 @@ namespace NostalgIA.Tests.EditMode
         {
             WithScene(() =>
             {
-                Assert.IsNotNull(Object.FindFirstObjectByType<PlayerMotor>(), "Falta el jugador.");
+                Assert.IsNotNull(Object.FindFirstObjectByType<PlayerMotor>(FindObjectsInactive.Include), "Falta el jugador (contenido independiente).");
                 Assert.IsNotNull(Object.FindFirstObjectByType<KillVolume>(), "Falta el volumen letal del agua.");
                 Assert.IsNotNull(Object.FindFirstObjectByType<FrutigerAtmosphere>(), "Falta FrutigerAtmosphere.");
 

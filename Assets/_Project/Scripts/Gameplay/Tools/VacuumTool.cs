@@ -11,6 +11,7 @@ using NostalgIA.Core.Services;
 using NostalgIA.Core.State;
 using NostalgIA.Gameplay.Aim;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace NostalgIA.Gameplay.Tools
 {
@@ -308,5 +309,12 @@ namespace NostalgIA.Gameplay.Tools
 
         /// <summary>Aplica una mejora de capacidad (Fase 2).</summary>
         public void SetCapacity(int capacity) => storage.SetCapacity(capacity);
+
+        /// <summary>
+        /// Lleva los objetos almacenados a la escena del nivel nuevo al cruzar una puerta de nivel;
+        /// así el jugador conserva lo que absorbió aunque el nivel anterior se descargue.
+        /// </summary>
+        /// <param name="scene">Escena del nivel nuevo.</param>
+        public void MoveStoredItemsToScene(Scene scene) => storage?.MoveItemsToScene(scene);
     }
 }

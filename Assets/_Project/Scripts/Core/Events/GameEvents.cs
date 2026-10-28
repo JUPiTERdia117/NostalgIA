@@ -16,6 +16,7 @@
 // -----------------------------------------------------------------------------
 
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace NostalgIA.Core.Events
 {
@@ -623,5 +624,104 @@ namespace NostalgIA.Core.Events
             Position = position;
             LaunchSpeed = launchSpeed;
         }
+    }
+
+    // ===================================================================== Puertas entre niveles
+
+    /// <summary>
+    /// La escena del nivel siguiente terminó de cargarse en segundo plano y quedó dormida.
+    /// Publica <c>LevelGate</c>; lo escucha la presentación para preparar la iluminación del
+    /// otro nivel y la vista del portal.
+    /// </summary>
+    public readonly struct LevelGatePrepared : IGameEvent
+    {
+        /// <summary>Marco de la puerta en el nivel actual.</summary>
+        public readonly Transform Gate;
+        /// <summary>Marco de llegada en el nivel siguiente.</summary>
+        public readonly Transform Exit;
+        /// <summary>Escena del nivel actual.</summary>
+        public readonly Scene Source;
+        /// <summary>Escena del nivel siguiente.</summary>
+        public readonly Scene Destination;
+        /// <summary>Ancho y alto de la abertura, en metros.</summary>
+        public readonly Vector2 Aperture;
+
+        /// <summary>Crea el evento.</summary>
+        public LevelGatePrepared(Transform gate, Transform exit, Scene source, Scene destination, Vector2 aperture)
+        {
+            Gate = gate;
+            Exit = exit;
+            Source = source;
+            Destination = destination;
+            Aperture = aperture;
+        }
+    }
+
+    /// <summary>
+    /// El nivel siguiente terminó de despertar (todos sus objetos activos) o volvió a dormir.
+    /// La presentación solo dibuja la vista del portal mientras está despierto.
+    /// </summary>
+    public readonly struct LevelGateAwakeChanged : IGameEvent
+    {
+        /// <summary>Marco de la puerta.</summary>
+        public readonly Transform Gate;
+        /// <summary><c>true</c> si el nivel siguiente está despierto.</summary>
+        public readonly bool Awake;
+
+        /// <summary>Crea el evento.</summary>
+        public LevelGateAwakeChanged(Transform gate, bool awake)
+        {
+            Gate = gate;
+            Awake = awake;
+        }
+    }
+
+    /// <summary>
+    /// El jugador atravesó la puerta: ya está en el nivel siguiente, que es la escena activa.
+    /// Lo escuchan la presentación (cambio de iluminación y disolución del nivel anterior) y la
+    /// reaparición (nuevo punto de partida).
+    /// </summary>
+    public readonly struct LevelGateCrossed : IGameEvent
+    {
+        /// <summary>Marco de la puerta en el nivel anterior.</summary>
+        public readonly Transform Gate;
+        /// <summary>Marco de llegada en el nivel nuevo.</summary>
+        public readonly Transform Exit;
+        /// <summary>Escena del nivel anterior.</summary>
+        public readonly Scene Source;
+        /// <summary>Escena del nivel nuevo.</summary>
+        public readonly Scene Destination;
+        /// <summary>Punto de reaparición inicial del nivel nuevo.</summary>
+        public readonly Vector3 SpawnPosition;
+        /// <summary>Orientación de reaparición inicial.</summary>
+        public readonly Quaternion SpawnRotation;
+        /// <summary>Duración de la disolución del nivel anterior, en segundos.</summary>
+        public readonly float FadeDuration;
+
+        /// <summary>Crea el evento.</summary>
+        public LevelGateCrossed(Transform gate, Transform exit, Scene source, Scene destination,
+                                Vector3 spawnPosition, Quaternion spawnRotation, float fadeDuration)
+        {
+            Gate = gate;
+            Exit = exit;
+            Source = source;
+            Destination = destination;
+            SpawnPosition = spawnPosition;
+            SpawnRotation = spawnRotation;
+            FadeDuration = fadeDuration;
+        }
+    }
+
+    /// <summary>
+    /// La disolución terminó y el nivel anterior está a punto de descargarse. La presentación
+    /// suelta en este momento las referencias a objetos de esa escena.
+    /// </summary>
+    public readonly struct LevelGateClosed : IGameEvent
+    {
+        /// <summary>Marco de la puerta en el nivel que se descarga.</summary>
+        public readonly Transform Gate;
+
+        /// <summary>Crea el evento.</summary>
+        public LevelGateClosed(Transform gate) => Gate = gate;
     }
 }

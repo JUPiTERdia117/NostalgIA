@@ -6,6 +6,7 @@
 
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace NostalgIA.Gameplay.Tools
 {
@@ -74,6 +75,20 @@ namespace NostalgIA.Gameplay.Tools
         public void PurgeDestroyedFront()
         {
             while (queue.Count > 0 && queue.Peek() == null) queue.Dequeue();
+        }
+
+        /// <summary>
+        /// Traslada los objetos almacenados a otra escena (cambio de nivel), para que no se
+        /// destruyan al descargar el nivel del que provienen. El enumerador de
+        /// <see cref="Queue{T}"/> es un struct, por lo que el recorrido no asigna memoria.
+        /// </summary>
+        /// <param name="scene">Escena del nivel nuevo.</param>
+        public void MoveItemsToScene(Scene scene)
+        {
+            foreach (Absorbable item in queue)
+            {
+                if (item != null) item.DetachToScene(scene);
+            }
         }
     }
 }

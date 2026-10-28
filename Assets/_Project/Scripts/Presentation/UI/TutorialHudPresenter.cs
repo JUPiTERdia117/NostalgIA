@@ -178,6 +178,13 @@ namespace NostalgIA.Presentation.UI
         private IPlayerMotionState motion;
         private IToolState toolState;
         private float zonePollTimer;
+
+        /// <summary>
+        /// Verdadero tras cruzar una puerta de nivel: el HUD acompaña al jugador al nivel siguiente
+        /// (lleva el marcador <c>PersistAcrossLevels</c>), pero la guía del Tutorial ya no aplica y
+        /// sus zonas están definidas en coordenadas del Tutorial, así que se oculta y deja de sondearse.
+        /// </summary>
+        private bool tutorialLeft;
         private float toastTimer;
         private float hurtTimer;
         private GameObject toastContainer;
@@ -254,6 +261,7 @@ namespace NostalgIA.Presentation.UI
             EventBus<CheckpointActivated>.Subscribe(OnCheckpointActivated);
             EventBus<HudMessageRequested>.Subscribe(OnHudMessage);
             EventBus<DimensionalPortalCrossed>.Subscribe(OnPortalCrossed);
+            EventBus<LevelGateCrossed>.Subscribe(OnLevelGateCrossed);
             EventBus<PlayerJumped>.Subscribe(OnPlayerJumped);
             EventBus<LocomotionStateChanged>.Subscribe(OnLocomotionChanged);
             EventBus<InputSchemeChanged>.Subscribe(OnSchemeChanged);
@@ -273,6 +281,7 @@ namespace NostalgIA.Presentation.UI
             EventBus<CheckpointActivated>.Unsubscribe(OnCheckpointActivated);
             EventBus<HudMessageRequested>.Unsubscribe(OnHudMessage);
             EventBus<DimensionalPortalCrossed>.Unsubscribe(OnPortalCrossed);
+            EventBus<LevelGateCrossed>.Unsubscribe(OnLevelGateCrossed);
             EventBus<PlayerJumped>.Unsubscribe(OnPlayerJumped);
             EventBus<LocomotionStateChanged>.Unsubscribe(OnLocomotionChanged);
             EventBus<InputSchemeChanged>.Unsubscribe(OnSchemeChanged);
@@ -305,7 +314,7 @@ namespace NostalgIA.Presentation.UI
             float dt = Time.unscaledDeltaTime;
 
             zonePollTimer -= dt;
-            if (zonePollTimer <= 0f)
+            if (!tutorialLeft && zonePollTimer <= 0f)
             {
                 zonePollTimer = ZonePollInterval;
                 EvaluateZone(false);
@@ -392,6 +401,13 @@ namespace NostalgIA.Presentation.UI
             {
                 ShowToast(ReturnedMessage);
             }
+        }
+
+        /// <summary>Al pasar al nivel siguiente se retira la guía del Tutorial; vida y herramienta siguen.</summary>
+        private void OnLevelGateCrossed(in LevelGateCrossed evt)
+        {
+            tutorialLeft = true;
+            if (guidePanel != null) guidePanel.SetActive(false);
         }
 
         private void OnSchemeChanged(in InputSchemeChanged evt)
@@ -577,7 +593,7 @@ namespace NostalgIA.Presentation.UI
         /// <summary>Escribe el paso actual y, si se pide, reinicia la animación de aparición.</summary>
         private void RefreshGuide(bool animate)
         {
-            if (currentStep < 0) return;
+            if (currentStep < 0 || tutorialLeft) return;
             bool done = stepCompleted[currentStep];
             if (zoneTitleText != null) zoneTitleText.SetText(done ? doneTitles[currentStep] : pendingTitles[currentStep]);
             if (controlsText != null) controlsText.SetText(done ? StepDoneControls : StepControls[currentStep, (int)scheme]);
