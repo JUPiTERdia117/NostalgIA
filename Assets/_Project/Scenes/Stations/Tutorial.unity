@@ -22852,6 +22852,7 @@ GameObject:
   m_Component:
   - component: {fileID: 951580202}
   - component: {fileID: 951580201}
+  - component: {fileID: 951580203}
   m_Layer: 0
   m_Name: Volume_Primavera
   m_TagString: Untagged
@@ -78493,3 +78494,16 @@ SceneRoots:
   - {fileID: 257283185}
   - {fileID: 80546946}
   - {fileID: 951580202}
+--- !u!114 &951580203
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 951580200}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bf081d2c0791408e91c4b58b6032c8ca, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: NostalgIA.Presentation::NostalgIA.Presentation.VFX.LdrVolumeProfileSwap
+  ldrProfile: {fileID: 11400000, guid: 65ee8b4f380d459f9ddc3b768eff5b60, type: 2}
