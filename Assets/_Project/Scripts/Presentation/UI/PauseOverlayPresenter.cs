@@ -42,6 +42,8 @@ namespace NostalgIA.Presentation.UI
         [SerializeField] private TextMeshProUGUI controlsText;
         [SerializeField] private TextMeshProUGUI resumeHintText;
         [SerializeField] private Button resumeButton;
+        [SerializeField] private Button nextLevelButton;
+        [SerializeField] private TextMeshProUGUI nextLevelLabel;
 
         /// <summary>Acciones listadas en la capa, en orden de lectura.</summary>
         private static readonly string[] ListedActions =
@@ -59,8 +61,10 @@ namespace NostalgIA.Presentation.UI
         private void Awake()
         {
             canvas = GetComponent<Canvas>();
+            EnsureNextLevelTestButton();
             BuildTexts();
             if (resumeButton != null) resumeButton.onClick.AddListener(Resume);
+            if (nextLevelButton != null) nextLevelButton.onClick.AddListener(RequestNextLevelSkip);
             SetVisible(false);
         }
 
@@ -69,6 +73,7 @@ namespace NostalgIA.Presentation.UI
         {
             EventBus<GameStateChanged>.Subscribe(OnGameStateChanged);
             EventBus<InputSchemeChanged>.Subscribe(OnSchemeChanged);
+            EventBus<NextLevelStatusReported>.Subscribe(OnNextLevelStatusReported);
             if (ServiceLocator.TryGet(out InputReader reader)) scheme = reader.CurrentScheme;
             bool paused = ServiceLocator.TryGet(out GameStateMachine machine) && machine.State == GameState.Paused;
             SetVisible(paused);
@@ -79,6 +84,7 @@ namespace NostalgIA.Presentation.UI
         {
             EventBus<GameStateChanged>.Unsubscribe(OnGameStateChanged);
             EventBus<InputSchemeChanged>.Unsubscribe(OnSchemeChanged);
+            EventBus<NextLevelStatusReported>.Unsubscribe(OnNextLevelStatusReported);
         }
 
         private void OnGameStateChanged(in GameStateChanged evt) => SetVisible(evt.Current == GameState.Paused);
@@ -89,11 +95,91 @@ namespace NostalgIA.Presentation.UI
             if (canvas.enabled) RefreshTexts();
         }
 
+        private void OnNextLevelStatusReported(in NextLevelStatusReported evt)
+        {
+            if (nextLevelLabel != null)
+            {
+                nextLevelLabel.SetText(evt.StatusText);
+                nextLevelLabel.color = evt.HasNextLevel
+                    ? new Color(0.91f, 0.96f, 1f, 1f)
+                    : new Color(1f, 0.72f, 0.56f, 1f);
+            }
+            if (nextLevelButton != null && nextLevelButton.targetGraphic != null)
+            {
+                nextLevelButton.targetGraphic.color = evt.HasNextLevel
+                    ? new Color(0.11f, 0.36f, 0.68f, 0.96f)
+                    : new Color(0.35f, 0.18f, 0.24f, 0.96f);
+            }
+        }
+
         /// <summary>Reanuda el juego (botón «Continuar»).</summary>
         public void Resume()
         {
             if (ServiceLocator.TryGet(out GameStateMachine machine) && machine.State == GameState.Paused)
                 machine.TogglePause();
+        }
+
+        /// <summary>Solicita saltar inmediatamente al siguiente nivel (botón de prueba en pausa).</summary>
+        public void RequestNextLevelSkip()
+        {
+            EventBus<NextLevelSkipRequested>.Raise(new NextLevelSkipRequested());
+        }
+
+        /// <summary>
+        /// Garantiza que el botón de prueba «Siguiente nivel» exista dentro de la ventana de pausa
+        /// incluso si el prefab <c>GameRoot</c> aún no se regeneró desde el menú de editor.
+        /// </summary>
+        private void EnsureNextLevelTestButton()
+        {
+            if (nextLevelButton != null && nextLevelLabel != null) return;
+            if (resumeButton == null) return;
+
+            Transform window = resumeButton.transform.parent;
+            if (window == null) return;
+
+            RectTransform resumeRect = resumeButton.GetComponent<RectTransform>();
+            if (resumeRect != null && resumeRect.anchoredPosition.y < -150f)
+            {
+                resumeRect.anchoredPosition = new Vector2(0f, -135f);
+                resumeRect.sizeDelta = new Vector2(360f, 58f);
+            }
+
+            Transform existing = window.Find("NextLevelTestButton");
+            GameObject btnGo = existing != null ? existing.gameObject : new GameObject("NextLevelTestButton", typeof(RectTransform));
+            if (existing == null) btnGo.transform.SetParent(window, false);
+
+            var rect = (RectTransform)btnGo.transform;
+            rect.anchorMin = rect.anchorMax = new Vector2(0.5f, 0.5f);
+            rect.anchoredPosition = new Vector2(0f, -206f);
+            rect.sizeDelta = new Vector2(440f, 54f);
+
+            Image img = btnGo.GetComponent<Image>();
+            if (img == null) img = btnGo.AddComponent<Image>();
+            img.color = new Color(0.11f, 0.36f, 0.68f, 0.96f);
+            img.raycastTarget = true;
+
+            nextLevelButton = btnGo.GetComponent<Button>();
+            if (nextLevelButton == null) nextLevelButton = btnGo.AddComponent<Button>();
+            nextLevelButton.targetGraphic = img;
+
+            Transform labelTransform = btnGo.transform.Find("Label");
+            GameObject labelGo = labelTransform != null ? labelTransform.gameObject : new GameObject("Label", typeof(RectTransform));
+            if (labelTransform == null) labelGo.transform.SetParent(btnGo.transform, false);
+
+            var labelRect = (RectTransform)labelGo.transform;
+            labelRect.anchorMin = labelRect.anchorMax = new Vector2(0.5f, 0.5f);
+            labelRect.anchoredPosition = Vector2.zero;
+            labelRect.sizeDelta = new Vector2(420f, 48f);
+
+            nextLevelLabel = labelGo.GetComponent<TextMeshProUGUI>();
+            if (nextLevelLabel == null) nextLevelLabel = labelGo.AddComponent<TextMeshProUGUI>();
+            if (resumeHintText != null && resumeHintText.font != null) nextLevelLabel.font = resumeHintText.font;
+            nextLevelLabel.fontSize = 21f;
+            nextLevelLabel.alignment = TextAlignmentOptions.Center;
+            nextLevelLabel.color = new Color(0.91f, 0.96f, 1f, 1f);
+            nextLevelLabel.raycastTarget = false;
+            if (string.IsNullOrEmpty(nextLevelLabel.text))
+                nextLevelLabel.text = "Siguiente nivel (Test)";
         }
 
         /// <summary>Muestra u oculta la capa.</summary>

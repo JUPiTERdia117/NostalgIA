@@ -116,6 +116,7 @@ namespace NostalgIA.EditorTools.Experimental
         [MenuItem(LevelsMenuRoot + "Construir Nivel 2 y Conectar Tutorial", priority = 303)]
         public static void BuildAndConnectTutorial()
         {
+            Phase1VisualBuilder.ConfigureGameRootVisuals();
             Build();
             EnsureTutorialConnected();
             EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
@@ -676,9 +677,6 @@ namespace NostalgIA.EditorTools.Experimental
             returnGo.transform.SetPositionAndRotation(startSpawn + Vector3.up * 0.2f, Quaternion.identity);
             safeGoalReturnAnchor = returnGo.transform;
 
-            // Marco decorativo alrededor de la Puerta de Inicio (donde aterriza LevelGate_Verano desde el Tutorial).
-            BuildDecorativeStartFrame(islandsGroup, Ground(2.8f, -6.2f), Quaternion.identity);
-
             // 3 objetos absorbibles iniciales en racimo sobre la Isla 1 (los 3 puntos verdes del boceto).
             AddAbsorbableOrb(islandsGroup, "Objeto_Inicio_1", Ground(1.1f, 3.8f) + Vector3.up * 0.55f, 0.44f);
             AddAbsorbableOrb(islandsGroup, "Objeto_Inicio_2", Ground(3.3f, 4.6f) + Vector3.up * 0.55f, 0.44f);
@@ -1222,38 +1220,6 @@ namespace NostalgIA.EditorTools.Experimental
 
             AddAudioSlotOn(gateGo, "Zumbido de portal de meta y sonido al cruzar al siguiente nivel",
                 AudioSlotTrigger.LevelGateOrCompletion, false, 1f, 45f, 0.9f);
-        }
-
-        /// <summary>Pórtico decorativo alrededor de <c>LevelEntrance</c> en la Isla 1 sin tapar la abertura.</summary>
-        private static void BuildDecorativeStartFrame(Transform parent, Vector3 groundPos, Quaternion rotation)
-        {
-            Transform frame = ChildGroup(parent, "Marco_PuertaInicio");
-            frame.SetPositionAndRotation(groundPos, rotation);
-            Mesh cube = Builtin(PrimitiveType.Cube);
-            float w = LevelGateBuilder.Aperture.x;
-            float h = LevelGateBuilder.Aperture.y;
-
-            GameObject left = Renderer("Poste_Izq", frame, cube, Materials["M_Frutiger_Chrome"],
-                groundPos + rotation * new Vector3(-(w * 0.5f + 0.22f), (h + 0.4f) * 0.5f, 0f),
-                new Vector3(0.38f, h + 0.4f, 0.42f), false);
-            left.transform.rotation = rotation;
-            left.AddComponent<BoxCollider>();
-            MarkStaticBaked(left);
-
-            GameObject right = Renderer("Poste_Der", frame, cube, Materials["M_Frutiger_Chrome"],
-                groundPos + rotation * new Vector3(w * 0.5f + 0.22f, (h + 0.4f) * 0.5f, 0f),
-                new Vector3(0.38f, h + 0.4f, 0.42f), false);
-            right.transform.rotation = rotation;
-            right.AddComponent<BoxCollider>();
-            MarkStaticBaked(right);
-
-            GameObject header = Renderer("Dintel", frame, cube, Materials["M_Frutiger_GrapplePad"],
-                groundPos + rotation * new Vector3(0f, h + 0.22f, 0f),
-                new Vector3(w + 0.85f, 0.42f, 0.48f), false);
-            header.transform.rotation = rotation;
-            header.layer = Layers.Default;
-            header.AddComponent<BoxCollider>();
-            MarkStaticBaked(header);
         }
 
         private static void AddGrappleSphere(Transform parent, string name, Vector3 position, float diameter)

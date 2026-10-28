@@ -779,4 +779,34 @@ namespace NostalgIA.Core.Events
         /// <summary>Crea el evento.</summary>
         public LevelGateClosed(Transform gate) => Gate = gate;
     }
+
+    /// <summary>
+    /// Solicitud de prueba desde la capa de pausa para saltar de inmediato al siguiente nivel.
+    /// Publica <c>PauseOverlayPresenter</c>; lo atiende <c>GameRoot</c>.
+    /// </summary>
+    public readonly struct NextLevelSkipRequested : IGameEvent
+    {
+    }
+
+    /// <summary>
+    /// Estado de disponibilidad del siguiente nivel para el botón de prueba en la capa de pausa.
+    /// Publica <c>GameRoot</c> al abrir la pausa o al intentar saltar de nivel.
+    /// </summary>
+    public readonly struct NextLevelStatusReported : IGameEvent
+    {
+        /// <summary><c>true</c> si la escena activa tiene una puerta conectada a un siguiente nivel.</summary>
+        public readonly bool HasNextLevel;
+        /// <summary>Nombre legible de la escena destino (vacío si no hay siguiente nivel).</summary>
+        public readonly string TargetSceneName;
+        /// <summary>Texto que se muestra en el botón o aviso de la capa de pausa.</summary>
+        public readonly string StatusText;
+
+        /// <summary>Crea el evento.</summary>
+        public NextLevelStatusReported(bool hasNextLevel, string targetSceneName, string statusText)
+        {
+            HasNextLevel = hasNextLevel;
+            TargetSceneName = targetSceneName ?? string.Empty;
+            StatusText = statusText ?? string.Empty;
+        }
+    }
 }
