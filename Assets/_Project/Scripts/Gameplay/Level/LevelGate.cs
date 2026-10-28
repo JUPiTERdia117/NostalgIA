@@ -118,6 +118,7 @@ namespace NostalgIA.Gameplay.Level
         // Estado del detector de cruce.
         private float previousSide;
         private bool hasPreviousSide;
+        private bool skipImmediatelyWhenLoaded;
 
         /// <summary>Ancho y alto de la abertura, en metros.</summary>
         public Vector2 Aperture => aperture;
@@ -133,6 +134,67 @@ namespace NostalgIA.Gameplay.Level
 
         /// <summary>Duración de la disolución tras cruzar, en segundos.</summary>
         public float FadeDuration => fadeDuration;
+
+        /// <summary><c>true</c> cuando esta puerta enlaza hacia una escena de nivel siguiente.</summary>
+        public bool HasValidDestination =>
+            (!string.IsNullOrEmpty(destinationSceneName) || !string.IsNullOrEmpty(destinationScenePath)) &&
+            phase != Phase.Crossed &&
+            phase != Phase.Done;
+
+        /// <summary>Nombre de la escena del nivel siguiente configurado en esta puerta.</summary>
+        public string DestinationSceneName => destinationSceneName;
+
+        /// <summary>
+        /// Fuerza el salto inmediato al siguiente nivel desde el botón de prueba del menú de pausa.
+        /// Si la escena destino ya está precargada, despierta todos sus objetos y ejecuta el cruce en
+        /// este mismo frame; si aún no termina de precargarse, acelera la carga y cruza al llegar.
+        /// </summary>
+        public bool TriggerImmediateSkip()
+        {
+            if (!HasValidDestination) return false;
+
+            if (motor == null)
+            {
+                motor = FindAnyObjectByType<PlayerMotor>();
+                if (motor != null) vacuum = motor.GetComponentInChildren<VacuumTool>(true);
+            }
+
+            if (destination.IsValid() && destination.isLoaded && exit != null)
+            {
+                ExecuteImmediateSkipCross();
+                return true;
+            }
+
+            skipImmediatelyWhenLoaded = true;
+            Application.backgroundLoadingPriority = ThreadPriority.High;
+            if (phase == Phase.Idle)
+            {
+                BeginPreload();
+            }
+            return phase == Phase.Loading || (destination.IsValid() && destination.isLoaded);
+        }
+
+        private void ExecuteImmediateSkipCross()
+        {
+            skipImmediatelyWhenLoaded = false;
+            if (phase != Phase.Awake)
+            {
+                StartSlicing(Phase.Waking);
+                FinishSlicing(true);
+                SetPhase(Phase.Awake);
+            }
+
+            if (motor != null)
+            {
+                // Coloco al jugador justo frente al centro del marco antes de invocar Cross() para que
+                // la transferencia al marco de llegada del siguiente nivel siempre caiga en el spawn limpio.
+                Vector3 gateCenter = transform.position + transform.up * (aperture.y * 0.45f) + transform.forward * 0.2f;
+                motor.Teleport(gateCenter, transform.rotation);
+                motor.SetVelocity(Vector3.zero);
+            }
+
+            Cross();
+        }
 
         /// <summary>Configura la puerta desde un constructor de editor.</summary>
         /// <param name="sceneName">Nombre de la escena destino.</param>
@@ -421,6 +483,11 @@ namespace NostalgIA.Gameplay.Level
             exit = FindEntrance(scene);
             SetPhase(Phase.Asleep);
             EventBus<LevelGatePrepared>.Raise(new LevelGatePrepared(transform, exit, source, destination, aperture));
+
+            if (skipImmediatelyWhenLoaded)
+            {
+                ExecuteImmediateSkipCross();
+            }
         }
 
         /// <summary>Busca la entrada de llegada (solo en la inicialización del nivel siguiente).</summary>

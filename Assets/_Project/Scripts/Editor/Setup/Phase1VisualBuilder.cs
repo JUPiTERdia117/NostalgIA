@@ -558,23 +558,23 @@ namespace NostalgIA.EditorTools.Setup
             backdropImage.raycastTarget = true;   // Bloquea toques al juego mientras está en pausa.
 
             // Ventana: borde de 2 px en azul código (iconografía con contorno, Guía §7).
-            Image border = Phase1Builder.GetOrCreateImage(overlay, "WindowBorder", Vector2.zero, new Vector2(664f, 504f), CodeBlue);
+            Image border = Phase1Builder.GetOrCreateImage(overlay, "WindowBorder", Vector2.zero, new Vector2(664f, 544f), CodeBlue);
             border.raycastTarget = false;
-            Image window = Phase1Builder.GetOrCreateImage(border.transform, "Window", Vector2.zero, new Vector2(660f, 500f), new Color(0.03f, 0.08f, 0.24f, 0.96f));
+            Image window = Phase1Builder.GetOrCreateImage(border.transform, "Window", Vector2.zero, new Vector2(660f, 540f), new Color(0.03f, 0.08f, 0.24f, 0.96f));
             window.raycastTarget = false;
 
-            TextMeshProUGUI title = GetOrCreateText(window.transform, "Title", new Vector2(0f, 196f), new Vector2(600f, 70f), font, 46f, TextAlignmentOptions.Center);
+            TextMeshProUGUI title = GetOrCreateText(window.transform, "Title", new Vector2(0f, 212f), new Vector2(600f, 70f), font, 46f, TextAlignmentOptions.Center);
             title.text = "PAUSA";
             title.characterSpacing = 18f;
             title.fontStyle = FontStyles.Bold;
             title.color = Phosphor;
 
-            TextMeshProUGUI controls = GetOrCreateText(window.transform, "Controls", new Vector2(0f, 20f), new Vector2(560f, 260f), font, 24f, TextAlignmentOptions.TopLeft);
+            TextMeshProUGUI controls = GetOrCreateText(window.transform, "Controls", new Vector2(0f, 40f), new Vector2(560f, 250f), font, 24f, TextAlignmentOptions.TopLeft);
             controls.text = string.Empty;
             controls.lineSpacing = 14f;
             controls.color = Phosphor;
 
-            Image buttonImage = Phase1Builder.GetOrCreateImage(window.transform, "ResumeButton", new Vector2(0f, -185f), new Vector2(340f, 70f), CodeBlue);
+            Image buttonImage = Phase1Builder.GetOrCreateImage(window.transform, "ResumeButton", new Vector2(0f, -135f), new Vector2(360f, 60f), CodeBlue);
             buttonImage.raycastTarget = true;
             Button button = Phase1Builder.GetOrAdd<Button>(buttonImage.gameObject);
             button.targetGraphic = buttonImage;
@@ -584,9 +584,18 @@ namespace NostalgIA.EditorTools.Setup
             colors.selectedColor = new Color(0.85f, 0.92f, 1f);
             colors.pressedColor = new Color(0.65f, 0.75f, 0.95f);
             button.colors = colors;
-            TextMeshProUGUI hint = GetOrCreateText(buttonImage.transform, "Label", Vector2.zero, new Vector2(320f, 60f), font, 28f, TextAlignmentOptions.Center);
+            TextMeshProUGUI hint = GetOrCreateText(buttonImage.transform, "Label", Vector2.zero, new Vector2(340f, 52f), font, 26f, TextAlignmentOptions.Center);
             hint.text = "Continuar";
             hint.color = Phosphor;
+
+            Image nextButtonImage = Phase1Builder.GetOrCreateImage(window.transform, "NextLevelTestButton", new Vector2(0f, -206f), new Vector2(440f, 54f), new Color(0.11f, 0.36f, 0.68f, 0.96f));
+            nextButtonImage.raycastTarget = true;
+            Button nextButton = Phase1Builder.GetOrAdd<Button>(nextButtonImage.gameObject);
+            nextButton.targetGraphic = nextButtonImage;
+            nextButton.colors = colors;
+            TextMeshProUGUI nextHint = GetOrCreateText(nextButtonImage.transform, "Label", Vector2.zero, new Vector2(420f, 48f), font, 21f, TextAlignmentOptions.Center);
+            nextHint.text = "Siguiente nivel (Test)";
+            nextHint.color = Phosphor;
 
             PauseOverlayPresenter presenter = Phase1Builder.GetOrAdd<PauseOverlayPresenter>(overlay.gameObject);
             var so = new SerializedObject(presenter);
@@ -594,6 +603,8 @@ namespace NostalgIA.EditorTools.Setup
             so.FindProperty("controlsText").objectReferenceValue = controls;
             so.FindProperty("resumeHintText").objectReferenceValue = hint;
             so.FindProperty("resumeButton").objectReferenceValue = button;
+            so.FindProperty("nextLevelButton").objectReferenceValue = nextButton;
+            so.FindProperty("nextLevelLabel").objectReferenceValue = nextHint;
             so.ApplyModifiedPropertiesWithoutUndo();
 
             // El lienzo empieza apagado: el presentador lo enciende solo en pausa.
