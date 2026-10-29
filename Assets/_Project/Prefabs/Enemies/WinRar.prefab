@@ -56,8 +56,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.9, y: 0.8, z: 1.2}
-  m_Center: {x: 0, y: 0.4, z: 0}
+  m_Size: {x: 2, y: 2.5, z: 2}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!54 &1382678298615448604
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -126,8 +126,10 @@ MonoBehaviour:
   fullHealthColor: {r: 0, g: 0, b: 0, a: 0}
   woundedColor: {r: 1, g: 0.55, b: 0.12, a: 1}
   criticalColor: {r: 0.85, g: 0.08, b: 0.08, a: 1}
+  forcePerDamageUnit: 45
+  minUnthrownForceThreshold: 25
   minImpactVelocity: 3.5
-  defaultImpactDamage: 1
+  minPlayerThrownDamage: 1
   damageFlashColor: {r: 1, g: 1, b: 1, a: 1}
   flashDuration: 0.12
   showFloatingDamage: 1
@@ -135,6 +137,7 @@ MonoBehaviour:
   healthBarHeight: 1.1
   spawnGibsOnDeath: 1
   gibCount: 5
+  contactDamageToPlayer: 1
   onTakeDamage:
     m_PersistentCalls:
       m_Calls: []
@@ -176,15 +179,15 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: -8679921383154817045, guid: 017941ca37aa09008a1c6ad326bea8e5, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0
+      value: 0.08
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 017941ca37aa09008a1c6ad326bea8e5, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: 0.59
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 017941ca37aa09008a1c6ad326bea8e5, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0
+      value: -1.34
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 017941ca37aa09008a1c6ad326bea8e5, type: 3}
       propertyPath: m_LocalRotation.w
