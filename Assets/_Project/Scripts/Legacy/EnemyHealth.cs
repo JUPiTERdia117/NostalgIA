@@ -433,26 +433,8 @@ public class EnemyHealth : MonoBehaviour, IDamageable, IContactHazard
 
     private void SpawnDebris()
     {
-        Vector3 center = transform.position;
-        for (int i = 0; i < gibCount; i++)
-        {
-            GameObject gib = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            gib.name = "Gib_Debris";
-            gib.transform.position = center + Random.insideUnitSphere * 0.35f;
-            gib.transform.localScale = Vector3.one * Random.Range(0.12f, 0.28f);
-
-            if (renderers != null && renderers.Length > 0 && renderers[0] != null && renderers[0].sharedMaterial != null)
-            {
-                gib.GetComponent<Renderer>().sharedMaterial = renderers[0].sharedMaterial;
-            }
-
-            Rigidbody rb = gib.AddComponent<Rigidbody>();
-            rb.mass = 0.2f;
-            Vector3 force = (Random.onUnitSphere + Vector3.up * 0.75f).normalized * Random.Range(3f, 7f);
-            rb.AddForce(force, ForceMode.Impulse);
-            rb.angularVelocity = Random.insideUnitSphere * 10f;
-
-            Destroy(gib, Random.Range(1.5f, 2.5f));
-        }
+        // El efecto se movió a EnemyDeathEffect para compartirlo con el jefe final; los números son los mismos.
+        Material material = renderers != null && renderers.Length > 0 && renderers[0] != null ? renderers[0].sharedMaterial : null;
+        NostalgIA.Gameplay.Enemies.EnemyDeathEffect.Spawn(transform.position, material, gibCount);
     }
 }

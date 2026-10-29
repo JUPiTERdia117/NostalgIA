@@ -29,6 +29,8 @@ namespace NostalgIA.Core
         public const string Dreamcore = "dreamcore";
         /// <summary>Estación 4 (Invierno), laberinto circular de TVs y combate contra la IA.</summary>
         public const string InviernoIA = "40_Invierno_IA";
+        /// <summary>Estación final: se llega por el portal que deja la IA al ser destruida.</summary>
+        public const string EstacionFinal = "50_Estacion_Final";
 
         /// <summary>Rutas de las escenas dentro del proyecto (solo para herramientas de editor).</summary>
         public static class Paths
@@ -39,6 +41,7 @@ namespace NostalgIA.Core
             public const string VeranoFrutiger = "Assets/_Project/Scenes/Stations/20_Verano_Frutiger.unity";
             public const string Dreamcore = "Assets/_Project/Scenes/Stations/dreamcore.unity";
             public const string InviernoIA = "Assets/_Project/Scenes/Stations/40_Invierno_IA.unity";
+            public const string EstacionFinal = "Assets/_Project/Scenes/Stations/50_Estacion_Final.unity";
             /// <summary>Carpeta de escenas de prueba que nunca deben incluirse en el build.</summary>
             public const string SandboxFolder = "Assets/_Project/Scenes/Sandbox/";
             /// <summary>Carpeta de escenas de las Estaciones.</summary>

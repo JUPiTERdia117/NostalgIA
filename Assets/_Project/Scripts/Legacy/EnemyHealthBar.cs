@@ -40,10 +40,13 @@ public class EnemyHealthBar : MonoBehaviour
         // 1. Fondo de la barra (Gris oscuro / Negro)
         GameObject bgObj = GameObject.CreatePrimitive(PrimitiveType.Quad);
         bgObj.name = "BG";
+        // Quito el collider del quad ANTES de colgarlo del enemigo: Destroy espera al final del
+        // frame y, mientras tanto, un MeshCollider cóncavo bajo un Rigidbody dinámico (las arañas
+        // que suelta el nido) llenaba la consola de errores de física.
+        DestroyImmediate(bgObj.GetComponent<Collider>());
         bgObj.transform.SetParent(transform, false);
         bgObj.transform.localPosition = new Vector3(0, 0, 0.005f);
         bgObj.transform.localScale = new Vector3(barSize.x + 0.06f, barSize.y + 0.04f, 1f);
-        Destroy(bgObj.GetComponent<Collider>());
 
         Renderer bgRend = bgObj.GetComponent<Renderer>();
         bgRend.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
@@ -55,10 +58,11 @@ public class EnemyHealthBar : MonoBehaviour
         // 2. Barra de relleno de vida
         GameObject fillObj = GameObject.CreatePrimitive(PrimitiveType.Quad);
         fillObj.name = "Fill";
+        // Igual que con el fondo: sin collider antes de colgarlo del enemigo.
+        DestroyImmediate(fillObj.GetComponent<Collider>());
         fillObj.transform.SetParent(transform, false);
         fillObj.transform.localPosition = Vector3.zero;
         fillObj.transform.localScale = new Vector3(barSize.x, barSize.y, 1f);
-        Destroy(fillObj.GetComponent<Collider>());
 
         fillTransform = fillObj.transform;
         fillRenderer = fillObj.GetComponent<Renderer>();

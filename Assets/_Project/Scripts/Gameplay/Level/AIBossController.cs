@@ -7,6 +7,7 @@
 // -----------------------------------------------------------------------------
 
 using NostalgIA.Core.Events;
+using NostalgIA.Gameplay.Enemies;
 using NostalgIA.Gameplay.Player;
 using UnityEngine;
 
@@ -19,7 +20,9 @@ namespace NostalgIA.Gameplay.Level
     /// <item>Despliega la Oleada 1; al derrotarla todos sus enemigos, activa el Monitor 1 en la pared.</item>
     /// <item>Cuando el jugador dispara un objeto absorbido y destruye el Monitor 1, daña a la IA (1/3) y lanza la Oleada 2.</item>
     /// <item>Al derrotar la Oleada 2 se activa el Monitor 2; al destruirlo daña a la IA (2/3) y lanza la Oleada 3.</item>
-    /// <item>Al derrotar la Oleada 3 se activa el Monitor 3; con el tercer golpe vence a la IA y gana el juego.</item>
+    /// <item>Al derrotar la Oleada 3 se activa el Monitor 3; con el tercer golpe vence a la IA.</item>
+    /// <item>La IA se destruye con el mismo efecto de muerte de los enemigos y en su lugar queda
+    /// flotando el portal a la estación final, con una esfera de gancho arriba para alcanzarlo.</item>
     /// </list>
     /// </summary>
     [DisallowMultipleComponent]
@@ -65,6 +68,18 @@ namespace NostalgIA.Gameplay.Level
         [Tooltip("Objetos que se activan al vencer a la IA (efectos o iluminación de victoria).")]
         [SerializeField] private GameObject[] activateOnVictory = new GameObject[0];
 
+        [Header("Destrucción de la IA y portal final")]
+        [Tooltip("Fragmentos del efecto de muerte de enemigos que suelta el núcleo al destruirse.")]
+        [SerializeField, Min(1)] private int coreGibCount = 16;
+        [Tooltip("Escala del efecto de muerte para un objeto tan grande como el núcleo (1 = enemigo normal).")]
+        [SerializeField, Min(0.1f)] private float coreGibScale = 2.5f;
+        [Tooltip("Portal a la estación final; queda apagado hasta vencer a la IA y aparece donde estaba el núcleo.")]
+        [SerializeField] private GameObject victoryPortal;
+        [Tooltip("Esfera de gancho sobre el portal para poder alcanzarlo; también aparece al vencer a la IA.")]
+        [SerializeField] private GameObject victoryGrappleAnchor;
+        [Tooltip("Distancia bajo el centro de la arena a partir de la cual un enemigo caído cuenta como derrotado, en m.")]
+        [SerializeField, Min(5f)] private float fallenEnemyDepth = 20f;
+
         private static readonly int BaseColorId = Shader.PropertyToID("_BaseColor");
         private static readonly int ColorId = Shader.PropertyToID("_Color");
         private const float PollInterval = 0.12f;
@@ -100,6 +115,24 @@ namespace NostalgIA.Gameplay.Level
             activateOnVictory = victoryObjects ?? new GameObject[0];
         }
 
+        /// <summary>Asigna el portal de victoria y su esfera de gancho desde una herramienta de editor.</summary>
+        public void ConfigureVictoryPortal(GameObject portal, GameObject grappleAnchor)
+        {
+            victoryPortal = portal;
+            victoryGrappleAnchor = grappleAnchor;
+        }
+
+        /// <summary>
+        /// Atajo de prueba (menú contextual del componente en modo juego): da por vencida a la IA
+        /// para revisar la destrucción y el portal sin jugar las tres oleadas.
+        /// </summary>
+        [ContextMenu("Prueba: vencer a la IA")]
+        private void DebugDefeat()
+        {
+            if (!Application.isPlaying || phase == BossPhase.Defeated) return;
+            CompleteBossFight();
+        }
+
         private void Awake()
         {
             propBlock = new MaterialPropertyBlock();
@@ -123,6 +156,10 @@ namespace NostalgIA.Gameplay.Level
             {
                 if (activateOnVictory[i] != null) activateOnVictory[i].SetActive(false);
             }
+
+            // El portal y su esfera de gancho no existen para el jugador hasta que cae la IA.
+            if (victoryPortal != null) victoryPortal.SetActive(false);
+            if (victoryGrappleAnchor != null) victoryGrappleAnchor.SetActive(false);
 
             ApplyBossEyeColor(new Color(0.0f, 0.85f, 1.0f, 1f));
         }
@@ -268,19 +305,29 @@ namespace NostalgIA.Gameplay.Level
                 new HudMessageRequested("» [IA CENTRAL] ¡Sobrecarga final! Derrota a la Oleada 3/3."));
         }
 
-        private static bool IsWaveCleared(Transform waveContainer)
+        /// <summary>
+        /// Una oleada termina cuando ya no le queda ningún enemigo activo. Si un enemigo cayó fuera
+        /// de la arena (por ejemplo, una araña expulsada por el nido que salió volando), nunca
+        /// podría morir y el combate se quedaría atorado: a los que están muy por debajo del piso
+        /// los cuento como derrotados y los elimino.
+        /// </summary>
+        private bool IsWaveCleared(Transform waveContainer)
         {
             if (waveContainer == null) return true;
-            int childCount = waveContainer.childCount;
-            for (int i = 0; i < childCount; i++)
+            float floorLimit = transform.position.y - fallenEnemyDepth;
+            bool cleared = true;
+            for (int i = waveContainer.childCount - 1; i >= 0; i--)
             {
                 Transform child = waveContainer.GetChild(i);
-                if (child != null && child.gameObject.activeInHierarchy)
+                if (child == null || !child.gameObject.activeInHierarchy) continue;
+                if (child.position.y < floorLimit)
                 {
-                    return false;
+                    Destroy(child.gameObject);
+                    continue;
                 }
+                cleared = false;
             }
-            return true;
+            return cleared;
         }
 
         private void ExposeMonitor(int index, string hudMessage)
@@ -314,11 +361,16 @@ namespace NostalgIA.Gameplay.Level
 
             ApplyBossEyeColor(new Color(0.08f, 0.1f, 0.12f, 1f));
 
+            // La IA se destruye con el mismo efecto que los enemigos (cubos con su material que
+            // salen disparados), solo que más grandes porque el núcleo mide varios metros.
             if (bossCoreTransform != null)
             {
-                Material mat = bossEyeRenderer != null ? bossEyeRenderer.sharedMaterial : null;
-                EventBus<BreakableDestroyed>.Raise(
-                    new BreakableDestroyed(bossCoreTransform.position, 18, mat, 3.5f));
+                Renderer coreRenderer = bossCoreTransform.GetComponentInChildren<Renderer>();
+                Material material = coreRenderer != null ? coreRenderer.sharedMaterial : null;
+                EnemyDeathEffect.Spawn(bossCoreTransform.position, material, coreGibCount, coreGibScale);
+                Destroy(bossCoreTransform.gameObject);
+                bossCoreTransform = null;
+                bossEyeRenderer = null;
             }
 
             for (int i = 0; i < activateOnVictory.Length; i++)
@@ -326,24 +378,19 @@ namespace NostalgIA.Gameplay.Level
                 if (activateOnVictory[i] != null) activateOnVictory[i].SetActive(true);
             }
 
+            // En el lugar del núcleo queda el portal flotando, con la esfera de gancho encima.
+            if (victoryPortal != null) victoryPortal.SetActive(true);
+            if (victoryGrappleAnchor != null) victoryGrappleAnchor.SetActive(true);
+
             EventBus<StationCompleted>.Raise(new StationCompleted(3, 3, Time.timeSinceLevelLoad));
             EventBus<HudMessageRequested>.Raise(
-                new HudMessageRequested("» ¡NÚCLEO DE LA IA DESTRUIDO (3/3)! ¡HAS VENCIDO A LA IA Y GANADO EL JUEGO!"));
+                new HudMessageRequested("» ¡NÚCLEO DE LA IA DESTRUIDO (3/3)! Engánchate a la esfera y déjate caer en el portal."));
         }
 
         private void AnimateBossCore(float dt)
         {
-            if (bossCoreTransform == null) return;
-
-            if (phase == BossPhase.Defeated)
-            {
-                // Al ser derrotada la IA, el chasis colgante pierde energía y queda inclinado hacia abajo.
-                Quaternion defeatedRot = coreBaseRotation * Quaternion.Euler(28f, 0f, 14f);
-                bossCoreTransform.localRotation = Quaternion.Slerp(bossCoreTransform.localRotation, defeatedRot, 2.5f * dt);
-                Vector3 defeatedPos = coreBasePosition + new Vector3(0f, -1.2f, 0f);
-                bossCoreTransform.localPosition = Vector3.Lerp(bossCoreTransform.localPosition, defeatedPos, 2.5f * dt);
-                return;
-            }
+            // Tras la derrota el núcleo ya no existe (se destruyó en CompleteBossFight).
+            if (bossCoreTransform == null || phase == BossPhase.Defeated) return;
 
             // Giro vigilante mirando hacia el jugador como el núcleo central de Portal.
             if (playerTransform != null)

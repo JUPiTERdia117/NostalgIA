@@ -107,6 +107,7 @@ namespace NostalgIA.Gameplay.Level
 
         private PlayerMotor motor;
         private VacuumTool vacuum;
+        private GrappleTool grapple;
         private Transform viewer;
         private PersistAcrossLevels[] persistent = new PersistAcrossLevels[0];
 
@@ -233,7 +234,11 @@ namespace NostalgIA.Gameplay.Level
         {
             source = gameObject.scene;
             motor = FindAnyObjectByType<PlayerMotor>();
-            if (motor != null) vacuum = motor.GetComponentInChildren<VacuumTool>(true);
+            if (motor != null)
+            {
+                vacuum = motor.GetComponentInChildren<VacuumTool>(true);
+                grapple = motor.GetComponentInChildren<GrappleTool>(true);
+            }
             Camera main = Camera.main;
             viewer = main != null ? main.transform : (motor != null ? motor.transform : null);
 
@@ -312,9 +317,10 @@ namespace NostalgIA.Gameplay.Level
             if (phase != Phase.Awake && phase != Phase.Waking && phase != Phase.Sleeping) return;
 
             Vector3 local = transform.InverseTransformPoint(viewer.position);
-            // Cuando la puerta está acostada mirando hacia arriba (forward ≈ +Y) y el jugador cae en ella
-            // desde una plataforma superior, doy algo más de margen en los bordes y en profundidad para
-            // no perder el cruce por la velocidad vertical de caída.
+            // Cuando la puerta está acostada (forward ≈ +Y, el jugador cae en ella desde una plataforma
+            // superior; o forward ≈ −Y, como el portal del jefe final, que se cruza subiendo con el
+            // gancho), doy algo más de margen en los bordes y en profundidad para no perder el cruce
+            // por la velocidad vertical.
             bool upwardGate = Mathf.Abs(transform.forward.y) > 0.5f;
             float margin = upwardGate ? 0.55f : 0.05f;
             float depthRange = upwardGate ? 3.8f : 2.4f;
@@ -447,10 +453,13 @@ namespace NostalgIA.Gameplay.Level
         }
 
         /// <summary>
-        /// Duerme la escena recién cargada: se desactivan los hijos directos de cada raíz (o la raíz
-        /// si no tiene hijos). Se eligió el primer nivel de la jerarquía como unidad de trabajo del
-        /// despertar por partes: es lo bastante fino para repartir el costo y no obliga a recorrer
-        /// toda la jerarquía.
+        /// Duerme la escena recién cargada: se desactivan los hijos de cada raíz (o la raíz si no
+        /// tiene hijos). Antes usaba solo el primer nivel de la jerarquía como unidad de trabajo,
+        /// pero en Verano casi todo cuelga de un grupo "Nivel2" con cinco hijos enormes: despertar
+        /// uno de ellos activaba decenas de objetos en un solo frame y el juego se trababa al
+        /// llegar a las escaleras del Tutorial. Ahora bajo dentro de los grupos vacíos (objetos
+        /// que solo tienen Transform) hasta encontrar objetos con contenido, así cada parte del
+        /// despertar es pequeña y el presupuesto de milisegundos por frame sí se respeta.
         /// </summary>
         private void AdoptDestination(Scene scene)
         {
@@ -471,13 +480,7 @@ namespace NostalgIA.Gameplay.Level
                     sleepers.Add(root);
                     continue;
                 }
-                for (int c = 0; c < rootTransform.childCount; c++)
-                {
-                    GameObject child = rootTransform.GetChild(c).gameObject;
-                    if (!child.activeSelf) continue;   // Lo que ya estaba apagado (contenido independiente) se respeta.
-                    child.SetActive(false);
-                    sleepers.Add(child);
-                }
+                CollectSleepers(rootTransform, 0);
             }
 
             exit = FindEntrance(scene);
@@ -487,6 +490,35 @@ namespace NostalgIA.Gameplay.Level
             if (skipImmediatelyWhenLoaded)
             {
                 ExecuteImmediateSkipCross();
+            }
+        }
+
+        /// <summary>
+        /// Duerme los hijos de <paramref name="parent"/>. Si un hijo es un grupo vacío (solo tiene
+        /// Transform) bajo un nivel más y duermo a sus hijos en su lugar; desactivar al grupo o a
+        /// cada uno de sus hijos da el mismo resultado, pero así el trabajo queda en piezas chicas.
+        /// Lo que ya estaba apagado (por ejemplo el contenido independiente) se respeta.
+        /// </summary>
+        /// <param name="parent">Objeto cuyos hijos se van a dormir.</param>
+        /// <param name="depth">Profundidad actual; limito la bajada a 6 niveles.</param>
+        private void CollectSleepers(Transform parent, int depth)
+        {
+            const int MaxDepth = 6;
+            for (int c = 0; c < parent.childCount; c++)
+            {
+                Transform childTransform = parent.GetChild(c);
+                GameObject child = childTransform.gameObject;
+                if (!child.activeSelf) continue;
+
+                bool emptyGroup = childTransform.childCount > 0 && child.GetComponentCount() == 1;
+                if (emptyGroup && depth < MaxDepth)
+                {
+                    CollectSleepers(childTransform, depth + 1);
+                    continue;
+                }
+
+                child.SetActive(false);
+                sleepers.Add(child);
             }
         }
 
@@ -585,6 +617,12 @@ namespace NostalgIA.Gameplay.Level
                 spawnPosition = entrance.SpawnPosition;
                 spawnRotation = entrance.SpawnRotation;
             }
+
+            // Si el jugador cruza colgado del gancho (el portal del jefe final se alcanza así), suelto
+            // el cable antes de trasladarlo: el ancla se queda en el nivel anterior y, sin soltarlo,
+            // el gancho lo seguiría jalando hacia ese punto lejano.
+            if (grapple == null) grapple = motor.GetComponentInChildren<GrappleTool>(true);
+            if (grapple != null) grapple.Release();
 
             Transform player = motor.transform;
             bool differentInclination = Mathf.Abs(transform.forward.y - exit.forward.y) > 0.5f;

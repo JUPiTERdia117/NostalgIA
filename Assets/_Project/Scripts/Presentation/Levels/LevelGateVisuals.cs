@@ -133,6 +133,17 @@ namespace NostalgIA.Presentation.Levels
         [Tooltip("Duración de la mezcla de perfiles de postprocesado al cruzar, en s.")]
         [SerializeField, Min(0.05f)] private float volumeCrossfade = 1f;
 
+        [Header("Precalentado de shaders")]
+        [Tooltip("Dibuja de forma invisible los materiales del nivel siguiente mientras duerme, para que sus shaders no se compilen todos de golpe al despertar.")]
+        [SerializeField] private bool warmShaders = true;
+        [Tooltip("Materiales que se precalientan por frame (1 reparte mejor los picos en teléfonos).")]
+        [SerializeField, Range(1, 8)] private int warmupItemsPerFrame = 1;
+        [Tooltip("Espera tras la precarga antes de empezar el precalentado, en s.")]
+        [SerializeField, Min(0f)] private float warmupDelay = 1f;
+
+        // Capa sin nombre en el proyecto: durante el precalentado la cámara del portal solo ve esta capa.
+        private const int WarmLayer = 31;
+
         private MaterialPropertyBlock block;
         private Camera portalCamera;
         private UniversalAdditionalCameraData portalCameraData;
@@ -158,6 +169,12 @@ namespace NostalgIA.Presentation.Levels
         private float dissolve;
         private Vector3 baseSurfaceScale;
         private Vector3 baseArrivalScale;
+
+        private LevelShaderWarmup warmup;
+        private RenderTexture warmTexture;
+        private bool warming;
+        private bool warmRendering;
+        private float warmupTimer;
 
         // ------------------------------------------------------------------ ciclo de vida
         /// <summary>Crea la cámara del portal y la cookie (una sola vez, al cargar el nivel).</summary>
@@ -221,6 +238,7 @@ namespace NostalgIA.Presentation.Levels
             RenderPipelineManager.endCameraRendering -= OnEndCameraRendering;
             if (borrowing) EndBorrow();
             ReleaseViewTexture();
+            ReleaseWarmTexture();
         }
 
         /// <summary>Libera la cookie y la abertura de regreso (que vive en la otra escena).</summary>
@@ -267,6 +285,15 @@ namespace NostalgIA.Presentation.Levels
             // Las sondas de luz de ambas escenas se combinan en segundo plano.
             LightProbes.TetrahedralizeAsync();
             prepared = true;
+
+            // Lista de materiales del nivel siguiente para precalentarlos mientras duerme.
+            if (warmShaders)
+            {
+                warmup ??= new LevelShaderWarmup();
+                warmup.Collect(evt.Destination);
+                warming = warmup.Count > 0;
+                warmupTimer = warmupDelay;
+            }
         }
 
         /// <summary>El nivel siguiente despertó o volvió a dormir.</summary>
@@ -468,6 +495,20 @@ namespace NostalgIA.Presentation.Levels
             }
             forceRenderFrame = false;
 
+            // Mientras el nivel siguiente duerme y la vista no se dibuja, la cámara del portal se
+            // presta para precalentar sus shaders. Si la vista real arranca antes de terminar (o el
+            // jugador cruza), el precalentado se corta: a partir de ahí el dibujo real hace lo mismo.
+            warmRendering = false;
+            if (warming)
+            {
+                if (!render && !crossed && !destinationAwake)
+                {
+                    WarmupStep();
+                    return;
+                }
+                StopWarmup();
+            }
+
             if (portalCamera.enabled != render) portalCamera.enabled = render;
             if (!render) return;
 
@@ -507,12 +548,90 @@ namespace NostalgIA.Presentation.Levels
             screen.localPosition = position;
         }
 
+        // ------------------------------------------------------------------ precalentado de shaders
+        /// <summary>
+        /// Un paso del precalentado: coloca la cámara del portal en el marco de llegada, la limita a
+        /// la capa de precalentado, apunta a la textura diminuta y dibuja la siguiente entrada.
+        /// </summary>
+        private void WarmupStep()
+        {
+            if (warmupTimer > 0f)
+            {
+                warmupTimer -= Time.deltaTime;
+                if (portalCamera.enabled) portalCamera.enabled = false;
+                return;
+            }
+
+            EnsureWarmTexture();
+            Transform anchor = exit != null ? exit : transform;
+            portalCamera.transform.SetPositionAndRotation(anchor.position + Vector3.up * 1.6f, anchor.rotation);
+            portalCamera.targetTexture = warmTexture;
+            portalCamera.cullingMask = 1 << WarmLayer;
+            portalCamera.fieldOfView = 60f;
+            portalCamera.aspect = 1f;
+            portalCamera.nearClipPlane = 0.1f;
+            portalCamera.farClipPlane = 50f;
+            portalCamera.ResetProjectionMatrix();
+            portalCamera.depth = (viewerCamera != null ? viewerCamera.depth : 0f) - 2f;
+            if (!portalCamera.enabled) portalCamera.enabled = true;
+            warmRendering = true;
+
+            if (warmup.DrawNext(portalCamera, WarmLayer, viewerCamera, warmupItemsPerFrame)) StopWarmup();
+        }
+
+        /// <summary>
+        /// Termina el precalentado: suelta la textura diminuta y deja creada la textura de la vista
+        /// real, para que tampoco haya que reservar memoria en el frame en que la puerta despierta.
+        /// </summary>
+        private void StopWarmup()
+        {
+            warming = false;
+            if (portalCamera == null) return;
+            // Si este mismo frame todavía tenía un dibujo de precalentado pendiente, la cámara se
+            // apaga en el siguiente paso de UpdatePortalCamera (que es quien decide si hay vista real).
+            if (!warmRendering) portalCamera.enabled = false;
+            portalCamera.targetTexture = null;
+            ReleaseWarmTexture();
+            EnsureViewTexture();
+        }
+
+        /// <summary>
+        /// Textura de 32 × 32 con el mismo formato y profundidad que la vista real: el estado de la
+        /// tubería gráfica depende del formato, no del tamaño, así que precalentar aquí sirve igual
+        /// y casi no cuesta.
+        /// </summary>
+        private void EnsureWarmTexture()
+        {
+            if (warmTexture != null) return;
+            RenderTextureFormat format = LdrEmissionFallback.PipelineIsLdr() ? RenderTextureFormat.Default : RenderTextureFormat.DefaultHDR;
+            warmTexture = new RenderTexture(32, 32, 24, format) { name = "LevelGateWarmup" };
+            warmTexture.Create();
+        }
+
+        /// <summary>Libera la textura del precalentado.</summary>
+        private void ReleaseWarmTexture()
+        {
+            if (warmTexture == null) return;
+            if (portalCamera != null && portalCamera.targetTexture == warmTexture) portalCamera.targetTexture = null;
+            warmTexture.Release();
+            Destroy(warmTexture);
+            warmTexture = null;
+        }
+
         // ------------------------------------------------------------------ iluminación prestada
         /// <summary>Justo antes de dibujar la cámara del portal se presta la iluminación del otro nivel.</summary>
         private void OnBeginCameraRendering(ScriptableRenderContext context, Camera camera)
         {
             if (camera != portalCamera || borrowedState == null || currentState == null) return;
             borrowing = true;
+            if (warmRendering)
+            {
+                // Precalentado: el sol del nivel siguiente sigue dormido (su objeto está apagado),
+                // así que dejo encendido el del nivel actual para que las variantes con sombras
+                // del sol sí se preparen; del nivel siguiente solo tomo cielo, ambiente y niebla.
+                borrowedState.ApplyRenderSettings();
+                return;
+            }
             currentState.SetSunsEnabled(false);
             borrowedState.SetSunsEnabled(true);
             borrowedState.ApplyRenderSettings();
@@ -545,7 +664,12 @@ namespace NostalgIA.Presentation.Levels
             float scale = Application.isMobilePlatform ? mobileResolutionScale : resolutionScale;
             int width = Mathf.Max(64, Mathf.RoundToInt(Screen.width * scale));
             int height = Mathf.Max(64, Mathf.RoundToInt(Screen.height * scale));
-            if (viewTexture != null && viewTexture.width == width && viewTexture.height == height) return;
+            if (viewTexture != null && viewTexture.width == width && viewTexture.height == height)
+            {
+                // La textura pudo crearse al terminar el precalentado sin quedar asignada a la cámara.
+                if (portalCamera.targetTexture != viewTexture) portalCamera.targetTexture = viewTexture;
+                return;
+            }
 
             ReleaseViewTexture();
             RenderTextureFormat format = LdrEmissionFallback.PipelineIsLdr() ? RenderTextureFormat.Default : RenderTextureFormat.DefaultHDR;
