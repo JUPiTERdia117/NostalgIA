@@ -194,6 +194,107 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 22927364}
   m_CullTransparentMesh: 1
+--- !u!1 &25910599
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 25910600}
+  - component: {fileID: 25910603}
+  - component: {fileID: 25910602}
+  - component: {fileID: 25910601}
+  m_Layer: 0
+  m_Name: PromptZone_Estrella
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &25910600
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 25910599}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 20.62, y: 4.3, z: -36.67}
+  m_LocalScale: {x: 0.15925042, y: 1.8662, z: 0.9887254}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1342790184}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &25910601
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 25910599}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 91f7a421b8c642e185d39f7062d854e1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: NostalgIA.Gameplay::NostalgIA.Gameplay.Level.PromptZone
+  mode: 0
+  triggerOnce: 1
+  title: Estrella
+  description: Recoge la estrella al pasar sobre ella
+  controls: 
+  gizmoColor: {r: 0.9837489, g: 1, b: 0, a: 0.35}
+  showAlways: 1
+--- !u!54 &25910602
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 25910599}
+  serializedVersion: 5
+  m_Mass: 1
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
+--- !u!65 &25910603
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 25910599}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 25, y: 8, z: 25}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &29017583
 GameObject:
   m_ObjectHideFlags: 0
@@ -1617,7 +1718,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1067873417948425442, guid: cc7a0bd4b1f3a48a0b306d11a87fb115, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 15.8
+      value: 11.59
       objectReference: {fileID: 0}
     - target: {fileID: 1067873417948425442, guid: cc7a0bd4b1f3a48a0b306d11a87fb115, type: 3}
       propertyPath: m_LocalPosition.y
@@ -1625,7 +1726,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1067873417948425442, guid: cc7a0bd4b1f3a48a0b306d11a87fb115, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -43.09
+      value: -43.33
       objectReference: {fileID: 0}
     - target: {fileID: 1067873417948425442, guid: cc7a0bd4b1f3a48a0b306d11a87fb115, type: 3}
       propertyPath: m_LocalRotation.w
@@ -5339,8 +5440,9 @@ GameObject:
   - component: {fileID: 533781050}
   - component: {fileID: 533781052}
   - component: {fileID: 533781051}
+  - component: {fileID: 533781053}
   m_Layer: 0
-  m_Name: PromptZone_4
+  m_Name: PromptZone_Combate
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5355,7 +5457,7 @@ Transform:
   m_GameObject: {fileID: 533781049}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 55, y: 1.5, z: -113.8}
+  m_LocalPosition: {x: -11.37, y: 1.5, z: -32.65}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -5409,6 +5511,26 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 20, y: 8, z: 20}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &533781053
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 533781049}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 91f7a421b8c642e185d39f7062d854e1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: NostalgIA.Gameplay::NostalgIA.Gameplay.Level.PromptZone
+  mode: 0
+  triggerOnce: 1
+  title: Combate a los enemigos
+  description: Absorbe proyectiles o cajas y derrota a los enemigos
+  controls: <color=#00E5FF><b>[Clic Der]</b></color> Absorber   <color=#FFD166><b>[Clic
+    Izq]</b></color> Disparar a enemigos
+  gizmoColor: {r: 0.9, g: 0.2, b: 0.4, a: 0.35}
+  showAlways: 1
 --- !u!43 &548709297
 Mesh:
   m_ObjectHideFlags: 0
@@ -5669,6 +5791,109 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 554689814}
   m_CullTransparentMesh: 1
+--- !u!1 &556533739
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 556533740}
+  - component: {fileID: 556533743}
+  - component: {fileID: 556533742}
+  - component: {fileID: 556533741}
+  m_Layer: 0
+  m_Name: PromptZone_Aspiradora
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &556533740
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 556533739}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -11.73, y: 1.5, z: 17.29}
+  m_LocalScale: {x: 1, y: 1, z: 0.23875873}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1342790184}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &556533741
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 556533739}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 91f7a421b8c642e185d39f7062d854e1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: NostalgIA.Gameplay::NostalgIA.Gameplay.Level.PromptZone
+  mode: 0
+  triggerOnce: 1
+  title: Absorber y Disparar
+  description: Absorbe cubos con clic secundario y dispara con primario para abrir
+    camino.
+  controls: '<color=#00E5FF><b>[Clic Der]</b></color> Absorber   <color=#FFD166><b>[Clic
+    Izq]</b></color> Disparar  '
+  gizmoColor: {r: 0, g: 0.9, b: 0.85, a: 0.35}
+  showAlways: 1
+--- !u!54 &556533742
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 556533739}
+  serializedVersion: 5
+  m_Mass: 1
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
+--- !u!65 &556533743
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 556533739}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 15, y: 8, z: 14}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &568202537
 GameObject:
   m_ObjectHideFlags: 0
@@ -5781,87 +6006,6 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 568202537}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
---- !u!1 &570415675
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 570415676}
-  - component: {fileID: 570415678}
-  - component: {fileID: 570415677}
-  m_Layer: 0
-  m_Name: PromptZone_3
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &570415676
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 570415675}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 8, y: 1.5, z: -45}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 1342790184}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!54 &570415677
-Rigidbody:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 570415675}
-  serializedVersion: 5
-  m_Mass: 1
-  m_LinearDamping: 0
-  m_AngularDamping: 0.05
-  m_CenterOfMass: {x: 0, y: 0, z: 0}
-  m_InertiaTensor: {x: 1, y: 1, z: 1}
-  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ImplicitCom: 1
-  m_ImplicitTensor: 1
-  m_UseGravity: 0
-  m_IsKinematic: 1
-  m_Interpolate: 0
-  m_Constraints: 0
-  m_CollisionDetection: 0
---- !u!65 &570415678
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 570415675}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 1
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 20, y: 8, z: 20}
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &576127045 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7478996251946673479, guid: 6dca3296afaed4206b5e70be896a5e8e, type: 3}
@@ -8101,7 +8245,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5952393192728891583, guid: df2a49966b35c40218e4485f863c7e5f, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 21
+      value: 26.19
       objectReference: {fileID: 0}
     - target: {fileID: 5952393192728891583, guid: df2a49966b35c40218e4485f863c7e5f, type: 3}
       propertyPath: m_LocalRotation.w
@@ -8705,7 +8849,7 @@ Transform:
   m_GameObject: {fileID: 972778426}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -12.36, y: 1.81, z: -17.06}
+  m_LocalPosition: {x: -12.36, y: 1.81, z: -20.89}
   m_LocalScale: {x: 19.79, y: 1.1, z: 1.2}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -8800,8 +8944,9 @@ GameObject:
   - component: {fileID: 1002267714}
   - component: {fileID: 1002267716}
   - component: {fileID: 1002267715}
+  - component: {fileID: 1002267717}
   m_Layer: 0
-  m_Name: PromptZone_2
+  m_Name: PromptZone_Salto
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -8816,8 +8961,8 @@ Transform:
   m_GameObject: {fileID: 1002267713}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -11.7, y: 1.5, z: -15}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: -11.7, y: 1.5, z: 5.14}
+  m_LocalScale: {x: 1, y: 1, z: 0.20619}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1342790184}
@@ -8870,6 +9015,25 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 16, y: 8, z: 16}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &1002267717
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1002267713}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 91f7a421b8c642e185d39f7062d854e1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: NostalgIA.Gameplay::NostalgIA.Gameplay.Level.PromptZone
+  mode: 0
+  triggerOnce: 1
+  title: Salto
+  description: "Salta el obst\xE1culo para continuar."
+  controls: '<color=#06D6A0><b>[Espacio]</b></color> Saltar  '
+  gizmoColor: {r: 0.95, g: 0.8, b: 0.1, a: 0.35}
+  showAlways: 1
 --- !u!1 &1002454333
 GameObject:
   m_ObjectHideFlags: 0
@@ -10373,8 +10537,9 @@ GameObject:
   - component: {fileID: 1163344548}
   - component: {fileID: 1163344550}
   - component: {fileID: 1163344549}
+  - component: {fileID: 1163344551}
   m_Layer: 0
-  m_Name: PromptZone_5
+  m_Name: PromptZone_Gancho
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -10389,8 +10554,8 @@ Transform:
   m_GameObject: {fileID: 1163344547}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 230, y: 1.5, z: -80}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: 42.11, y: 4.3, z: -36.56}
+  m_LocalScale: {x: 1.2334838, y: 1.8662, z: 0.65941405}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1342790184}
@@ -10443,6 +10608,27 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 25, y: 8, z: 25}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &1163344551
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1163344547}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 91f7a421b8c642e185d39f7062d854e1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: NostalgIA.Gameplay::NostalgIA.Gameplay.Level.PromptZone
+  mode: 0
+  triggerOnce: 1
+  title: Gancho y Lava
+  description: "Cambia al gancho, apunta al punto de anclaje y balanc\xE9ate sobre
+    la lava."
+  controls: <color=#06D6A0><b>[F]</b></color> Modo gancho   <color=#00E5FF><b>[Clic
+    Der]</b></color> Enganchar
+  gizmoColor: {r: 0.4, g: 0.3, b: 0.95, a: 0.35}
+  showAlways: 1
 --- !u!1 &1166682614
 GameObject:
   m_ObjectHideFlags: 0
@@ -10844,8 +11030,9 @@ GameObject:
   - component: {fileID: 1204016056}
   - component: {fileID: 1204016058}
   - component: {fileID: 1204016057}
+  - component: {fileID: 1204016059}
   m_Layer: 0
-  m_Name: PromptZone_1
+  m_Name: PromptZone_MovimientoBasico
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -10860,8 +11047,8 @@ Transform:
   m_GameObject: {fileID: 1204016055}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -11.7, y: 1.5, z: 16}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: -11.73, y: 1.5, z: 24.59}
+  m_LocalScale: {x: 1, y: 1, z: 0.23875873}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1342790184}
@@ -10914,6 +11101,25 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 15, y: 8, z: 14}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &1204016059
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1204016055}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 91f7a421b8c642e185d39f7062d854e1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: NostalgIA.Gameplay::NostalgIA.Gameplay.Level.PromptZone
+  mode: 0
+  triggerOnce: 1
+  title: Aprende a moverte
+  description: "Muevete con las teclas del teclado y el rat\xF3n"
+  controls: <color=#FFD166><b>[W A S D]</b></color> Moverse
+  gizmoColor: {r: 0.714369, g: 0.06132078, b: 1, a: 0.35}
+  showAlways: 1
 --- !u!1 &1218125547
 GameObject:
   m_ObjectHideFlags: 0
@@ -22122,10 +22328,13 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1204016056}
+  - {fileID: 556533740}
   - {fileID: 1002267714}
-  - {fileID: 570415676}
+  - {fileID: 1706167145}
+  - {fileID: 1400000002}
   - {fileID: 533781050}
   - {fileID: 1163344548}
+  - {fileID: 25910600}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!43 &1352116522
@@ -22518,6 +22727,80 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1393942200}
   m_CullTransparentMesh: 1
+--- !u!1 &1400000001
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1400000002}
+  - component: {fileID: 1400000003}
+  - component: {fileID: 1400000004}
+  m_Layer: 0
+  m_Name: PromptZone_Paso3_Deslizar
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1400000002
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1400000001}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -11.7, y: 1.5, z: -9.93}
+  m_LocalScale: {x: 1, y: 1, z: 0.19786479}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1342790184}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &1400000003
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1400000001}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 16, y: 8, z: 16}
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &1400000004
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1400000001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 91f7a421b8c642e185d39f7062d854e1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: NostalgIA.Gameplay::NostalgIA.Gameplay.Level.PromptZone
+  mode: 0
+  triggerOnce: 1
+  title: Deslizarse
+  description: "Corre con Shift y ag\xE1chate con C para deslizarte por la rampa."
+  controls: <color=#FFD166><b>[Shift + W]</b></color> Correr  +  <color=#06D6A0><b>[C]</b></color>
+    Deslizar
+  gizmoColor: {r: 1, g: 0.5, b: 0.1, a: 0.35}
+  showAlways: 1
 --- !u!1 &1404233631
 GameObject:
   m_ObjectHideFlags: 0
@@ -24978,7 +25261,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1067873417948425442, guid: cc7a0bd4b1f3a48a0b306d11a87fb115, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 8.38
+      value: 6.79
       objectReference: {fileID: 0}
     - target: {fileID: 1067873417948425442, guid: cc7a0bd4b1f3a48a0b306d11a87fb115, type: 3}
       propertyPath: m_LocalPosition.y
@@ -24986,7 +25269,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1067873417948425442, guid: cc7a0bd4b1f3a48a0b306d11a87fb115, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -33.07
+      value: -31.27
       objectReference: {fileID: 0}
     - target: {fileID: 1067873417948425442, guid: cc7a0bd4b1f3a48a0b306d11a87fb115, type: 3}
       propertyPath: m_LocalRotation.w
@@ -25853,6 +26136,107 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1487784685}
   m_LocalEulerAnglesHint: {x: 0, y: 178.172, z: 0}
+--- !u!1 &1706167144
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1706167145}
+  - component: {fileID: 1706167148}
+  - component: {fileID: 1706167147}
+  - component: {fileID: 1706167146}
+  m_Layer: 0
+  m_Name: PromptZone_Agacharse
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1706167145
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1706167144}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -11.7, y: 1.5, z: -3.14}
+  m_LocalScale: {x: 1, y: 1, z: 0.20619}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1342790184}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1706167146
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1706167144}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 91f7a421b8c642e185d39f7062d854e1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: NostalgIA.Gameplay::NostalgIA.Gameplay.Level.PromptZone
+  mode: 0
+  triggerOnce: 1
+  title: Agachate
+  description: 'Agachate para '
+  controls: <color=#06D6A0><b>[C]</b></color> Agacharse
+  gizmoColor: {r: 1, g: 0, b: 0.9248581, a: 0.35}
+  showAlways: 1
+--- !u!54 &1706167147
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1706167144}
+  serializedVersion: 5
+  m_Mass: 1
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
+--- !u!65 &1706167148
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1706167144}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 16, y: 8, z: 16}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1001 &1712754139
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -25867,7 +26251,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1067873417948425442, guid: cc7a0bd4b1f3a48a0b306d11a87fb115, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 15.8
+      value: 13.95
       objectReference: {fileID: 0}
     - target: {fileID: 1067873417948425442, guid: cc7a0bd4b1f3a48a0b306d11a87fb115, type: 3}
       propertyPath: m_LocalPosition.y
@@ -25875,7 +26259,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1067873417948425442, guid: cc7a0bd4b1f3a48a0b306d11a87fb115, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -32.79
+      value: -30.15
       objectReference: {fileID: 0}
     - target: {fileID: 1067873417948425442, guid: cc7a0bd4b1f3a48a0b306d11a87fb115, type: 3}
       propertyPath: m_LocalRotation.w
@@ -31364,7 +31748,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6618052979346812605, guid: df842c63aefb54bb5ae98c28c6a3c728, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 30.84
+      value: 24.92
       objectReference: {fileID: 0}
     - target: {fileID: 6618052979346812605, guid: df842c63aefb54bb5ae98c28c6a3c728, type: 3}
       propertyPath: m_LocalPosition.y
@@ -31372,7 +31756,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6618052979346812605, guid: df842c63aefb54bb5ae98c28c6a3c728, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -37.91
+      value: -37.02
       objectReference: {fileID: 0}
     - target: {fileID: 6618052979346812605, guid: df842c63aefb54bb5ae98c28c6a3c728, type: 3}
       propertyPath: m_LocalRotation.w
