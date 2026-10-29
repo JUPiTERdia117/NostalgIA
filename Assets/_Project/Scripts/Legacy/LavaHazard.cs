@@ -10,7 +10,7 @@ public class LavaHazard : MonoBehaviour
 {
     [Tooltip("Cantidad de daño infligido. 99 para muerte instantánea.")]
     [SerializeField] private int damage = 99;
-    [SerializeField] private bool applyBlueCodeShader = true;
+    [SerializeField] private bool applyBlueCodeShader = false;
 
     private static Material sharedBlueCodeMaterial;
 
