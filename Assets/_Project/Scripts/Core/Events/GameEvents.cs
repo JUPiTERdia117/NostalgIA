@@ -809,4 +809,68 @@ namespace NostalgIA.Core.Events
             StatusText = statusText ?? string.Empty;
         }
     }
+
+    /// <summary>
+    /// Modo de funcionamiento para un volumen de aviso o guía (<c>PromptZone</c>).
+    /// </summary>
+    public enum PromptZoneMode
+    {
+        /// <summary>Muestra el aviso al entrar a la zona.</summary>
+        Activate = 0,
+        /// <summary>Oculta / descarta el aviso activo al entrar.</summary>
+        Complete = 1,
+        /// <summary>Muestra el aviso al entrar y lo oculta automáticamente al salir de la zona.</summary>
+        ActivateAndCompleteOnExit = 2
+    }
+
+    /// <summary>
+    /// Evento publicado al entrar o salir de una zona de aviso (<c>PromptZone</c>).
+    /// Permite mostrar avisos, descripciones y controles dinámicos en cualquier nivel.
+    /// </summary>
+    public readonly struct PromptTriggered : IGameEvent
+    {
+        /// <summary>Título o encabezado principal del aviso.</summary>
+        public readonly string Title;
+        /// <summary>Descripción detallada o instrucción secundaria.</summary>
+        public readonly string Description;
+        /// <summary>Controles o teclas recomendadas.</summary>
+        public readonly string Controls;
+        /// <summary>Modo de activación del volumen.</summary>
+        public readonly PromptZoneMode Mode;
+        /// <summary><c>true</c> si el volumen solicita ocultar el aviso activo.</summary>
+        public readonly bool Hide;
+
+        public PromptTriggered(string title, string description = null, string controls = null, PromptZoneMode mode = PromptZoneMode.Activate, bool hide = false)
+        {
+            Title = title ?? string.Empty;
+            Description = description ?? string.Empty;
+            Controls = controls ?? string.Empty;
+            Mode = mode;
+            Hide = hide;
+        }
+    }
+
+    /// <summary>
+    /// Evento publicado al entrar o salir de un volumen de tutorial (<c>TutorialPromptZone</c>).
+    /// </summary>
+    [System.Obsolete("Usa PromptTriggered.")]
+    public readonly struct TutorialStepTriggered : IGameEvent
+    {
+        /// <summary>Índice del paso del tutorial (0 a 6).</summary>
+        public readonly int StepIndex;
+        /// <summary><c>true</c> si el volumen marca el paso como completado en lugar de activarlo.</summary>
+        public readonly bool MarkCompleted;
+        /// <summary>Título personalizado opcional para la guía.</summary>
+        public readonly string CustomTitle;
+        /// <summary>Controles personalizados opcionales para la guía.</summary>
+        public readonly string CustomControls;
+
+        public TutorialStepTriggered(int stepIndex, bool markCompleted = false, string customTitle = null, string customControls = null)
+        {
+            StepIndex = stepIndex;
+            MarkCompleted = markCompleted;
+            CustomTitle = customTitle ?? string.Empty;
+            CustomControls = customControls ?? string.Empty;
+        }
+    }
 }

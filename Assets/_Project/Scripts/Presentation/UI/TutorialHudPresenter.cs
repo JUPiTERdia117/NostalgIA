@@ -171,6 +171,9 @@ namespace NostalgIA.Presentation.UI
         private InputScheme scheme = InputScheme.KeyboardMouse;
 
         private readonly bool[] stepCompleted = new bool[TotalSteps];
+        private readonly string[] customPendingTitles = new string[TotalSteps];
+        private readonly string[] customStepControls = new string[TotalSteps];
+        private bool hasActivePromptZone;
         private int currentStep = -1;
         private bool absorbedInStep0;
         private bool absorbedInStep5;
@@ -236,6 +239,12 @@ namespace NostalgIA.Presentation.UI
                 toastContainer = parent != null && parent.GetComponent<Image>() != null ? parent.gameObject : checkpointNotificationText.gameObject;
             }
 
+            if (guidePanel == null && zoneTitleText != null)
+            {
+                Transform parent = zoneTitleText.transform.parent;
+                guidePanel = parent != null ? parent.gameObject : null;
+            }
+
             if (guidePanel != null)
             {
                 guideGroup = guidePanel.GetComponent<CanvasGroup>();
@@ -265,6 +274,8 @@ namespace NostalgIA.Presentation.UI
             EventBus<PlayerJumped>.Subscribe(OnPlayerJumped);
             EventBus<LocomotionStateChanged>.Subscribe(OnLocomotionChanged);
             EventBus<InputSchemeChanged>.Subscribe(OnSchemeChanged);
+            EventBus<PromptTriggered>.Subscribe(OnPromptTriggered);
+            EventBus<TutorialStepTriggered>.Subscribe(OnTutorialStepTriggered);
         }
 
         /// <summary>Cancela suscripciones.</summary>
@@ -285,6 +296,8 @@ namespace NostalgIA.Presentation.UI
             EventBus<PlayerJumped>.Unsubscribe(OnPlayerJumped);
             EventBus<LocomotionStateChanged>.Unsubscribe(OnLocomotionChanged);
             EventBus<InputSchemeChanged>.Unsubscribe(OnSchemeChanged);
+            EventBus<PromptTriggered>.Unsubscribe(OnPromptTriggered);
+            EventBus<TutorialStepTriggered>.Unsubscribe(OnTutorialStepTriggered);
         }
 
         /// <summary>Estado visual inicial.</summary>
@@ -401,6 +414,86 @@ namespace NostalgIA.Presentation.UI
         private void OnCheckpointActivated(in CheckpointActivated evt) => ShowToast(evt.Label);
 
         private void OnHudMessage(in HudMessageRequested evt) => ShowToast(evt.Message);
+
+        private void OnPromptTriggered(in PromptTriggered evt)
+        {
+            hasActivePromptZone = true;
+
+            if (evt.Hide || evt.Mode == PromptZoneMode.Complete)
+            {
+                if (guidePanel != null) guidePanel.SetActive(false);
+                return;
+            }
+
+            if (guidePanel != null)
+            {
+                guidePanel.SetActive(true);
+            }
+            else if (zoneTitleText != null && zoneTitleText.transform.parent != null)
+            {
+                zoneTitleText.transform.parent.gameObject.SetActive(true);
+            }
+
+            if (zoneTitleText != null && !string.IsNullOrEmpty(evt.Title))
+            {
+                zoneTitleText.SetText(evt.Title);
+            }
+
+            if (descriptionText != null && !string.IsNullOrEmpty(evt.Description))
+            {
+                descriptionText.SetText(evt.Description);
+            }
+            else if (taskText != null && !string.IsNullOrEmpty(evt.Description))
+            {
+                taskText.SetText(evt.Description);
+            }
+
+            if (controlsText != null && !string.IsNullOrEmpty(evt.Controls))
+            {
+                controlsText.SetText(evt.Controls);
+            }
+
+            if (guideAccent != null)
+            {
+                guideAccent.color = new Color(0f, 0.9f, 1f, 1f);
+                guideAccent.canvasRenderer.SetAlpha(1f);
+            }
+
+            // Reinicia la animación y restaura la opacidad del panel al 100%
+            if (guideGroup != null)
+            {
+                guideGroup.alpha = 1f;
+            }
+            guideAnimCompleted = false;
+            guideAnimTime = 0f;
+        }
+
+        private void OnTutorialStepTriggered(in TutorialStepTriggered evt)
+        {
+            if (tutorialLeft) return;
+            hasActivePromptZone = true;
+
+            if (evt.MarkCompleted)
+            {
+                CompleteStep(evt.StepIndex);
+                return;
+            }
+
+            if (evt.StepIndex >= 0 && evt.StepIndex < TotalSteps)
+            {
+                if (!string.IsNullOrEmpty(evt.CustomTitle))
+                {
+                    customPendingTitles[evt.StepIndex] = $"<color=#FFD166><b>{StepTags[evt.StepIndex]}</b></color>  {evt.CustomTitle}";
+                }
+                if (!string.IsNullOrEmpty(evt.CustomControls))
+                {
+                    customStepControls[evt.StepIndex] = evt.CustomControls;
+                }
+
+                currentStep = evt.StepIndex;
+                RefreshGuide(true);
+            }
+        }
 
         private void OnPortalCrossed(in DimensionalPortalCrossed evt)
         {
@@ -585,11 +678,14 @@ namespace NostalgIA.Presentation.UI
             if (!stepCompleted[3] && pos.z < -31f) CompleteStep(3);
             if (!stepCompleted[5] && pos.z < -78f && pos.x > 35f) CompleteStep(5);
 
-            int step = DetermineStep(pos);
-            if (step != currentStep || force)
+            if (!hasActivePromptZone)
             {
-                currentStep = step;
-                RefreshGuide(true);
+                int step = DetermineStep(pos);
+                if (step != currentStep || force)
+                {
+                    currentStep = step;
+                    RefreshGuide(true);
+                }
             }
         }
 
@@ -619,8 +715,16 @@ namespace NostalgIA.Presentation.UI
         {
             if (currentStep < 0 || tutorialLeft) return;
             bool done = stepCompleted[currentStep];
-            if (zoneTitleText != null) zoneTitleText.SetText(done ? doneTitles[currentStep] : pendingTitles[currentStep]);
-            if (controlsText != null) controlsText.SetText(done ? StepDoneControls : StepControls[currentStep, (int)scheme]);
+            if (zoneTitleText != null)
+            {
+                string title = done ? doneTitles[currentStep] : (customPendingTitles[currentStep] ?? pendingTitles[currentStep]);
+                zoneTitleText.SetText(title);
+            }
+            if (controlsText != null)
+            {
+                string controls = done ? StepDoneControls : (customStepControls[currentStep] ?? StepControls[currentStep, (int)scheme]);
+                controlsText.SetText(controls);
+            }
             if (guideAccent != null)
             {
                 // Color por estado (una escritura al cambiar de paso); el pulso del paso pendiente

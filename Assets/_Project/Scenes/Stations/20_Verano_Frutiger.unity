@@ -17515,11 +17515,11 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1917498249231754745, guid: 6dca3296afaed4206b5e70be896a5e8e, type: 3}
       propertyPath: destinationSceneName
-      value: 40_Invierno_IA
+      value: dreamcore
       objectReference: {fileID: 0}
     - target: {fileID: 1917498249231754745, guid: 6dca3296afaed4206b5e70be896a5e8e, type: 3}
       propertyPath: destinationScenePath
-      value: Assets/_Project/Scenes/Stations/40_Invierno_IA.unity
+      value: Assets/_Project/Scenes/Stations/dreamcore.unity
       objectReference: {fileID: 0}
     - target: {fileID: 8507803508828818449, guid: 6dca3296afaed4206b5e70be896a5e8e, type: 3}
       propertyPath: m_Name

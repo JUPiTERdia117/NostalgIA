@@ -18,6 +18,9 @@ EditorBuildSettings:
     path: Assets/_Project/Scenes/Stations/20_Verano_Frutiger.unity
     guid: 94cd38f1c184648efb7445db0f307729
   - enabled: 1
+    path: Assets/_Project/Scenes/Stations/dreamcore.unity
+    guid: 7d3c01e84a294b4ea91230d7c2a51f30
+  - enabled: 1
     path: Assets/_Project/Scenes/Stations/40_Invierno_IA.unity
     guid: 6702c69c3717745f2807053feb00b53b
   m_configObjects:

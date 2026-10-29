@@ -4300,7 +4300,9 @@ Transform:
   - {fileID: 440071501}
   - {fileID: 1222772361}
   - {fileID: 1397848429}
+  - {fileID: 1400000002}
   - {fileID: 1247872411}
+  - {fileID: 1400000012}
   - {fileID: 1167614592}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -11860,6 +11862,7 @@ GameObject:
   - component: {fileID: 440071501}
   - component: {fileID: 440071503}
   - component: {fileID: 440071504}
+  - component: {fileID: 440071505}
   m_Layer: 0
   m_Name: PromptZone_1
   m_TagString: Untagged
@@ -29943,6 +29946,7 @@ GameObject:
   - component: {fileID: 1167614592}
   - component: {fileID: 1167614595}
   - component: {fileID: 1167614594}
+  - component: {fileID: 1167614596}
   m_Layer: 0
   m_Name: PromptZone_5
   m_TagString: Untagged
@@ -31161,6 +31165,7 @@ GameObject:
   - component: {fileID: 1222772361}
   - component: {fileID: 1222772363}
   - component: {fileID: 1222772364}
+  - component: {fileID: 1222772365}
   m_Layer: 0
   m_Name: PromptZone_2
   m_TagString: Untagged
@@ -32382,6 +32387,7 @@ GameObject:
   - component: {fileID: 1247872411}
   - component: {fileID: 1247872413}
   - component: {fileID: 1247872414}
+  - component: {fileID: 1247872415}
   m_Layer: 0
   m_Name: PromptZone_4
   m_TagString: Untagged
@@ -56862,6 +56868,7 @@ GameObject:
   - component: {fileID: 1397848429}
   - component: {fileID: 1397848431}
   - component: {fileID: 1397848432}
+  - component: {fileID: 1397848435}
   m_Layer: 0
   m_Name: PromptZone_3
   m_TagString: Untagged
@@ -78617,3 +78624,251 @@ SceneRoots:
   - {fileID: 80546946}
   - {fileID: 951580202}
   - {fileID: 302095181}
+
+--- !u!114 &440071505
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 440071500}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 91f7a421b8c642e185d39f7062d854e1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: NostalgIA.Gameplay::NostalgIA.Gameplay.Level.PromptZone
+  mode: 0
+  triggerOnce: 0
+  title: "Absorber y Disparar"
+  description: "Absorbe cubos con clic secundario y dispara con primario para abrir camino."
+  controls: "<color=#00E5FF><b>[Clic Der]</b></color> Absorber   <color=#FFD166><b>[Clic Izq]</b></color> Disparar"
+  gizmoColor: {r: 0, g: 0.9, b: 0.85, a: 0.35}
+  showAlways: 1
+
+--- !u!114 &1222772365
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1222772360}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 91f7a421b8c642e185d39f7062d854e1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: NostalgIA.Gameplay::NostalgIA.Gameplay.Level.PromptZone
+  mode: 0
+  triggerOnce: 0
+  title: "Salto"
+  description: "Salta el obstáculo para continuar."
+  controls: "<color=#06D6A0><b>[Espacio]</b></color> Saltar   <color=#FFD166><b>[W A S D]</b></color> Moverse"
+  gizmoColor: {r: 0.95, g: 0.8, b: 0.1, a: 0.35}
+  showAlways: 1
+
+--- !u!114 &1397848435
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1397848428}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 91f7a421b8c642e185d39f7062d854e1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: NostalgIA.Gameplay::NostalgIA.Gameplay.Level.PromptZone
+  mode: 0
+  triggerOnce: 0
+  title: "Agacharse"
+  description: "Pasa agachado bajo la viga."
+  controls: "<color=#06D6A0><b>[C]</b></color> Agacharse   <color=#FFD166><b>[W]</b></color> Avanzar"
+  gizmoColor: {r: 1, g: 0.5, b: 0.1, a: 0.35}
+  showAlways: 1
+
+--- !u!114 &1247872415
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1247872410}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 91f7a421b8c642e185d39f7062d854e1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: NostalgIA.Gameplay::NostalgIA.Gameplay.Level.PromptZone
+  mode: 0
+  triggerOnce: 0
+  title: "Combate y Estrella"
+  description: "Absorbe proyectiles o cajas, derrota a los enemigos y recoge la estrella."
+  controls: "<color=#00E5FF><b>[Clic Der]</b></color> Absorber   <color=#FFD166><b>[Clic Izq]</b></color> Disparar a enemigos"
+  gizmoColor: {r: 0.9, g: 0.2, b: 0.4, a: 0.35}
+  showAlways: 1
+
+--- !u!114 &1167614596
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1167614591}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 91f7a421b8c642e185d39f7062d854e1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: NostalgIA.Gameplay::NostalgIA.Gameplay.Level.PromptZone
+  mode: 0
+  triggerOnce: 0
+  title: "Gancho y Lava"
+  description: "Cambia al gancho, apunta al punto de anclaje y balancéate sobre la lava."
+  controls: "<color=#06D6A0><b>[F]</b></color> Modo gancho   <color=#00E5FF><b>[Clic Der]</b></color> Enganchar"
+  gizmoColor: {r: 0.4, g: 0.3, b: 0.95, a: 0.35}
+  showAlways: 1
+
+--- !u!1 &1400000001
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1400000002}
+  - component: {fileID: 1400000003}
+  - component: {fileID: 1400000004}
+  m_Layer: 0
+  m_Name: PromptZone_Paso3_Deslizar
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1400000002
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1400000001}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -11.7, y: 1.5, z: -25}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 185278521}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &1400000003
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1400000001}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 16, y: 8, z: 16}
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &1400000004
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1400000001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 91f7a421b8c642e185d39f7062d854e1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: NostalgIA.Gameplay::NostalgIA.Gameplay.Level.PromptZone
+  mode: 0
+  triggerOnce: 0
+  title: "Deslizarse"
+  description: "Corre con Shift y agáchate con C para deslizarte por la rampa."
+  controls: "<color=#FFD166><b>[Shift + W]</b></color> Correr  +  <color=#06D6A0><b>[C]</b></color> Deslizar"
+  gizmoColor: {r: 1, g: 0.5, b: 0.1, a: 0.35}
+  showAlways: 1
+
+--- !u!1 &1400000011
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1400000012}
+  - component: {fileID: 1400000013}
+  - component: {fileID: 1400000014}
+  m_Layer: 0
+  m_Name: PromptZone_Paso5_Muro
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1400000012
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1400000011}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 45, y: 1.5, z: -80}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 185278521}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &1400000013
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1400000011}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 18, y: 8, z: 18}
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &1400000014
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1400000011}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 91f7a421b8c642e185d39f7062d854e1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: NostalgIA.Gameplay::NostalgIA.Gameplay.Level.PromptZone
+  mode: 0
+  triggerOnce: 0
+  title: "Muro de Cajas"
+  description: "Absorbe las cajas para derribar el muro y abrir paso."
+  controls: "<color=#00E5FF><b>[Clic Der]</b></color> Absorber cajas   <color=#FFD166><b>[Clic Izq]</b></color> Derribar el muro"
+  gizmoColor: {r: 0.1, g: 0.7, b: 0.95, a: 0.35}
+  showAlways: 1
