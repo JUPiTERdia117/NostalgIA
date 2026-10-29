@@ -70,6 +70,12 @@ namespace NostalgIA.Input
         [Tooltip("Exponente de la curva de respuesta: 1 es lineal; valores mayores dan más precisión cerca del centro.")]
         [SerializeField, Range(1f, 3f)] private float stickResponseExponent = 1f;
 
+        [Header("Stick táctil de vista (pad de la aspiradora)")]
+        [Tooltip("Velocidad angular máxima horizontal del pad de la aspiradora usado como stick, en grados por segundo.")]
+        [SerializeField, Min(0f)] private float touchStickMaxSpeedX = 110f;
+        [Tooltip("Velocidad angular máxima vertical del pad de la aspiradora usado como stick, en grados por segundo.")]
+        [SerializeField, Min(0f)] private float touchStickMaxSpeedY = 70f;
+
         [Header("General")]
         [Tooltip("Invierte el eje vertical de la mirada en todas las fuentes.")]
         [SerializeField] private bool invertY;
@@ -98,6 +104,8 @@ namespace NostalgIA.Input
         [NonSerialized] private Vector2 pendingTouchDelta;
         [NonSerialized] private bool virtualSprint;
         [NonSerialized] private bool virtualAbsorb;
+        [NonSerialized] private Vector2 virtualLookStick;
+        [NonSerialized] private Vector2 touchStickAngularVelocity;
         [NonSerialized] private InputSchemeResolver schemeResolver;
 
         // ------------------------------------------------------------- eventos de pulsación
@@ -313,6 +321,18 @@ namespace NostalgIA.Input
             schemeResolver?.Report(InputScheme.Touch);
         }
 
+        /// <summary>
+        /// Stick de vista virtual: el pad de la aspiradora lo usa mientras se mantiene presionado, para
+        /// girar la cámara sin soltar la succión. El valor va de −1 a 1 por eje y se convierte en
+        /// velocidad angular igual que un stick de mando (zona muerta, curva y rampa), pero con sus
+        /// propias velocidades máximas (<c>touchStickMaxSpeedX/Y</c>).
+        /// </summary>
+        public void SetVirtualLookStick(Vector2 value)
+        {
+            virtualLookStick = GameplayEnabled ? Vector2.ClampMagnitude(value, 1f) : Vector2.zero;
+            if (virtualLookStick != Vector2.zero) schemeResolver?.Report(InputScheme.Touch);
+        }
+
         /// <summary>Correr virtual del pad táctil izquierdo (llevado al borde superior).</summary>
         public void SetVirtualSprint(bool held)
         {
@@ -380,6 +400,8 @@ namespace NostalgIA.Input
             if (!GameplayEnabled)
             {
                 stickAngularVelocity = Vector2.zero;
+                touchStickAngularVelocity = Vector2.zero;
+                virtualLookStick = Vector2.zero;
                 pendingTouchDelta = Vector2.zero;
                 return Vector2.zero;
             }
@@ -398,6 +420,12 @@ namespace NostalgIA.Input
             stickAngularVelocity.x = AccelerateAxis(stick.x, stickAngularVelocity.x, stickMaxSpeedX, deltaTime);
             stickAngularVelocity.y = AccelerateAxis(stick.y, stickAngularVelocity.y, stickMaxSpeedY, deltaTime);
             result += stickAngularVelocity * deltaTime;
+
+            // 4) Stick táctil del pad de la aspiradora: misma integración que el stick del mando,
+            //    con su propia velocidad para que girar mientras absorbo no se sienta lento.
+            touchStickAngularVelocity.x = AccelerateAxis(virtualLookStick.x, touchStickAngularVelocity.x, touchStickMaxSpeedX, deltaTime);
+            touchStickAngularVelocity.y = AccelerateAxis(virtualLookStick.y, touchStickAngularVelocity.y, touchStickMaxSpeedY, deltaTime);
+            result += touchStickAngularVelocity * deltaTime;
 
             if (invertY) result.y = -result.y;
             return result;
@@ -433,6 +461,8 @@ namespace NostalgIA.Input
         public void ResetTransientState()
         {
             stickAngularVelocity = Vector2.zero;
+            touchStickAngularVelocity = Vector2.zero;
+            virtualLookStick = Vector2.zero;
             pendingTouchDelta = Vector2.zero;
             virtualSprint = false;
             if (virtualAbsorb)

@@ -375,7 +375,7 @@ namespace NostalgIA.EditorTools.Validation
                 offendingScenes++;
                 report.Add(ProBuilderDefaultMaterialIsError ? ValidationSeverity.Error : ValidationSeverity.Warning,
                     ValidationRules.ProBuilderMaterial, scene.Key,
-                    $"{count} referencia(s) al material gris de prototipo de ProBuilder. Reemplazar por materiales de la Estación (tarea F1-B02).");
+                    $"{count} referencia(s) al material gris de prototipo de ProBuilder. Reemplazar por materiales de la Estación (tarea F1-B02) o limpiar con NostalgIA › Fase 1 › Acabado visual › Limpiar caras residuales de ProBuilder.");
             }
 
             if (offendingScenes == 0)

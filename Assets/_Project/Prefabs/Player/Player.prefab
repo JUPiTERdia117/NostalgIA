@@ -5121,6 +5121,7 @@ GameObject:
   - component: {fileID: 8207678142853499975}
   - component: {fileID: 1936790533599824975}
   - component: {fileID: 4763264352384977089}
+  - component: {fileID: 3871245519006427731}
   m_Layer: 6
   m_Name: Player
   m_TagString: Player
@@ -6084,3 +6085,15 @@ Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 75b05a9674e5316ef94692c037609d2e, type: 3}
   m_PrefabInstance: {fileID: 8384318185046393080}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &3871245519006427731
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7243138653710705996}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 91e59c6da0544b73b447d98d3b2c8fc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: NostalgIA.Gameplay::NostalgIA.Gameplay.Player.DuplicatePlayerGuard

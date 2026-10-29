@@ -853,8 +853,9 @@ namespace NostalgIA.EditorTools.Setup
         /// lo dejamos vacío. Se accede por serialización porque este ensamblado no referencia
         /// ProBuilder.
         /// </summary>
-        private static void ClearLegacyFaceMaterials()
+        public static int ClearLegacyFaceMaterials()
         {
+            int modifiedCount = 0;
             foreach (MonoBehaviour behaviour in Object.FindObjectsByType<MonoBehaviour>(FindObjectsInactive.Include, FindObjectsSortMode.None))
             {
                 if (behaviour == null || behaviour.GetType().Name != "ProBuilderMesh") continue;
@@ -869,8 +870,24 @@ namespace NostalgIA.EditorTools.Setup
                     legacy.objectReferenceValue = null;
                     changed = true;
                 }
-                if (changed) so.ApplyModifiedPropertiesWithoutUndo();
+                if (changed)
+                {
+                    so.ApplyModifiedPropertiesWithoutUndo();
+                    modifiedCount++;
+                }
             }
+            return modifiedCount;
+        }
+
+        /// <summary>
+        /// Limpia las caras residuales de ProBuilder en la escena activa sin alterar los materiales asignados.
+        /// </summary>
+        [MenuItem(MenuRoot + "Limpiar caras residuales de ProBuilder (escena activa)", priority = 140)]
+        public static void ClearLegacyFaceMaterialsInActiveScene()
+        {
+            int modifiedCount = ClearLegacyFaceMaterials();
+            EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
+            Debug.Log($"[Fase 1] Caras residuales de ProBuilder limpiadas en {modifiedCount} objeto(s) de la escena activa.");
         }
 
         /// <summary>Volumen global de la Estación (prioridad 0; un solo perfil por Estación, Guía §8).</summary>
