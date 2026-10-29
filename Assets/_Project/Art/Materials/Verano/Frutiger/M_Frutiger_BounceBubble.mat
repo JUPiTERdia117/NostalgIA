@@ -9,35 +9,41 @@ Material:
   m_PrefabAsset: {fileID: 0}
   m_Name: M_Frutiger_BounceBubble
   m_Shader: {fileID: 4800000, guid: 80aa700b2e0fc4f4da05ca8b1e5a2208, type: 3}
-  m_Parent: {fileID: 0}
+  m_Parent: {fileID: 2100000, guid: a08b37380710541c1a198ebd9e7a7bc4, type: 2}
   m_ModifiedSerializedProperties: 0
-  m_ValidKeywords: []
+  m_ValidKeywords:
+  - _IMPOSTOR
   m_InvalidKeywords: []
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
   m_CustomRenderQueue: -1
   stringTagMap: {}
-  disabledShaderPasses: []
+  disabledShaderPasses:
+  - MOTIONVECTORS
   m_LockedProperties: 
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs: []
     m_Ints: []
     m_Floats:
-    - _BaseAlpha: 0.1
-    - _DriftAmplitude: 0
-    - _DriftSpeed: 0.5
-    - _EdgeAlpha: 0.92
-    - _FilmThickness: 0.55
-    - _Impostor: 0
-    - _Iridescence: 2.1
-    - _Reflection: 0.9
-    - _Specular: 2
-    - _WindowHighlight: 0.9
-    - _WobbleAmount: 0.045
-    - _WobbleSpeed: 3
-    m_Colors:
-    - _Tint: {r: 0.92, g: 0.98, b: 1, a: 1}
+    - _BlendOpacity: 1.96
+    - _ColorPower: 0.26
+    - _FreshnelPower: 0.88
+    - _NoiseSubtraction: 0.069
+    m_Colors: []
   m_BuildTextureStacks: []
   m_AllowLocking: 1
+--- !u!114 &3776860472384367640
+MonoBehaviour:
+  m_ObjectHideFlags: 11
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0353a89b1f911e48b9e16bdc9f2e058, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Editor::UnityEditor.Rendering.Universal.AssetVersion
+  version: 10
