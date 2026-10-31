@@ -23,12 +23,10 @@ namespace NostalgIA.Core
         public const string Tutorial = "Tutorial";
         /// <summary>Dimensión enlazada por el portal no euclidiano; se carga de forma aditiva.</summary>
         public const string OtherDimension = "OtherDimension";
-        /// <summary>Estación 2 (Verano), nivel Frutiger Aero; se carga en segundo plano desde el Tutorial.</summary>
-        public const string VeranoFrutiger = "20_Verano_Frutiger";
-        /// <summary>Estación 3 (Otoño), nivel Dreamcore / Liminal.</summary>
-        public const string Dreamcore = "dreamcore";
-        /// <summary>Estación 4 (Invierno), laberinto circular de TVs y combate contra la IA.</summary>
-        public const string InviernoIA = "40_Invierno_IA";
+        /// <summary>Nivel 2: océano, islas y lote de edificios; se carga en segundo plano desde el Tutorial.</summary>
+        public const string Nivel2 = "20_Nivel2_Islas";
+        /// <summary>Nivel 3: laberinto circular y combate contra la IA.</summary>
+        public const string Nivel3 = "30_Nivel3_Laberinto";
         /// <summary>Estación final: se llega por el portal que deja la IA al ser destruida.</summary>
         public const string EstacionFinal = "50_Estacion_Final";
 
@@ -38,9 +36,8 @@ namespace NostalgIA.Core
             public const string Boot = "Assets/_Project/Scenes/00_Boot.unity";
             public const string Tutorial = "Assets/_Project/Scenes/Stations/Tutorial.unity";
             public const string OtherDimension = "Assets/_Project/Scenes/Stations/OtherDimension.unity";
-            public const string VeranoFrutiger = "Assets/_Project/Scenes/Stations/20_Verano_Frutiger.unity";
-            public const string Dreamcore = "Assets/_Project/Scenes/Stations/dreamcore.unity";
-            public const string InviernoIA = "Assets/_Project/Scenes/Stations/40_Invierno_IA.unity";
+            public const string Nivel2 = "Assets/_Project/Scenes/Stations/20_Nivel2_Islas.unity";
+            public const string Nivel3 = "Assets/_Project/Scenes/Stations/30_Nivel3_Laberinto.unity";
             public const string EstacionFinal = "Assets/_Project/Scenes/Stations/50_Estacion_Final.unity";
             /// <summary>Carpeta de escenas de prueba que nunca deben incluirse en el build.</summary>
             public const string SandboxFolder = "Assets/_Project/Scenes/Sandbox/";

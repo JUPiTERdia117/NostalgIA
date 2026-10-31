@@ -2,7 +2,7 @@
 // NostalgIA — Editor (NostalgIA.Editor)
 // Archivo: LevelGateBuilder.cs
 // Propósito: construir el prefab de la puerta entre niveles (mallas, materiales,
-// perfil de destello) y conectarla en el Tutorial con el nivel de Verano.
+// perfil de destello) y conectarla en el Tutorial con el Nivel 2.
 // -----------------------------------------------------------------------------
 
 using System.Linq;
@@ -44,7 +44,7 @@ namespace NostalgIA.EditorTools.Levels
         private const float PoolLength = 7.5f;
 
         /// <summary>Nombre de la instancia en el Tutorial.</summary>
-        public const string TutorialGateName = "LevelGate_Verano";
+        public const string TutorialGateName = "LevelGate_Nivel2";
 
         // ================================================================== prefab
         /// <summary>Crea o reemplaza el prefab de la puerta y sus assets.</summary>
@@ -96,7 +96,7 @@ namespace NostalgIA.EditorTools.Levels
 
             var root = new GameObject("LevelGate");
             LevelGate gate = root.AddComponent<LevelGate>();
-            gate.Configure(SceneNames.VeranoFrutiger, SceneNames.Paths.VeranoFrutiger, Aperture);
+            gate.Configure(SceneNames.Nivel2, SceneNames.Paths.Nivel2, Aperture);
             LevelGateVisuals visuals = root.AddComponent<LevelGateVisuals>();
 
             float w = Aperture.x;
@@ -334,13 +334,13 @@ namespace NostalgIA.EditorTools.Levels
             return component;
         }
 
-        // ================================================================== Tutorial → Verano
+        // ================================================================== Tutorial → Nivel 2
         /// <summary>
-        /// Sustituye la puerta dimensional del Tutorial por una puerta de nivel hacia Verano
+        /// Sustituye la puerta dimensional del Tutorial por una puerta de nivel hacia el Nivel 2
         /// (Frutiger Aero), marca el <c>EventSystem</c> para que acompañe al jugador y agrega la
-        /// escena de Verano a la lista del build.
+        /// escena del Nivel 2 a la lista del build.
         /// </summary>
-        [MenuItem(MenuRoot + "Conectar Tutorial con Verano", priority = 301)]
+        [MenuItem(MenuRoot + "Conectar Tutorial con Nivel 2", priority = 301)]
         public static void ConnectTutorial()
         {
             if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
@@ -380,7 +380,7 @@ namespace NostalgIA.EditorTools.Levels
             var instance = (GameObject)PrefabUtility.InstantiatePrefab(prefab, scene);
             instance.name = TutorialGateName;
             instance.transform.SetPositionAndRotation(floor, Quaternion.LookRotation(normal, Vector3.up));
-            instance.GetComponent<LevelGate>().Configure(SceneNames.VeranoFrutiger, SceneNames.Paths.VeranoFrutiger, Aperture);
+            instance.GetComponent<LevelGate>().Configure(SceneNames.Nivel2, SceneNames.Paths.Nivel2, Aperture);
             door.SetActive(false);
 
             // Acompañan al jugador al nivel siguiente: el EventSystem y el HUD (raíces con el presentador
@@ -394,7 +394,7 @@ namespace NostalgIA.EditorTools.Levels
                     root.AddComponent<PersistAcrossLevels>();
             }
 
-            EnsureInBuild(SceneNames.Paths.VeranoFrutiger);
+            EnsureInBuild(SceneNames.Paths.Nivel2);
             EditorSceneManager.MarkSceneDirty(scene);
             EditorSceneManager.SaveScene(scene);
             Debug.Log($"[Niveles] Puerta {TutorialGateName} colocada en {floor} mirando a {normal}.");

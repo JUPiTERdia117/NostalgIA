@@ -320,11 +320,8 @@ namespace NostalgIA.Presentation.UI
             {
                 tutorialLeft = true;
                 if (guidePanel != null) guidePanel.SetActive(false);
-                if (activeSceneName == NostalgIA.Core.SceneNames.InviernoIA && maxStars < 5)
-                {
-                    maxStars = 5;
-                    starToastFormat = "♦ Estrella {0}/" + maxStars;
-                }
+                maxStars = StarsInLevel(activeSceneName);
+                starToastFormat = "♦ Estrella {0}/" + maxStars;
             }
 
             RefreshHealth();
@@ -508,20 +505,24 @@ namespace NostalgIA.Presentation.UI
             }
         }
 
+        /// <summary>
+        /// Estrellas que tiene cada nivel: el Nivel 2 solo da la del spawn del edificio central y el
+        /// Nivel 3 tiene cinco repartidas en el laberinto; los demás conservan las tres de siempre.
+        /// </summary>
+        private static int StarsInLevel(string sceneName)
+        {
+            if (sceneName == NostalgIA.Core.SceneNames.Nivel2) return 1;
+            if (sceneName == NostalgIA.Core.SceneNames.Nivel3) return 5;
+            return 3;
+        }
+
         /// <summary>Al pasar al nivel siguiente se retira la guía del Tutorial; vida y herramienta siguen.</summary>
         private void OnLevelGateCrossed(in LevelGateCrossed evt)
         {
             tutorialLeft = true;
             if (guidePanel != null) guidePanel.SetActive(false);
             stars = 0;
-            if (evt.Destination.IsValid() && evt.Destination.name == NostalgIA.Core.SceneNames.InviernoIA)
-            {
-                maxStars = 5;
-            }
-            else
-            {
-                maxStars = 3;
-            }
+            maxStars = StarsInLevel(evt.Destination.IsValid() ? evt.Destination.name : string.Empty);
             starToastFormat = "♦ Estrella {0}/" + maxStars;
             RefreshHealth();
             RefreshScore();

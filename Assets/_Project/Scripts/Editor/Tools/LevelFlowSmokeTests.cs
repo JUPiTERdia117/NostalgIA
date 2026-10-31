@@ -21,7 +21,7 @@ using UnityEngine.SceneManagement;
 namespace NostalgIA.EditorTools.Tools
 {
     /// <summary>
-    /// Recorre el final sin jugar las tres oleadas. Con la escena de Invierno en modo de juego:
+    /// Recorre el final sin jugar las tres oleadas. Con la escena del Nivel 3 en modo de juego:
     /// <list type="number">
     /// <item>Vence a la IA con el atajo de prueba de <see cref="AIBossController"/>.</item>
     /// <item>Coloca al jugador en el piso, 2,5 m a un lado del centro (no justo debajo, para
@@ -73,7 +73,7 @@ namespace NostalgIA.EditorTools.Tools
             motor = Object.FindAnyObjectByType<PlayerMotor>();
             if (!Application.isPlaying || fightBoss == null || motor == null)
             {
-                Report("Entra al modo de juego con 40_Invierno_IA primero.");
+                Report("Entra al modo de juego con 30_Nivel3_Laberinto primero.");
                 return;
             }
             motor.Teleport(fightBoss.transform.position + new Vector3(0f, 0.1f, -6f), Quaternion.identity);
@@ -223,14 +223,14 @@ namespace NostalgIA.EditorTools.Tools
             }
         }
 
-        /// <summary>Inicia la prueba (solo en modo de juego con Invierno cargado).</summary>
+        /// <summary>Inicia la prueba (solo en modo de juego con el Nivel 3 cargado).</summary>
         [MenuItem("NostalgIA/Depuración/Probar final: vencer a la IA y cruzar el portal (juego)", priority = 920)]
         private static void Run()
         {
             log.Clear();
             if (!Application.isPlaying)
             {
-                Report("Entra al modo de juego con 40_Invierno_IA primero.");
+                Report("Entra al modo de juego con 30_Nivel3_Laberinto primero.");
                 return;
             }
 

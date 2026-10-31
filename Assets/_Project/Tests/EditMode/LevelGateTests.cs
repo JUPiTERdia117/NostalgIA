@@ -2,7 +2,7 @@
 // NostalgIA — Pruebas de editor (NostalgIA.Tests.EditMode)
 // Archivo: LevelGateTests.cs
 // Propósito: verificar la puerta entre niveles: geometría del portal, shaders,
-// prefab, conexión del Tutorial con Verano y separación de regiones.
+// prefab, cadena Tutorial → Nivel 2 → Nivel 3 y separación de regiones.
 // -----------------------------------------------------------------------------
 
 using System.IO;
@@ -129,30 +129,44 @@ namespace NostalgIA.Tests.EditMode
         }
 
         /// <summary>
-        /// El Tutorial tiene la puerta hacia Verano, la puerta dimensional anterior está apagada y la
-        /// escena de Verano está en el build.
+        /// El Tutorial tiene la puerta hacia el Nivel 2, la puerta dimensional anterior está apagada y
+        /// las escenas de los niveles están en el build.
         /// </summary>
         [Test]
-        public void Tutorial_ConectadoConVerano()
+        public void Tutorial_ConectadoConNivel2()
         {
-            Assert.IsTrue(EditorBuildSettings.scenes.Any(s => s.path == SceneNames.Paths.VeranoFrutiger && s.enabled),
-                          "La escena de Verano debe estar en la lista del build para cargarse en segundo plano.");
+            foreach (string path in new[] { SceneNames.Paths.Nivel2, SceneNames.Paths.Nivel3 })
+                Assert.IsTrue(EditorBuildSettings.scenes.Any(s => s.path == path && s.enabled),
+                              $"{path} debe estar en la lista del build para cargarse en segundo plano.");
             WithScene(SceneNames.Paths.Tutorial, scene =>
             {
                 LevelGate gate = scene.GetRootGameObjects().SelectMany(r => r.GetComponentsInChildren<LevelGate>(true)).FirstOrDefault();
                 Assert.IsNotNull(gate, "Falta la puerta de nivel en el Tutorial.");
-                Assert.AreEqual(SceneNames.VeranoFrutiger, new SerializedObject(gate).FindProperty("destinationSceneName").stringValue);
+                Assert.AreEqual(SceneNames.Nivel2, new SerializedObject(gate).FindProperty("destinationSceneName").stringValue);
                 bool oldDoorActive = scene.GetRootGameObjects().SelectMany(r => r.GetComponentsInChildren<MonoBehaviour>(true))
                     .Any(c => c != null && c.GetType().Name == "TutorialDoor" && c.gameObject.activeInHierarchy);
                 Assert.IsFalse(oldDoorActive, "La puerta dimensional anterior cargaría otra escena a la vez.");
             });
         }
 
-        /// <summary>Verano tiene entrada de llegada y su jugador propio queda apagado al llegar por una puerta.</summary>
+        /// <summary>La meta del Nivel 2 lleva al Nivel 3.</summary>
         [Test]
-        public void Verano_EntradaYContenidoIndependiente()
+        public void Nivel2_MetaLlevaAlNivel3()
         {
-            WithScene(SceneNames.Paths.VeranoFrutiger, scene =>
+            WithScene(SceneNames.Paths.Nivel2, scene =>
+            {
+                LevelGate gate = scene.GetRootGameObjects().SelectMany(r => r.GetComponentsInChildren<LevelGate>(true))
+                    .FirstOrDefault(g => new SerializedObject(g).FindProperty("destinationSceneName").stringValue == SceneNames.Nivel3);
+                Assert.IsNotNull(gate, "Falta la puerta de meta hacia el Nivel 3.");
+            });
+        }
+
+        /// <summary>Cada nivel tiene entrada de llegada y su jugador propio queda apagado al llegar por una puerta.</summary>
+        [TestCase("Assets/_Project/Scenes/Stations/20_Nivel2_Islas.unity")]
+        [TestCase("Assets/_Project/Scenes/Stations/30_Nivel3_Laberinto.unity")]
+        public void Nivel_EntradaYContenidoIndependiente(string path)
+        {
+            WithScene(path, scene =>
             {
                 GameObject[] roots = scene.GetRootGameObjects();
                 Assert.IsTrue(roots.Any(r => r.GetComponentInChildren<LevelEntrance>(true) != null), "Falta LevelEntrance.");
@@ -164,16 +178,23 @@ namespace NostalgIA.Tests.EditMode
             });
         }
 
-        /// <summary>Tutorial y Verano están separados más que el plano lejano de la cámara.</summary>
+        /// <summary>Tutorial, Nivel 2 y Nivel 3 están separados más que el plano lejano de la cámara.</summary>
         [Test]
-        public void Regiones_TutorialYVeranoNoSeVen()
+        public void Regiones_NivelesNoSeVen()
         {
-            Bounds tutorial = default;
-            Bounds verano = default;
-            WithScene(SceneNames.Paths.Tutorial, scene => Assert.IsTrue(LevelRegionTools.TryGetSceneBounds(scene, out tutorial)));
-            WithScene(SceneNames.Paths.VeranoFrutiger, scene => Assert.IsTrue(LevelRegionTools.TryGetSceneBounds(scene, out verano)));
-            float gap = LevelRegionTools.Gap(tutorial, verano);
-            Assert.GreaterOrEqual(gap, LevelRegionTools.PlayerFarClip, $"Separación {gap:0} m.");
+            string[] paths = { SceneNames.Paths.Tutorial, SceneNames.Paths.Nivel2, SceneNames.Paths.Nivel3 };
+            var bounds = new Bounds[paths.Length];
+            for (int i = 0; i < paths.Length; i++)
+            {
+                int k = i;
+                WithScene(paths[k], scene => Assert.IsTrue(LevelRegionTools.TryGetSceneBounds(scene, out bounds[k])));
+            }
+            for (int i = 0; i < paths.Length; i++)
+                for (int j = i + 1; j < paths.Length; j++)
+                {
+                    float gap = LevelRegionTools.Gap(bounds[i], bounds[j]);
+                    Assert.GreaterOrEqual(gap, LevelRegionTools.PlayerFarClip, $"{paths[i]} y {paths[j]}: separación {gap:0} m.");
+                }
         }
 
         /// <summary>
