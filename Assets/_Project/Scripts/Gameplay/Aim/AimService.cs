@@ -95,6 +95,14 @@ namespace NostalgIA.Gameplay.Aim
         [Tooltip("Distancia máxima de sondeo, en metros. Debe superar el alcance de todas las herramientas para detectar «fuera de alcance».")]
         [SerializeField, Min(1f)] private float probeDistance = 120f;
 
+        [Header("Asistencia del gancho")]
+        [Tooltip("Ángulo máximo, en grados, entre el centro de la retícula y un ancla para que el gancho la tome igual. Cero la apaga.")]
+        [SerializeField, Range(0f, 12f)] private float grappleAssistAngle = 5f;
+        [Tooltip("Radio máximo de la búsqueda alrededor del rayo, en metros (limita la ayuda en anclas lejanas).")]
+        [SerializeField, Min(0.1f)] private float grappleAssistMaxRadius = 1.6f;
+
+        private const int GrappleMask = 1 << Layers.Grapple;
+
         private AimSample current;
         private ToolId activeTool = ToolId.Vacuum;
         private float activeRange = 10f;
@@ -153,9 +161,70 @@ namespace NostalgIA.Gameplay.Aim
                 next = new AimSample(ray, false, ray.GetPoint(probeDistance), -ray.direction, probeDistance, null, AimTargetKind.None);
             }
 
+            if (activeTool == ToolId.Grapple && next.Kind != AimTargetKind.Anchor && next.Kind != AimTargetKind.OutOfRange &&
+                TryAssistGrapple(ray, out AimSample assisted))
+                next = assisted;
+
             current = next;
             if (next.Kind != previous)
                 EventBus<AimTargetChanged>.Raise(new AimTargetChanged(previous, next.Kind));
+        }
+
+        /// <summary>
+        /// Asistencia de puntería del gancho, parecida a la del Grappleshot de Halo Infinite: si el
+        /// centro de la retícula no cae en un ancla pero hay una casi en la mira, el gancho la toma.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// 1) Lanzo una esfera de radio <c>r</c> a lo largo del rayo solo contra la capa
+        /// <c>Grapple</c>. 2) Del collider que toca tomo el punto más cercano a la línea de mira
+        /// (con <c>ClosestPoint</c>, desde el punto del rayo a la misma profundidad). 3) Acepto si el
+        /// ángulo entre el rayo y ese punto es ≤ <c>grappleAssistAngle</c>; así la ayuda es un cono
+        /// (la misma sensación cerca y lejos) y la esfera solo sirve para encontrar candidatos.
+        /// 4) Compruebo línea de vista con un rayo normal para no enganchar a través de paredes.
+        /// </para>
+        /// <para>
+        /// Solo corre con el gancho equipado y cuando el centro no está ya sobre un ancla; usa
+        /// consultas sin asignación (<c>SphereCast</c> y <c>Raycast</c> con <c>out</c>).
+        /// </para>
+        /// </remarks>
+        private bool TryAssistGrapple(Ray ray, out AimSample assisted)
+        {
+            assisted = default;
+            if (grappleAssistAngle <= 0f) return false;
+
+            float radius = Mathf.Min(grappleAssistMaxRadius, Mathf.Tan(grappleAssistAngle * Mathf.Deg2Rad) * activeRange);
+            if (!Physics.SphereCast(ray, radius, out RaycastHit sphereHit, activeRange, GrappleMask, QueryTriggerInteraction.Ignore))
+                return false;
+
+            Collider candidate = sphereHit.collider;
+            Vector3 target = sphereHit.point;
+            // ClosestPoint solo funciona con cajas, esferas, cápsulas y mallas convexas.
+            bool supportsClosest = !(candidate is MeshCollider mesh) || mesh.convex;
+            if (supportsClosest)
+            {
+                float depth = Mathf.Max(0f, Vector3.Dot(sphereHit.point - ray.origin, ray.direction));
+                target = candidate.ClosestPoint(ray.GetPoint(depth));
+            }
+
+            Vector3 toTarget = target - ray.origin;
+            float distance = toTarget.magnitude;
+            if (distance < 0.01f || distance > activeRange) return false;
+            if (Vector3.Angle(ray.direction, toTarget) > grappleAssistAngle) return false;
+
+            // Línea de vista: lo primero que toca el rayo hacia el punto debe ser el propio ancla.
+            Vector3 normal = sphereHit.normal;
+            var sightRay = new Ray(ray.origin, toTarget / distance);
+            if (Physics.Raycast(sightRay, out RaycastHit sight, distance + 0.05f, AimMask, QueryTriggerInteraction.Ignore))
+            {
+                if (sight.collider != candidate) return false;
+                target = sight.point;
+                normal = sight.normal;
+                distance = sight.distance;
+            }
+
+            assisted = new AimSample(ray, true, target, normal, distance, candidate, AimTargetKind.Anchor);
+            return true;
         }
 
         /// <summary>

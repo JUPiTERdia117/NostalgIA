@@ -16,11 +16,19 @@ MonoBehaviour:
   arrivalRadius: 1.5
   maxPullDuration: 3
   overshootDistance: 2
-  gravity: 0
-  pullAcceleration: 38
-  pullSpeed: 24
-  pullRampTime: 0.2
+  gravity: 2
+  pullAcceleration: 70
+  pullSpeed: 26
+  pullRampTime: 0.08
   airControl: 8
+  steerAcceleration: 30
+  steerMaxSpeed: 11
+  lateralDamping: 1.5
+  releaseAirAcceleration: 18
+  releaseAirControlTime: 1.2
   releaseMomentumRetention: 0.85
   launchLift: 4
-  cooldown: 1.5
+  jumpLaunchSpeed: 6.5
+  jumpForwardBoost: 2.5
+  arrivalLift: 5
+  cooldown: 1

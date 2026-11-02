@@ -45,6 +45,10 @@ namespace NostalgIA.Presentation.CameraFX
         [SerializeField, Min(1f)] private float grappleFovSpeed = 24f;
         [Tooltip("Inverso del tiempo de suavizado del FOV, en 1/s.")]
         [SerializeField, Min(0.1f)] private float fovChangeSpeed = 5f;
+        [Tooltip("Golpe de FOV al engancharse, en grados (se suma al objetivo y se desvanece).")]
+        [SerializeField, Min(0f)] private float grappleAttachFovPunch = 6f;
+        [Tooltip("Rapidez con la que se desvanece el golpe de FOV, en 1/s.")]
+        [SerializeField, Min(0.1f)] private float fovPunchDecay = 4f;
 
         [Header("Balanceo al caminar")]
         [SerializeField] private bool useHeadBob = true;
@@ -67,6 +71,7 @@ namespace NostalgIA.Presentation.CameraFX
         private Vector3 baseLocalPosition;
 
         private float fovVelocity;
+        private float fovPunch;
         private float bobTimer;
         private float tilt;
         private float tiltVelocity;
@@ -83,12 +88,17 @@ namespace NostalgIA.Presentation.CameraFX
         }
 
         /// <summary>Suscripción al fin del deslizamiento.</summary>
-        private void OnEnable() => EventBus<SlideEnded>.Subscribe(OnSlideEnded);
+        private void OnEnable()
+        {
+            EventBus<SlideEnded>.Subscribe(OnSlideEnded);
+            EventBus<GrappleAttached>.Subscribe(OnGrappleAttached);
+        }
 
         /// <summary>Cancela la suscripción y restablece la cámara.</summary>
         private void OnDisable()
         {
             EventBus<SlideEnded>.Unsubscribe(OnSlideEnded);
+            EventBus<GrappleAttached>.Unsubscribe(OnGrappleAttached);
             transform.localPosition = baseLocalPosition;
             transform.localRotation = Quaternion.identity;
         }
@@ -100,6 +110,15 @@ namespace NostalgIA.Presentation.CameraFX
             shakeIntensity = crashShakeIntensity;
             shakeTimer = crashShakeDuration;
             shakeDirection = evt.LocalImpactDirection;
+        }
+
+        /// <summary>
+        /// Al morder el gancho abro el FOV de golpe unos grados (como el tirón del Grappleshot de
+        /// Halo Infinite); el suavizado normal y el decaimiento lo regresan solos.
+        /// </summary>
+        private void OnGrappleAttached(in GrappleAttached evt)
+        {
+            if (useFovKick) fovPunch = grappleAttachFovPunch;
         }
 
         /// <summary>Se ejecuta después del motor para usar el estado final del frame.</summary>
@@ -144,6 +163,9 @@ namespace NostalgIA.Presentation.CameraFX
                         break;
                 }
             }
+            // El golpe decae exponencialmente (independiente de los FPS) y se suma al objetivo.
+            fovPunch *= Mathf.Exp(-fovPunchDecay * dt);
+            target += fovPunch;
             cam.fieldOfView = Mathf.SmoothDamp(cam.fieldOfView, target, ref fovVelocity, 1f / fovChangeSpeed, Mathf.Infinity, dt);
         }
 

@@ -118,6 +118,8 @@ namespace NostalgIA.Gameplay.Player
         private bool releaseMomentumPending;
         private float grappleRetention = 1f;
         private float grappleAirControl;
+        private float postGrappleAirTimer;
+        private float postGrappleAirAcceleration;
 
         /// <summary>Si es verdadero, los choques eliminan la componente de la velocidad contra la superficie.</summary>
         private bool projectCollisions;
@@ -480,6 +482,7 @@ namespace NostalgIA.Gameplay.Player
 
             velocity.y -= settings.gravity * dt;
             ApplyAirControl(dt);
+            if (postGrappleAirTimer > 0f) postGrappleAirTimer -= dt;
 
             float verticalBeforeMove = velocity.y;
             projectCollisions = true;
@@ -508,6 +511,11 @@ namespace NostalgIA.Gameplay.Player
         /// Solo se añade velocidad en la dirección de la entrada mientras su proyección no supere
         /// el máximo; empujar en sentido contrario frena porque la proyección es negativa. Después,
         /// el exceso sobre <c>maxAirSpeed</c> decae con <c>e^(−k·Δt)</c> (arrastre aéreo bajo).
+        /// <para>
+        /// Justo después de soltar el gancho la aceleración sube a <c>ReleaseAirAcceleration</c>
+        /// durante <c>ReleaseAirControlTime</c>: así se puede corregir el vuelo que dejó el cable sin
+        /// que el salto normal se vuelva más «flotante».
+        /// </para>
         /// </remarks>
         private void ApplyAirControl(float dt)
         {
@@ -522,7 +530,10 @@ namespace NostalgIA.Gameplay.Player
                 float room = settings.maxAirSpeed * wishMagnitude - Vector3.Dot(horizontal, direction);
                 if (room > 0f)
                 {
-                    horizontal += direction * Mathf.Min(settings.airAcceleration * wishMagnitude * dt, room);
+                    float acceleration = postGrappleAirTimer > 0f
+                        ? Mathf.Max(settings.airAcceleration, postGrappleAirAcceleration)
+                        : settings.airAcceleration;
+                    horizontal += direction * Mathf.Min(acceleration * wishMagnitude * dt, room);
                     horizontal = Vector3.ClampMagnitude(horizontal, Mathf.Max(settings.maxAirSpeed, speedBefore));
                 }
             }
@@ -544,6 +555,7 @@ namespace NostalgIA.Gameplay.Player
         private void Land(float impactSpeed)
         {
             velocity.y = LeaveGroundVerticalSpeed;
+            postGrappleAirTimer = 0f;
             jumpedSinceGrounded = false;
             lastGroundedTime = Time.time;
             EventBus<PlayerLanded>.Raise(new PlayerLanded(transform.position, Mathf.Max(0f, impactSpeed)));
@@ -704,6 +716,12 @@ namespace NostalgIA.Gameplay.Player
         private void TickGrappling(float dt)
         {
             sprinting = false;
+            if (JumpBuffered && tether != null && tether.IsAttached)
+            {
+                GrappleJump();
+                return;
+            }
+
             int steps = Mathf.Clamp(Mathf.CeilToInt(dt * settings.grappleSubstepRate), 1, 32);
             float step = dt / steps;
 
@@ -714,7 +732,8 @@ namespace NostalgIA.Gameplay.Player
                 ApplyReleaseMomentum();
                 if (tether == null || !tether.IsAttached) velocity.y -= settings.gravity * step;
 
-                ApplyGrappleAirControl(step);
+                if (tether != null && tether.IsAttached) ApplyGrappleSteering(step);
+                else ApplyGrappleAirControl(step);
 
                 Vector3 previousPosition = transform.position;
                 Vector3 previousCenter = CapsuleCenter;
@@ -751,8 +770,56 @@ namespace NostalgIA.Gameplay.Player
         }
 
         /// <summary>
+        /// Control mientras el cable jala. Trabajo en el plano perpendicular al cable
+        /// (<c>d̂</c> = dirección al ancla), porque lo que va a lo largo del cable ya lo decide la
+        /// tracción:
+        /// <code>
+        /// v∥ = d̂·(v·d̂),  v⊥ = v − v∥
+        /// ŵ⊥ = normalizar(proyectar(w, d̂))            (entrada de movimiento sin la parte del cable)
+        /// con entrada:  v⊥ ← v⊥ + ŵ⊥·min(a·|w|·Δt, max(0, vMáx·|w| − v⊥·ŵ⊥))
+        /// sin entrada:  v⊥ ← v⊥·e^(−k·Δt)              (se endereza sola hacia el ancla)
+        /// </code>
+        /// Uso la cámara para la dirección: adelante/atrás con la mirada inclinada también desvía
+        /// hacia arriba o abajo, y a los lados se «carvea» alrededor del cable. Empujar contra el
+        /// desvío actual lo frena porque <c>v⊥·ŵ⊥</c> sale negativo y el margen crece. Al final limito
+        /// la rapidez a <c>max(|v| previa, vMáx)</c> para que desviarse no sume velocidad.
+        /// </summary>
+        private void ApplyGrappleSteering(float step)
+        {
+            Vector3 offset = tether.AnchorPoint - CapsuleCenter;
+            if (offset.sqrMagnitude < 0.0001f) return;
+            Vector3 cable = offset.normalized;
+            Vector3 along = cable * Vector3.Dot(velocity, cable);
+            Vector3 lateral = velocity - along;
+
+            Transform view = cameraParent != null ? cameraParent : transform;
+            Vector3 wish = Vector3.ClampMagnitude(view.right * moveInput.x + view.forward * moveInput.y, 1f);
+            Vector3 wishLateral = Vector3.ProjectOnPlane(wish, cable);
+            float strength = Mathf.Min(1f, wishLateral.magnitude);
+
+            float speedBefore = velocity.magnitude;
+            if (strength > 0.05f)
+            {
+                Vector3 direction = wishLateral.normalized;
+                float room = Mathf.Max(0f, tether.SteerMaxSpeed * strength - Vector3.Dot(lateral, direction));
+                lateral += direction * Mathf.Min(tether.SteerAcceleration * strength * step, room);
+            }
+            else
+            {
+                lateral *= Mathf.Exp(-tether.LateralDamping * step);
+            }
+            velocity = along + lateral;
+
+            // Desviarse dobla la trayectoria pero no la acelera: a alta velocidad solo giro el vector
+            // (igual que el control aéreo normal); si iba lento, sí dejo ganar hasta SteerMaxSpeed.
+            // Sin esto el desvío se convertía en tracción al girar el cable y salía disparado.
+            velocity = Vector3.ClampMagnitude(velocity, Mathf.Max(speedBefore, tether.SteerMaxSpeed));
+        }
+
+        /// <summary>
         /// Control aéreo durante el remolque (física del prototipo): ignora el retroceso para no
         /// frenar con «atrás», no frena sin entrada y no supera <c>max(sprint, |v_h|)</c>.
+        /// Solo se usa en el subpaso en que el cable ya se soltó.
         /// </summary>
         private void ApplyGrappleAirControl(float step)
         {
@@ -770,12 +837,55 @@ namespace NostalgIA.Gameplay.Player
             velocity.z = horizontal.z;
         }
 
-        /// <summary>Reduce la velocidad una sola vez al soltar (sin frenado acumulativo por frame).</summary>
+        /// <summary>
+        /// Reduce la velocidad una sola vez al soltar (sin frenado acumulativo por frame), salvo
+        /// cuando el gancho se soltó por pasarse del ancla. Si el
+        /// gancho soltó por llegar a una pared o esfera, además garantizo una velocidad vertical
+        /// mínima para que el jugador suba al borde en lugar de quedarse pegado debajo.
+        /// </summary>
         private void ApplyReleaseMomentum()
         {
             if (!releaseMomentumPending || (tether != null && tether.IsAttached)) return;
-            velocity *= grappleRetention;
+            // Si el gancho se soltó por pasarse del ancla, la velocidad queda tal cual.
+            bool free = tether != null && tether.ConsumeFreeRelease();
+            if (!free) velocity *= grappleRetention;
             releaseMomentumPending = false;
+            if (tether != null)
+            {
+                postGrappleAirTimer = tether.ReleaseAirControlTime;
+                postGrappleAirAcceleration = tether.ReleaseAirAcceleration;
+            }
+            float lift = tether != null ? tether.ConsumeReleaseLift() : 0f;
+            if (lift > 0f) velocity.y = Mathf.Max(velocity.y, lift);
+        }
+
+        /// <summary>
+        /// Salto con gancho (como cancelar el Grappleshot de Halo Infinite con un salto): suelta el
+        /// cable sin la pérdida de <c>releaseMomentumRetention</c>, asegura una velocidad vertical
+        /// mínima de <c>JumpLaunchSpeed</c> y añade <c>JumpForwardBoost</c> en la dirección
+        /// horizontal de la cámara. Así el jugador puede «lanzarse» por encima de un borde o
+        /// encadenar el impulso hacia la siguiente plataforma.
+        /// </summary>
+        private void GrappleJump()
+        {
+            IGrappleTether current = tether;
+            float up = current.JumpLaunchSpeed;
+            float forwardBoost = current.JumpForwardBoost;
+
+            jumpBufferTimer = 0f;
+            jumpedSinceGrounded = true;
+            grappleRetention = 1f;          // este suelte no pierde impulso
+            current.Release();
+            ApplyReleaseMomentum();
+            current.ConsumeReleaseLift();   // por si acaso: el salto manda sobre el brinco de llegada
+
+            Vector3 flatForward = Vector3.ProjectOnPlane(transform.forward, Vector3.up).normalized;
+            velocity += flatForward * forwardBoost;
+            velocity.y = Mathf.Max(velocity.y, up);
+
+            tether = null;
+            EventBus<PlayerJumped>.Raise(new PlayerJumped(transform.position, velocity));
+            ChangeState(LocomotionState.Airborne);
         }
 
         // ------------------------------------------------------------------ colisiones
