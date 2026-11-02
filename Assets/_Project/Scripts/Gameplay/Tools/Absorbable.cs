@@ -2,7 +2,7 @@
 // NostalgIA — Jugabilidad (NostalgIA.Gameplay)
 // Archivo: Absorbable.cs
 // Propósito: objeto que la aspiradora puede absorber, almacenar y disparar, con
-// registro cinemático para el daño por impacto F = m·a (TDD §6.3, tarea F1-A09).
+// registro cinemático para el daño por impacto F = m·a.
 // -----------------------------------------------------------------------------
 
 using NostalgIA.Core;

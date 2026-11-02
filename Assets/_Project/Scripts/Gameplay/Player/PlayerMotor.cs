@@ -2,8 +2,7 @@
 // NostalgIA — Jugabilidad (NostalgIA.Gameplay)
 // Archivo: PlayerMotor.cs
 // Propósito: motor de locomoción del jugador en primera persona con máquina de
-// estados Grounded / Crouching / Sliding / Airborne / Grappling
-// (TDD §5.1, tarea F1-A06).
+// estados Grounded / Crouching / Sliding / Airborne / Grappling.
 //
 // Atribución: código derivado de «EasyPeasy First Person Controller» (Unity Asset
 // Store, licencia Standard Unity Asset Store EULA; ver CREDITS.md), modificado y
@@ -39,7 +38,7 @@ namespace NostalgIA.Gameplay.Player
     /// (o una vez por subpaso en <see cref="LocomotionState.Grappling"/>).
     /// </para>
     /// <para>
-    /// <b>Conservación de impulso aéreo (TDD §5.1).</b> En el aire, el control solo acelera hacia la
+    /// <b>Conservación de impulso aéreo.</b> En el aire, el control solo acelera hacia la
     /// dirección de entrada <c>ŵ</c> mientras la proyección <c>v·ŵ</c> sea menor que
     /// <c>maxAirSpeed</c>; nunca frena hacia una velocidad objetivo como el controlador original
     /// (que reducía 8 m/s a 5 m/s durante un salto). El exceso sobre <c>maxAirSpeed</c> decae

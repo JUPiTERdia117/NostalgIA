@@ -2,12 +2,12 @@
 // NostalgIA — Núcleo (NostalgIA.Core)
 // Archivo: GameEnums.cs
 // Propósito: enumeraciones compartidas por la carga útil de los eventos y por las
-// interfaces de estado (TDD §3.2, §4.2, §5, §6 y §7).
+// interfaces de estado.
 // -----------------------------------------------------------------------------
 
 namespace NostalgIA.Core.Events
 {
-    /// <summary>Estados globales de la partida (TDD §3.2).</summary>
+    /// <summary>Estados globales de la partida.</summary>
     public enum GameState
     {
         /// <summary>Arranque: servicios en inicialización.</summary>
@@ -28,7 +28,7 @@ namespace NostalgIA.Core.Events
         Results
     }
 
-    /// <summary>Esquema de control activo (TDD §7.4).</summary>
+    /// <summary>Esquema de control activo.</summary>
     public enum InputScheme
     {
         /// <summary>Teclado y ratón.</summary>
@@ -39,7 +39,7 @@ namespace NostalgIA.Core.Events
         Touch
     }
 
-    /// <summary>Estados de la máquina de locomoción del jugador (TDD §5.1).</summary>
+    /// <summary>Estados de la máquina de locomoción del jugador.</summary>
     public enum LocomotionState
     {
         /// <summary>En el suelo: caminar o correr.</summary>
@@ -54,7 +54,7 @@ namespace NostalgIA.Core.Events
         Grappling
     }
 
-    /// <summary>Herramientas intercambiables del dron (GDD 2.3).</summary>
+    /// <summary>Herramientas intercambiables del dron.</summary>
     public enum ToolId
     {
         /// <summary>Aspiradora Lanzadora.</summary>
@@ -63,7 +63,7 @@ namespace NostalgIA.Core.Events
         Grapple
     }
 
-    /// <summary>Tipo de objetivo bajo la retícula (TDD §6.2).</summary>
+    /// <summary>Tipo de objetivo bajo la retícula.</summary>
     public enum AimTargetKind
     {
         /// <summary>Nada utilizable por la herramienta activa.</summary>
@@ -76,7 +76,7 @@ namespace NostalgIA.Core.Events
         OutOfRange
     }
 
-    /// <summary>Tipo de daño (TDD §5.2).</summary>
+    /// <summary>Tipo de daño.</summary>
     public enum DamageType
     {
         /// <summary>Resta corazones y respeta la invulnerabilidad temporal.</summary>
@@ -85,7 +85,7 @@ namespace NostalgIA.Core.Events
         Instakill
     }
 
-    /// <summary>Causa de muerte del jugador (TDD §4.2, evento <c>PlayerDied</c>).</summary>
+    /// <summary>Causa de muerte del jugador (evento <c>PlayerDied</c>).</summary>
     public enum DeathCause
     {
         /// <summary>Se agotaron los corazones.</summary>
@@ -96,7 +96,7 @@ namespace NostalgIA.Core.Events
         Instakill
     }
 
-    /// <summary>Tipos de enemigo del bestiario (GDD 3.3).</summary>
+    /// <summary>Tipos de enemigo del bestiario.</summary>
     public enum EnemyKind
     {
         /// <summary>Correo de Spam: atacante a distancia.</summary>

@@ -11,7 +11,6 @@ using System.IO;
 using System.Linq;
 using NostalgIA.Core;
 using NostalgIA.EditorTools.Levels;
-using NostalgIA.EditorTools.Setup;
 using NostalgIA.Gameplay.Level;
 using NostalgIA.Gameplay.Player;
 using NostalgIA.Gameplay.Tools;
@@ -38,7 +37,6 @@ namespace NostalgIA.EditorTools.Experimental
         private const string ExperimentalMenuRoot = "NostalgIA/Experimental/";
         private const string LevelsMenuRoot = "NostalgIA/Niveles/";
         public const string ScenePath = "Assets/_Project/Scenes/Stations/20_Verano_Frutiger.unity";
-        public const string AutoBuildMarkerPath = "Temp/verano_level2_autobuild.once";
 
         /// <summary>
         /// Origen de la región del mundo que ocupa Verano: a 3 km en +X respecto al Tutorial para que
@@ -58,14 +56,14 @@ namespace NostalgIA.EditorTools.Experimental
         private const string HorsePrefabPath = "Assets/_Project/Prefabs/Enemies/Horse.prefab";
         private const string WinRarPrefabPath = "Assets/_Project/Prefabs/Enemies/WinRar.prefab";
 
-        /// <summary>Shaders del kit Frutiger Aero verificados también por las pruebas de editor.</summary>
+        /// <summary>Shaders del kit Frutiger Aero; antes de construir reviso que existan todos.</summary>
         public static readonly string[] ShaderNames =
         {
             "NOS/AeroSky", "NOS/AeroGloss", "NOS/AeroBubble", "NOS/AeroBubbleSprite", "NOS/AeroWater",
             "NOS/AeroGlass", "NOS/AeroRibbon", "NOS/AeroGodRay", "NOS/AeroRainbow", "NOS/AeroFoam", "NOS/AeroFish"
         };
 
-        // Paleta de Verano (Guía de estilo §5.2) y acentos semánticos de lectura rápida.
+        // Paleta de Verano y acentos semánticos de lectura rápida.
         private static readonly Color SkyCyan = Hex(0x2EC5FF);
         private static readonly Color DeepBlue = Hex(0x0077D9);
         private static readonly Color Lime = Hex(0x7ED957);
@@ -88,27 +86,6 @@ namespace NostalgIA.EditorTools.Experimental
         private static Transform root;
         private static Transform safeGoalReturnAnchor;
 
-        // ================================================================== auto-ejecución única al recargar el editor
-        [InitializeOnLoadMethod]
-        private static void CheckPendingAutoBuild()
-        {
-            if (!File.Exists(AutoBuildMarkerPath)) return;
-            EditorApplication.delayCall += TryRunPendingAutoBuild;
-        }
-
-        private static void TryRunPendingAutoBuild()
-        {
-            if (!File.Exists(AutoBuildMarkerPath)) return;
-            if (EditorApplication.isPlayingOrWillChangePlaymode || EditorApplication.isCompiling || EditorApplication.isUpdating)
-            {
-                EditorApplication.delayCall += TryRunPendingAutoBuild;
-                return;
-            }
-
-            File.Delete(AutoBuildMarkerPath);
-            BuildAndConnectTutorial();
-        }
-
         // ================================================================== menús
         [MenuItem(LevelsMenuRoot + "Construir Nivel 2 — Verano (Frutiger Aero)", priority = 302)]
         public static void BuildMenu() => Build();
@@ -116,7 +93,6 @@ namespace NostalgIA.EditorTools.Experimental
         [MenuItem(LevelsMenuRoot + "Construir Nivel 2 y Conectar Tutorial", priority = 303)]
         public static void BuildAndConnectTutorial()
         {
-            Phase1VisualBuilder.ConfigureGameRootVisuals();
             Build();
             EnsureTutorialConnected();
             EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
@@ -138,8 +114,8 @@ namespace NostalgIA.EditorTools.Experimental
                 }
             }
 
-            Phase1Builder.EnsureFolder(MaterialsRoot);
-            Phase1Builder.EnsureFolder(MeshesRoot);
+            LevelGateBuilder.EnsureFolder(MaterialsRoot);
+            LevelGateBuilder.EnsureFolder(MeshesRoot);
             CreateMaterials();
             CreateVolumes();
 
@@ -220,74 +196,6 @@ namespace NostalgIA.EditorTools.Experimental
             }
 
             LevelGateBuilder.EnsureInBuild(ScenePath);
-        }
-
-        /// <summary>Diagnóstico de shaders del kit Frutiger Aero en la plataforma actual.</summary>
-        [MenuItem(ExperimentalMenuRoot + "Diagnóstico de shaders", priority = 201)]
-        public static void ShaderReport()
-        {
-            var report = new System.Text.StringBuilder();
-            foreach (string name in ShaderNames)
-            {
-                Shader shader = Shader.Find(name);
-                if (shader == null) { report.AppendLine($"{name}: NO ENCONTRADO"); continue; }
-                report.AppendLine($"{name}: error={ShaderUtil.ShaderHasError(shader)} soportado={shader.isSupported}");
-                foreach (ShaderMessage message in ShaderUtil.GetShaderMessages(shader))
-                    report.AppendLine($"   [{message.severity}] {message.message} ({message.file}:{message.line}) {message.messageDetails}");
-            }
-            File.WriteAllText("Temp/frutiger_shaders.txt", report.ToString());
-            Debug.Log("[Frutiger] Diagnóstico de shaders:\n" + report);
-        }
-
-        /// <summary>Puntos de cámara actualizados al recorrido oficial del Nivel 2.</summary>
-        private static readonly (string name, Vector3 eye, Vector3 target)[] Views =
-        {
-            ("01_isla_inicio", new Vector3(2f, 6.2f, -10f), new Vector3(0f, 3.5f, 35f)),
-            ("02_bifurcacion_islas", new Vector3(0f, 11f, 14f), new Vector3(0f, 4f, 42f)),
-            ("03_isla_derecha_aspas", new Vector3(6f, 8.5f, 22f), new Vector3(17f, 3.5f, 36f)),
-            ("04_plataformas_moviles", new Vector3(0f, 13f, 48f), new Vector3(0f, 11f, 82f)),
-            ("05_lote_edificios", new Vector3(-28f, 26f, 76f), new Vector3(2f, 15f, 120f)),
-            ("06_arena_central_spawner", new Vector3(-12f, 22f, 102f), new Vector3(2f, 16f, 118f)),
-            ("07_plataforma_final_y_meta", new Vector3(-14f, 27f, 150f), new Vector3(0f, 14f, 178f)),
-            ("08_agua_poco_profunda", new Vector3(-14f, 3.5f, 102f), new Vector3(6f, 2f, 122f)),
-            ("09_cenital_completo", new Vector3(0f, 250f, 88f), new Vector3(0f, 0f, 88f))
-        };
-
-        [MenuItem(ExperimentalMenuRoot + "Capturar vistas del nivel", priority = 202)]
-        public static void CaptureViews()
-        {
-            var go = new GameObject("CamaraCaptura") { hideFlags = HideFlags.HideAndDontSave };
-            Camera cam = go.AddComponent<Camera>();
-            UniversalAdditionalCameraData data = go.AddComponent<UniversalAdditionalCameraData>();
-            data.renderPostProcessing = true;
-            data.antialiasing = AntialiasingMode.FastApproximateAntialiasing;
-            cam.fieldOfView = 70f;
-            cam.farClipPlane = 1000f;
-            var rt = new RenderTexture(1280, 720, 24, RenderTextureFormat.ARGB32);
-            var tex = new Texture2D(1280, 720, TextureFormat.RGB24, false);
-            try
-            {
-                foreach ((string name, Vector3 eye, Vector3 target) in Views)
-                {
-                    go.transform.SetPositionAndRotation(eye + RegionOrigin, Quaternion.LookRotation(target - eye));
-                    cam.targetTexture = rt;
-                    cam.Render();
-                    RenderTexture.active = rt;
-                    tex.ReadPixels(new Rect(0, 0, 1280, 720), 0, 0);
-                    tex.Apply();
-                    RenderTexture.active = null;
-                    File.WriteAllBytes($"Temp/frutiger_view_{name}.png", tex.EncodeToPNG());
-                }
-            }
-            finally
-            {
-                cam.targetTexture = null;
-                Object.DestroyImmediate(go);
-                Object.DestroyImmediate(tex);
-                rt.Release();
-                Object.DestroyImmediate(rt);
-            }
-            Debug.Log("[Frutiger] Vistas guardadas en Temp/frutiger_view_*.png");
         }
 
         // ================================================================== materiales (todos como assets)
@@ -1646,7 +1554,7 @@ namespace NostalgIA.EditorTools.Experimental
             var bootstrap = new GameObject("LevelBootstrap");
             bootstrap.AddComponent<StandaloneLevelContent>().Configure(standalone);
 
-            var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(Phase1Builder.Paths.Player);
+            var prefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/_Project/Prefabs/Player/Player.prefab");
             if (prefab != null)
             {
                 var player = (GameObject)PrefabUtility.InstantiatePrefab(prefab, scene);

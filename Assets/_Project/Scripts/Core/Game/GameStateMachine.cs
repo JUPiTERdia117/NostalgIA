@@ -1,8 +1,7 @@
 // -----------------------------------------------------------------------------
 // NostalgIA — Núcleo (NostalgIA.Core)
 // Archivo: GameStateMachine.cs
-// Propósito: estados globales, escala de tiempo y bloqueo del cursor
-// (TDD §3.2, tarea F1-A14).
+// Propósito: estados globales, escala de tiempo y bloqueo del cursor.
 // -----------------------------------------------------------------------------
 
 using NostalgIA.Core.Events;
@@ -15,7 +14,7 @@ namespace NostalgIA.Core.Game
     /// </summary>
     /// <remarks>
     /// <para>
-    /// Cada transición aplica la tabla del TDD §3.2 y publica <see cref="GameStateChanged"/>. El
+    /// Cada transición aplica su escala de tiempo y cursor y publica <see cref="GameStateChanged"/>. El
     /// mapa de acciones activo y la visibilidad de los controles táctiles los decide cada
     /// consumidor al recibir el evento (<c>InputReader</c>, <c>TouchControlsVisibility</c>), de modo
     /// que este servicio de <c>Core</c> no depende del ensamblado de entrada.

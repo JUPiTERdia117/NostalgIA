@@ -1,8 +1,7 @@
 // -----------------------------------------------------------------------------
 // NostalgIA — Núcleo (NostalgIA.Core)
 // Archivo: PoolService.cs
-// Propósito: servicio de pools de GameObjects sobre UnityEngine.Pool.ObjectPool
-// (TDD §8.5.1, tarea F1-A13).
+// Propósito: servicio de pools de GameObjects sobre UnityEngine.Pool.ObjectPool.
 // -----------------------------------------------------------------------------
 
 using System.Collections.Generic;

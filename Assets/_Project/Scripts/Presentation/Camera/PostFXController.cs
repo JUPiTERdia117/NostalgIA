@@ -2,7 +2,7 @@
 // NostalgIA — Presentación (NostalgIA.Presentation)
 // Archivo: PostFXController.cs
 // Propósito: retroalimentación de postprocesado ante daño y muerte mediante el
-// peso de un Volume global de alta prioridad (TDD §8.4, perfil VP_Feedback).
+// peso de un Volume global de alta prioridad (perfil VP_Feedback).
 // -----------------------------------------------------------------------------
 
 using NostalgIA.Core.Events;
@@ -44,7 +44,7 @@ namespace NostalgIA.Presentation.CameraFX
         [Tooltip("Volume global de retroalimentación (prioridad alta, perfil VP_Feedback).")]
         [SerializeField] private Volume feedbackVolume;
 
-        [Tooltip("Duración del pulso de daño (TDD §8.4: 0,35 s).")]
+        [Tooltip("Duración del pulso de daño (0,35 s).")]
         [SerializeField, Min(0.05f)] private float damagePulseDuration = 0.35f;
 
         [Tooltip("Duración del desvanecimiento tras reaparecer.")]

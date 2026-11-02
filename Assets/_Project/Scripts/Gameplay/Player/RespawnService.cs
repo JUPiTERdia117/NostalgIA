@@ -1,8 +1,7 @@
 // -----------------------------------------------------------------------------
 // NostalgIA — Jugabilidad (NostalgIA.Gameplay)
 // Archivo: RespawnService.cs
-// Propósito: reaparición en el último checkpoint sin recargar la escena
-// (TDD §5.3, tarea F1-A12).
+// Propósito: reaparición en el último checkpoint sin recargar la escena.
 // -----------------------------------------------------------------------------
 
 using NostalgIA.Core.Events;
@@ -18,7 +17,7 @@ namespace NostalgIA.Gameplay.Player
     /// Servicio de reaparición del jugador.
     /// </summary>
     /// <remarks>
-    /// <para>Secuencia (TDD §5.3):</para>
+    /// <para>Secuencia:</para>
     /// <list type="number">
     /// <item>Recibe <see cref="PlayerDied"/> y cambia el estado global a <see cref="GameState.Respawning"/>
     /// (sin entrada) durante <c>respawnDelay</c> segundos (≈ 0,8 s, tiempo de la transición visual).</item>

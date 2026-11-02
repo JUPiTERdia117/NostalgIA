@@ -125,7 +125,6 @@ namespace NostalgIA.EditorTools.Levels
                 }
             }
             report.Insert(0, problems == 0 ? "Regiones de nivel correctas.\n" : $"{problems} pares de niveles demasiado cerca.\n");
-            File.WriteAllText("Temp/level_regions.txt", report.ToString());
             if (problems == 0) Debug.Log("[Niveles] " + report);
             else Debug.LogWarning("[Niveles] " + report);
         }

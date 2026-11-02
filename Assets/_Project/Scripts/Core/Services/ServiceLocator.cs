@@ -1,8 +1,7 @@
 // -----------------------------------------------------------------------------
 // NostalgIA — Núcleo (NostalgIA.Core)
 // Archivo: ServiceLocator.cs
-// Propósito: registro mínimo de servicios e interfaces de estado de solo lectura
-// (TDD §4.1, tarea F1-A01).
+// Propósito: registro mínimo de servicios e interfaces de estado de solo lectura.
 // -----------------------------------------------------------------------------
 
 using System;
@@ -16,7 +15,7 @@ namespace NostalgIA.Core.Services
     /// </summary>
     /// <remarks>
     /// <para>
-    /// Lo usamos para dos fines del TDD: (1) acceder a servicios persistentes
+    /// Lo usamos para dos fines: (1) acceder a servicios persistentes
     /// (<c>GameStateMachine</c>, <c>PoolService</c>, <c>InputReader</c>) y (2) exponer el estado
     /// continuo de alta frecuencia mediante interfaces de solo lectura
     /// (<c>IPlayerMotionState</c>, <c>IVacuumState</c>, <c>IToolState</c>) sin publicar eventos por frame.

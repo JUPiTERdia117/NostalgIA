@@ -2,7 +2,7 @@
 // NostalgIA — Entrada (NostalgIA.Input)
 // Archivo: InputReader.cs
 // Propósito: punto único de lectura de la entrada de juego para teclado y ratón,
-// mando y pantalla táctil (TDD §7.2, tarea F1-A03).
+// mando y pantalla táctil.
 // -----------------------------------------------------------------------------
 
 using System;
@@ -292,7 +292,7 @@ namespace NostalgIA.Input
             ResetTransientState();
         }
 
-        /// <summary>Aplica la tabla del TDD §3.2: qué mapa corresponde a cada estado global.</summary>
+        /// <summary>Decide qué mapa corresponde a cada estado global.</summary>
         private void OnGameStateChanged(in GameStateChanged evt)
         {
             switch (evt.Current)
@@ -384,7 +384,7 @@ namespace NostalgIA.Input
             if (!string.IsNullOrEmpty(json)) activeAsset.LoadBindingOverridesFromJson(json);
         }
 
-        /// <summary>Elimina las reasignaciones y restaura los controles del GDD.</summary>
+        /// <summary>Elimina las reasignaciones y restaura los controles por defecto.</summary>
         public void ClearBindingOverrides()
         {
             if (activeAsset == null) return;

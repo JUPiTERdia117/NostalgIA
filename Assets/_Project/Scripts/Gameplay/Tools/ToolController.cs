@@ -2,7 +2,7 @@
 // NostalgIA — Jugabilidad (NostalgIA.Gameplay)
 // Archivo: ToolController.cs
 // Propósito: herramienta activa, resolución contextual de acciones y
-// enfriamiento compartido (GDD 2.3, TDD §6.1 y §7.3, tarea F1-A08).
+// enfriamiento compartido.
 // -----------------------------------------------------------------------------
 
 using NostalgIA.Core.Events;
@@ -19,14 +19,14 @@ namespace NostalgIA.Gameplay.Tools
     /// Controlador de herramientas del dron.
     /// </summary>
     /// <remarks>
-    /// <para>Responsabilidades (TDD §6.1):</para>
+    /// <para>Responsabilidades:</para>
     /// <list type="bullet">
-    /// <item>Mantener <b>una sola herramienta activa</b> (GDD 2.3) y procesar <c>SwitchTool</c>.</item>
+    /// <item>Mantener <b>una sola herramienta activa</b> y procesar <c>SwitchTool</c>.</item>
     /// <item>Traducir las acciones lógicas a <see cref="ToolInput"/> según la herramienta activa
-    /// (TDD §7.3): la aspiradora atiende <c>Absorb</c> y <c>Fire</c>; el gancho, <c>Grapple</c>.
+    /// la aspiradora atiende <c>Absorb</c> y <c>Fire</c>; el gancho, <c>Grapple</c>.
     /// Esto resuelve que el clic derecho y RT tengan significados distintos según la herramienta.</item>
     /// <item>Administrar el <b>enfriamiento compartido</b>: tras soltar el gancho, ninguna de las
-    /// dos herramientas acepta acciones hasta que el ducto se retrae (GDD 2.3, <i>Cooldown</i>).
+    /// dos herramientas acepta acciones hasta que el ducto se retrae (<i>Cooldown</i>).
     /// Cambiar de herramienta sí está permitido durante el enfriamiento.</item>
     /// <item>Publicar <see cref="ToolSwitched"/> y <see cref="ToolCooldownChanged"/> (solo al
     /// iniciar y terminar; el valor intermedio se lee en <see cref="IToolState"/>).</item>
@@ -166,7 +166,7 @@ namespace NostalgIA.Gameplay.Tools
 
         /// <summary>
         /// Construye la entrada filtrada: durante el enfriamiento no pasa ninguna acción, y cada
-        /// herramienta recibe solo las suyas (TDD §7.3).
+        /// herramienta recibe solo las suyas.
         /// </summary>
         private ToolInput BuildInput()
         {
@@ -223,7 +223,7 @@ namespace NostalgIA.Gameplay.Tools
         private void OnFirePressed() => firePressed = true;
         private void OnGrapplePressed() => grapplePressed = true;
 
-        /// <summary>Al soltar el gancho empieza el enfriamiento compartido (GDD 2.3).</summary>
+        /// <summary>Al soltar el gancho empieza el enfriamiento compartido.</summary>
         private void OnGrappleReleased(in GrappleReleased evt)
         {
             if (grapple != null) StartCooldown(grapple.CooldownDuration);

@@ -1,8 +1,7 @@
 // -----------------------------------------------------------------------------
 // NostalgIA — Entrada (NostalgIA.Input)
 // Archivo: TouchLookZone.cs
-// Propósito: zona de arrastre para mirar en la mitad derecha de la pantalla
-// (TDD §7.5, tarea F1-A05).
+// Propósito: zona de arrastre para mirar en la mitad derecha de la pantalla.
 // -----------------------------------------------------------------------------
 
 using NostalgIA.Core.Services;
@@ -19,7 +18,7 @@ namespace NostalgIA.Input.TouchControls
     /// En este módulo se decidió usar los eventos de puntero de uGUI sobre una imagen transparente
     /// que cubre la mitad derecha, en lugar de leer <c>EnhancedTouch</c> directamente: los botones
     /// del HUD están por encima en el orden de dibujo y capturan sus propios toques, de modo que la
-    /// condición «arrastre fuera de botones» del TDD se cumple sin lógica de exclusión adicional.
+    /// condición «arrastre fuera de botones» se cumple sin lógica de exclusión adicional.
     /// </para>
     /// <para>
     /// El delta del puntero (píxeles de pantalla en este frame) se entrega a

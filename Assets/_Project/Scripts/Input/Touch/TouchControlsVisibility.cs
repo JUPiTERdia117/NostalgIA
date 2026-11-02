@@ -2,7 +2,7 @@
 // NostalgIA — Entrada (NostalgIA.Input)
 // Archivo: TouchControlsVisibility.cs
 // Propósito: mostrar los controles táctiles solo con el esquema Táctil y durante
-// el juego (TDD §3.2 y §7.4, tarea F1-A05).
+// el juego.
 // -----------------------------------------------------------------------------
 
 using NostalgIA.Core.Events;

@@ -1,7 +1,7 @@
 // -----------------------------------------------------------------------------
 // NostalgIA — Núcleo (NostalgIA.Core)
 // Archivo: PoolDefinition.cs
-// Propósito: definición de datos de un pool de objetos (TDD §8.5.1, tarea F1-A13).
+// Propósito: definición de datos de un pool de objetos.
 // -----------------------------------------------------------------------------
 
 using UnityEngine;
@@ -13,7 +13,7 @@ namespace NostalgIA.Core.Pooling
     /// </summary>
     /// <remarks>
     /// Separamos los tamaños de PC y móvil porque el presupuesto de partículas y fragmentos de
-    /// móvil es menor (TDD §8.5.4). El tamaño inicial se instancia durante la carga
+    /// móvil es menor. El tamaño inicial se instancia durante la carga
     /// (<i>prewarm</i>) para que el primer uso en juego no cree objetos; el máximo acota la
     /// memoria: los objetos devueltos por encima del máximo se destruyen.
     /// </remarks>

@@ -7,14 +7,14 @@ using UnityEngine;
 /// Rota y flota; al recogerla el jugador publica <see cref="StarCollected"/> y se destruye.
 /// </summary>
 /// <remarks>
-/// Fase 1: la estrella ya no busca al controlador del juego; comunica la recolección por el bus
+/// La estrella ya no busca al controlador del juego; comunica la recolección por el bus
 /// de eventos y el HUD, la guía y la progresión la escuchan. La rotación y la flotación siguen
-/// en <c>Update</c> hasta que la Fase 3 las traslade a un shader de vértices.
+/// en <c>Update</c> hasta que se trasladen a un shader de vértices.
 /// </remarks>
 public class StarController : MonoBehaviour
 {
     [Header("Identidad")]
-    [Tooltip("Índice de la estrella dentro de la estación (0–2). Lo asigna el constructor de la Fase 1 a partir del nombre.")]
+    [Tooltip("Índice de la estrella dentro de la estación (0–2). Se asigna a partir del nombre.")]
     [SerializeField] private int starIndex = -1;
 
     [Header("Animation")]

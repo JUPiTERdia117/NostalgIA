@@ -2,7 +2,7 @@
 // NostalgIA — Jugabilidad (NostalgIA.Gameplay)
 // Archivo: PlayerSettings.cs
 // Propósito: parámetros de diseño del jugador: movimiento, salto, deslizamiento,
-// alturas y vida (TDD §10, tarea F1-A15).
+// alturas y vida.
 // -----------------------------------------------------------------------------
 
 using UnityEngine;
@@ -15,12 +15,12 @@ namespace NostalgIA.Gameplay.Player
     /// <remarks>
     /// <para>
     /// Los valores por defecto son los del prototipo jugable (<c>Player.prefab</c> previo a la
-    /// Fase 1), de modo que el cambio de arquitectura no altera la sensación de control. Con salto
+    /// reestructuración), de modo que el cambio de arquitectura no altera la sensación de control. Con salto
     /// v₀ = 5 m/s y g = 9,81 m/s², la altura máxima es h = v₀² / 2g ≈ 1,27 m y el tiempo de vuelo
     /// t = 2v₀ / g ≈ 1,02 s.
     /// </para>
     /// <para>
-    /// No se debe modificar el asset en tiempo de ejecución (TDD §10): los valores alterables
+    /// No se debe modificar el asset en tiempo de ejecución: los valores alterables
     /// por mejoras viven en objetos C# creados a partir de él.
     /// </para>
     /// <para>
@@ -96,7 +96,7 @@ namespace NostalgIA.Gameplay.Player
         [Min(0.05f)] public float grappleBlockedRelease = 0.25f;
 
         [Header("Vida")]
-        [Tooltip("Corazones máximos (GDD 2.5).")]
+        [Tooltip("Corazones máximos.")]
         [Min(1)] public int maxHearts = 3;
         [Tooltip("Invulnerabilidad tras recibir daño normal, en segundos.")]
         [Min(0f)] public float invulnerabilityDuration = 0.5f;
@@ -104,7 +104,7 @@ namespace NostalgIA.Gameplay.Player
         [Min(0f)] public float lethalFallSpeed = 24f;
 
         [Header("Reaparición")]
-        [Tooltip("Duración de la secuencia de muerte antes de reubicar al jugador, en segundos (TDD §3.2: ≈ 0,8 s; meta ≤ 1 s).")]
+        [Tooltip("Duración de la secuencia de muerte antes de reubicar al jugador, en segundos (≈ 0,8 s; meta ≤ 1 s).")]
         [Range(0f, 1f)] public float respawnDelay = 0.8f;
     }
 }

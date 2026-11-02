@@ -1,7 +1,7 @@
 // -----------------------------------------------------------------------------
 // NostalgIA — Presentación (NostalgIA.Presentation)
 // Archivo: DebrisFragment.cs
-// Propósito: fragmento físico reutilizable del pool de estallidos (TDD §8.5.1).
+// Propósito: fragmento físico reutilizable del pool de estallidos.
 // -----------------------------------------------------------------------------
 
 using NostalgIA.Core.Pooling;

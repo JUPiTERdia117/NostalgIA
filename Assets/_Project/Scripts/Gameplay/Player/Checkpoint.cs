@@ -1,7 +1,7 @@
 // -----------------------------------------------------------------------------
 // NostalgIA — Jugabilidad (NostalgIA.Gameplay)
 // Archivo: Checkpoint.cs
-// Propósito: punto de reaparición colocado en la escena (TDD §5.3, tarea F1-A12).
+// Propósito: punto de reaparición colocado en la escena.
 // -----------------------------------------------------------------------------
 
 using NostalgIA.Core.Events;
@@ -15,8 +15,8 @@ namespace NostalgIA.Gameplay.Player
     /// </summary>
     /// <remarks>
     /// <para>
-    /// <b>La posición del objeto en la escena es la fuente de verdad</b> (TDD §5.3). El prototipo
-    /// reubicaba los checkpoints por código con una tabla de coordenadas fijas; en la Fase 1 esa
+    /// <b>La posición del objeto en la escena es la fuente de verdad</b>. El prototipo
+    /// reubicaba los checkpoints por código con una tabla de coordenadas fijas; después esa
     /// tabla se aplicó una única vez en el editor y se eliminó del código.
     /// </para>
     /// <para>

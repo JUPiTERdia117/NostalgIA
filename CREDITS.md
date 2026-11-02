@@ -2,9 +2,9 @@
 
 **Proyecto:** *NostalgIA* — Fundamentos Técnicos de VFX  
 **Equipo:** Integrante 1 (Ingeniería de Gameplay, Físicas, IA y Optimización) · Integrante 2 (Technical Artist)  
-**Última actualización:** 26 de octubre de 2026 (tarea F0-B02)
+**Última actualización:** 26 de octubre de 2026
 
-Este registro cumple la restricción 2 de `Docs/Requisitos.md`: todo contenido externo se modifica de forma significativa y se documenta con su atribución. Cada activo nuevo se registra aquí **en el mismo *commit* en que se incorpora al proyecto**.
+Este registro cumple la restricción 2 de los requisitos del curso: todo contenido externo se modifica de forma significativa y se documenta con su atribución. Cada activo nuevo se registra aquí **en el mismo *commit* en que se incorpora al proyecto**.
 
 ---
 
@@ -28,9 +28,9 @@ Este registro cumple la restricción 2 de `Docs/Requisitos.md`: todo contenido e
 
 | Activo | Ruta | Autor / origen | Licencia | Modificación realizada por el equipo |
 | :--- | :--- | :--- | :--- | :--- |
-| EasyPeasy First Person Controller (documentación; código derivado en `_Project`) | `Assets/ThirdParty/EasyPeasyFirstPersonController/` | Unity Asset Store — publicador: *pendiente de registrar* | Standard Unity Asset Store EULA | Durante el prototipo se integró el gancho y se adaptó la entrada al Input System. Se retiraron la escena, el prefab, los materiales y la textura de demostración. En la Fase 1 (F1-A06) el código se reestructuró por completo: los estados de movimiento, el salto, el agachado, el deslizamiento y el remolque del gancho pasaron a `Assets/_Project/Scripts/Gameplay/Player/PlayerMotor.cs`, y las curvas de FOV, balanceo, inclinación y sacudida a `Assets/_Project/Scripts/Presentation/Camera/PlayerCameraFeedback.cs`. Ambos archivos conservan esta atribución en su cabecera. En `Assets/ThirdParty/` solo permanece la documentación original. Los estados de nado y agarre de cornisa se descartaron por no formar parte del GDD. |
+| EasyPeasy First Person Controller (documentación; código derivado en `_Project`) | `Assets/ThirdParty/EasyPeasyFirstPersonController/` | Unity Asset Store — publicador: *pendiente de registrar* | Standard Unity Asset Store EULA | Durante el prototipo se integró el gancho y se adaptó la entrada al Input System. Se retiraron la escena, el prefab, los materiales y la textura de demostración. Después el código se reestructuró por completo: los estados de movimiento, el salto, el agachado, el deslizamiento y el remolque del gancho pasaron a `Assets/_Project/Scripts/Gameplay/Player/PlayerMotor.cs`, y las curvas de FOV, balanceo, inclinación y sacudida a `Assets/_Project/Scripts/Presentation/Camera/PlayerCameraFeedback.cs`. Ambos archivos conservan esta atribución en su cabecera. En `Assets/ThirdParty/` solo permanece la documentación original. Los estados de nado y agarre de cornisa se descartaron por no formar parte del GDD. |
 | TextMesh Pro — recursos esenciales | `Assets/TextMesh Pro/` | Unity Technologies | Unity Companion License | Sin modificar; recurso de la interfaz de usuario |
-| Fuente Liberation Sans (incluida en TextMesh Pro) | `Assets/TextMesh Pro/Fonts/` | Red Hat, Inc. | SIL Open Font License 1.1 | Sin modificar; se sustituirá por las fuentes definidas en `Docs/Guia_Estilo_Visual.md` (§7) |
+| Fuente Liberation Sans (incluida en TextMesh Pro) | `Assets/TextMesh Pro/Fonts/` | Red Hat, Inc. | SIL Open Font License 1.1 | Sin modificar; se sustituirá por las fuentes definitivas de la interfaz |
 | Paquetes de Unity (URP, Input System, ProBuilder, AI Navigation, Timeline, Test Framework) | `Packages/manifest.json` | Unity Technologies | Unity Companion License | Dependencias del motor; no se redistribuyen modificadas |
 
 ---

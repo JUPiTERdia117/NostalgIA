@@ -1,7 +1,7 @@
 // -----------------------------------------------------------------------------
 // NostalgIA — Núcleo (NostalgIA.Core)
 // Archivo: IGameEvent.cs
-// Propósito: interfaz marcadora de los eventos que viajan por el bus (TDD §4.1).
+// Propósito: interfaz marcadora de los eventos que viajan por el bus.
 // -----------------------------------------------------------------------------
 
 namespace NostalgIA.Core.Events

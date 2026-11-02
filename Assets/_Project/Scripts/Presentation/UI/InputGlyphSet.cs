@@ -2,7 +2,7 @@
 // NostalgIA — Presentación (NostalgIA.Presentation)
 // Archivo: InputGlyphSet.cs
 // Propósito: glifos de controles por esquema de entrada (teclado y ratón, mando,
-// táctil) para la interfaz (Guía de estilo §7, tarea F1-B03).
+// táctil) para la interfaz.
 // -----------------------------------------------------------------------------
 
 using System;

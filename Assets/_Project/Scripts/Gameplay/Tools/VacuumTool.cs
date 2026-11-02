@@ -2,7 +2,7 @@
 // NostalgIA — Jugabilidad (NostalgIA.Gameplay)
 // Archivo: VacuumTool.cs
 // Propósito: Aspiradora Lanzadora: succión en cono, almacenamiento FIFO y disparo
-// con verificación de salida (GDD 2.3 A, TDD §6.3, tarea F1-A09).
+// con verificación de salida.
 // -----------------------------------------------------------------------------
 
 using NostalgIA.Core;
@@ -19,7 +19,7 @@ namespace NostalgIA.Gameplay.Tools
     /// Aspiradora Lanzadora.
     /// </summary>
     /// <remarks>
-    /// <para>Estados (TDD §6.3): Idle → Suctioning (Absorb mantenido y capacidad disponible) →
+    /// <para>Estados: Idle → Suctioning (Absorb mantenido y capacidad disponible) →
     /// Idle al soltar o al llenarse; Fire con objetos almacenados lanza el frente de la cola.</para>
     /// <para>
     /// <b>Detección en cono.</b> En cada paso de física con succión activa se ejecuta
@@ -36,7 +36,7 @@ namespace NostalgIA.Gameplay.Tools
     /// </list>
     /// <para>
     /// Hasta <c>maxSimultaneousPulls</c> objetos recorren su trayectoria a la vez, lo que permite
-    /// barrer una zona girando la cámara (GDD 2.2). Los enemigos no están en la capa
+    /// barrer una zona girando la cámara. Los enemigos no están en la capa
     /// <c>Absorbable</c> y, además, se exige el componente <see cref="Absorbable"/>.
     /// </para>
     /// <para>
@@ -307,7 +307,7 @@ namespace NostalgIA.Gameplay.Tools
             EventBus<ObjectLaunched>.Raise(new ObjectLaunched(spawnCenter, direction, storage.Count, storage.Capacity, mass));
         }
 
-        /// <summary>Aplica una mejora de capacidad (Fase 2).</summary>
+        /// <summary>Aplica una mejora de capacidad.</summary>
         public void SetCapacity(int capacity) => storage.SetCapacity(capacity);
 
         /// <summary>

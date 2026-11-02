@@ -2,7 +2,7 @@
 // NostalgIA — Presentación (NostalgIA.Presentation)
 // Archivo: SuctionVortexFx.cs
 // Propósito: vórtice de partículas de la aspiradora, encendido y apagado por el
-// evento SuctionStateChanged (TDD §8.2, Pilar 2; matriz de integración §8.6).
+// evento SuctionStateChanged.
 // -----------------------------------------------------------------------------
 
 using NostalgIA.Core.Events;
@@ -15,7 +15,7 @@ namespace NostalgIA.Presentation.VFX
     /// </summary>
     /// <remarks>
     /// <para>
-    /// El sistema vive permanentemente en la herramienta (pool de tamaño 1 según el TDD §8.2):
+    /// El sistema vive permanentemente en la herramienta (pool de tamaño 1):
     /// nunca se instancia ni se destruye; solo se reproduce y se detiene. Las partículas nacen
     /// dentro de un cono orientado hacia delante y viajan hacia su vértice (velocidad inicial
     /// negativa) con velocidad orbital alrededor del eje, lo que dibuja la espiral de aire que
@@ -23,14 +23,14 @@ namespace NostalgIA.Presentation.VFX
     /// </para>
     /// <para>
     /// En móvil se multiplica la tasa de emisión por <see cref="mobileEmissionMultiplier"/>
-    /// (0,4 en el TDD §8.2) una sola vez al iniciar, para respetar el presupuesto de 60
+    /// (0,4) una sola vez al iniciar, para respetar el presupuesto de 60
     /// partículas simultáneas.
     /// </para>
     /// </remarks>
     [RequireComponent(typeof(ParticleSystem))]
     public sealed class SuctionVortexFx : MonoBehaviour
     {
-        [Tooltip("Multiplicador de emisión en plataformas móviles (TDD §8.2: 0,4).")]
+        [Tooltip("Multiplicador de emisión en plataformas móviles (0,4).")]
         [SerializeField, Range(0.1f, 1f)] private float mobileEmissionMultiplier = 0.4f;
 
         /// <summary>Sistema del vórtice.</summary>

@@ -2,7 +2,7 @@
 // NostalgIA — Entrada (NostalgIA.Input)
 // Archivo: InputSchemeResolver.cs
 // Propósito: detectar el esquema de control en uso y publicar
-// InputSchemeChanged (TDD §7.4, tarea F1-A04).
+// InputSchemeChanged.
 // -----------------------------------------------------------------------------
 
 using NostalgIA.Core.Events;

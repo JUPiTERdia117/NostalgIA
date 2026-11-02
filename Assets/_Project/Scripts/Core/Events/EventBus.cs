@@ -2,7 +2,7 @@
 // NostalgIA — Núcleo (NostalgIA.Core)
 // Archivo: EventBus.cs
 // Propósito: bus de eventos estático y genérico por tipo, sin asignaciones de
-// memoria al publicar (TDD §4.1, tarea F1-A01).
+// memoria al publicar.
 // -----------------------------------------------------------------------------
 
 using System;
@@ -30,7 +30,7 @@ namespace NostalgIA.Core.Events
     /// <c>OnEnable</c>/<c>OnDisable</c> y nunca dentro del bucle de juego.
     /// </para>
     /// <para>
-    /// Reglas de uso (TDD §4.1): suscribirse en <c>OnEnable</c> y cancelar en <c>OnDisable</c>;
+    /// Reglas de uso: suscribirse en <c>OnEnable</c> y cancelar en <c>OnDisable</c>;
     /// un oyente no publica eventos de su mismo tipo dentro del manejador.
     /// </para>
     /// </remarks>

@@ -1,7 +1,7 @@
 // -----------------------------------------------------------------------------
 // NostalgIA — Núcleo (NostalgIA.Core)
 // Archivo: GameEvents.cs
-// Propósito: catálogo de eventos del juego (TDD §4.2, tarea F1-A01).
+// Propósito: catálogo de eventos del juego.
 // -----------------------------------------------------------------------------
 //
 // Convenciones del catálogo:
@@ -456,7 +456,7 @@ namespace NostalgIA.Core.Events
         }
     }
 
-    // ===================================================================== Enemigos (Fase 2)
+    // ===================================================================== Enemigos
 
     /// <summary>Apareció un enemigo. Publica <c>EnemyBase</c>.</summary>
     public readonly struct EnemySpawned : IGameEvent

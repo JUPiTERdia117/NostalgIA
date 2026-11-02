@@ -13,7 +13,7 @@ namespace NostalgIA.Core
     /// <remarks>
     /// <c>SceneManager.LoadSceneAsync</c> identifica la escena por su nombre de archivo sin
     /// extensión. Se centralizan aquí para que renombrar una escena implique cambiar una sola
-    /// línea. Las rutas siguen la estructura de carpetas del TDD (§14).
+    /// línea. Las rutas siguen la estructura de carpetas del proyecto.
     /// </remarks>
     public static class SceneNames
     {

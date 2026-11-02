@@ -27,7 +27,7 @@ namespace NostalgIA.Presentation.Levels
 
     /// <summary>
     /// Presentación de la puerta de nivel. Escucha los eventos de <c>LevelGate</c> y no conoce la
-    /// jugabilidad (separación simulación/presentación del TDD).
+    /// jugabilidad (separación simulación/presentación).
     /// </summary>
     /// <remarks>
     /// <para>

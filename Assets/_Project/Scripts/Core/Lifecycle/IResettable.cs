@@ -2,7 +2,7 @@
 // NostalgIA — Núcleo (NostalgIA.Core)
 // Archivo: IResettable.cs
 // Propósito: reinicio de objetos de la estación al reaparecer el jugador sin
-// recargar la escena (TDD §5.3, tarea F1-A12).
+// recargar la escena.
 // -----------------------------------------------------------------------------
 
 using System.Collections.Generic;

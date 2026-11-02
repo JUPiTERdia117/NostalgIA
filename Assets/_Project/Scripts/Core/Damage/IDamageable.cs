@@ -1,7 +1,7 @@
 // -----------------------------------------------------------------------------
 // NostalgIA — Núcleo (NostalgIA.Core)
 // Archivo: IDamageable.cs
-// Propósito: contratos de recepción de daño e impactos (TDD §5.2 y §6.3).
+// Propósito: contratos de recepción de daño e impactos.
 // -----------------------------------------------------------------------------
 
 using UnityEngine;
@@ -37,7 +37,7 @@ namespace NostalgIA.Core.Damage
     }
 
     /// <summary>
-    /// Receptor de impactos físicos de objetos lanzados (botones, mecanismos; Fase 2).
+    /// Receptor de impactos físicos de objetos lanzados (botones, mecanismos).
     /// </summary>
     public interface IImpactReceiver
     {

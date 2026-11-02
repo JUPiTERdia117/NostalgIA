@@ -600,7 +600,7 @@ public class TutorialDoor : MonoBehaviour
     }
 
     /// <summary>
-    /// Notifica el cruce del portal mediante el bus de eventos (Fase 1): el HUD del Tutorial
+    /// Notifica el cruce del portal mediante el bus de eventos: el HUD del Tutorial
     /// completa el último paso al entrar a la dimensión enlazada y avisa al regresar.
     /// </summary>
     public void OnPlayerCrossedDimensionalPortal(NonEuclideanPortal destinationPortal)

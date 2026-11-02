@@ -2,7 +2,7 @@
 // NostalgIA — Jugabilidad (NostalgIA.Gameplay)
 // Archivo: IGrappleTether.cs
 // Propósito: contrato entre el motor del jugador y el gancho durante el estado
-// Grappling (TDD §5.1 y §6.4, tareas F1-A06 y F1-A10).
+// Grappling.
 // -----------------------------------------------------------------------------
 
 using UnityEngine;

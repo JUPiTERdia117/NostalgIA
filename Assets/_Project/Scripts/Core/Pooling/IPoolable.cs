@@ -1,8 +1,7 @@
 // -----------------------------------------------------------------------------
 // NostalgIA — Núcleo (NostalgIA.Core)
 // Archivo: IPoolable.cs
-// Propósito: contrato de los componentes que viven en un pool (TDD §8.5.1,
-// tarea F1-A13).
+// Propósito: contrato de los componentes que viven en un pool.
 // -----------------------------------------------------------------------------
 
 namespace NostalgIA.Core.Pooling

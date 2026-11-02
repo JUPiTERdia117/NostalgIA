@@ -2,13 +2,13 @@
 // NostalgIA — Núcleo (NostalgIA.Core)
 // Archivo: StateContracts.cs
 // Propósito: interfaces de solo lectura del estado continuo del jugador y de sus
-// herramientas, consultadas por la capa de presentación (TDD §4.1).
+// herramientas, consultadas por la capa de presentación.
 // -----------------------------------------------------------------------------
 //
 // La jugabilidad registra sus componentes con estas interfaces en el
 // ServiceLocator; la presentación (cámara, retícula, shaders, audio) las lee cada
 // frame. Así evitamos publicar eventos por frame y la presentación no necesita
-// referenciar el ensamblado de jugabilidad (principio P1 del TDD).
+// referenciar el ensamblado de jugabilidad.
 // -----------------------------------------------------------------------------
 
 using NostalgIA.Core.Events;

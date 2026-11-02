@@ -226,7 +226,7 @@ public class EnemyHealth : MonoBehaviour, IDamageable, IContactHazard
             return;
         }
 
-        // Fase 1: Absorbable reúne el registro cinemático que antes estaba repartido entre
+        // Absorbable reúne el registro cinemático que antes estaba repartido entre
         // PoolableController y ThrowableDamage.
         Absorbable absorbable = collision.gameObject.GetComponentInParent<Absorbable>();
         if (absorbable != null && absorbable.IsDestroyed) return;
@@ -329,7 +329,7 @@ public class EnemyHealth : MonoBehaviour, IDamageable, IContactHazard
 
     // ------------------------------------------------------------------ contratos de NostalgIA.Core
 
-    /// <summary>Aplica un golpe descrito por <see cref="DamageInfo"/> (lava, peligros, Fase 2).</summary>
+    /// <summary>Aplica un golpe descrito por <see cref="DamageInfo"/> (lava, peligros).</summary>
     public void TakeDamage(in DamageInfo info)
     {
         if (IsDead) return;

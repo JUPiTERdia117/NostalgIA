@@ -2,7 +2,7 @@
 // NostalgIA — Jugabilidad (NostalgIA.Gameplay)
 // Archivo: PlayerHealth.cs
 // Propósito: corazones del jugador, invulnerabilidad temporal, muerte
-// instantánea y caída letal (GDD 2.5, TDD §5.2, tarea F1-A11).
+// instantánea y caída letal.
 // -----------------------------------------------------------------------------
 
 using NostalgIA.Core.Damage;
@@ -16,14 +16,14 @@ namespace NostalgIA.Gameplay.Player
     /// </summary>
     /// <remarks>
     /// <para>
-    /// Reglas (GDD 2.5 y TDD §5.2):
+    /// Reglas:
     /// </para>
     /// <list type="bullet">
     /// <item>El daño <see cref="DamageType.Normal"/> resta corazones y abre una ventana de
     /// invulnerabilidad; durante ella se ignoran golpes normales.</item>
     /// <item>El daño <see cref="DamageType.Instakill"/> ignora corazones e invulnerabilidad.</item>
     /// <item>Un aterrizaje con rapidez vertical ≥ <c>lethalFallSpeed</c> se trata como caída al
-    /// vacío (GDD: «caer desde alturas extremas»). En caída libre desde el reposo,
+    /// vacío («caer desde alturas extremas»). En caída libre desde el reposo,
     /// <c>v = √(2·g·h)</c>; con 24 m/s y g = 9,81 m/s² la altura equivalente es ≈ 29 m.</item>
     /// </list>
     /// <para>

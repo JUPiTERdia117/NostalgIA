@@ -1,8 +1,7 @@
 // -----------------------------------------------------------------------------
 // NostalgIA — Entrada (NostalgIA.Input)
 // Archivo: InputActionNames.cs
-// Propósito: nombres de mapas y acciones del asset InputSystem_Actions
-// (TDD §7.1, tarea F1-A02).
+// Propósito: nombres de mapas y acciones del asset InputSystem_Actions.
 // -----------------------------------------------------------------------------
 
 namespace NostalgIA.Input
@@ -59,7 +58,7 @@ namespace NostalgIA.Input
             "Navigate", "Submit", "Cancel", "Point", "Click", "ScrollWheel"
         };
 
-        /// <summary>Esquemas de control conservados (TDD §7.1).</summary>
+        /// <summary>Esquemas de control conservados.</summary>
         public static readonly string[] ControlSchemes = { "KeyboardMouse", "Gamepad", "Touch" };
     }
 }

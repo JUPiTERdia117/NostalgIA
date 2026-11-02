@@ -1,8 +1,7 @@
 // -----------------------------------------------------------------------------
 // NostalgIA — Núcleo (NostalgIA.Core)
 // Archivo: PooledObject.cs
-// Propósito: componente raíz de todo objeto administrado por PoolService
-// (TDD §8.5.1, tarea F1-A13).
+// Propósito: componente raíz de todo objeto administrado por PoolService.
 // -----------------------------------------------------------------------------
 
 using UnityEngine;

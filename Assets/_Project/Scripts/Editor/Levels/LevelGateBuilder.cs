@@ -8,7 +8,6 @@
 using System.Linq;
 using NostalgIA.Core;
 using NostalgIA.Core.Levels;
-using NostalgIA.EditorTools.Setup;
 using NostalgIA.Gameplay.Level;
 using NostalgIA.Gameplay.Player;
 using NostalgIA.Presentation.Levels;
@@ -46,14 +45,23 @@ namespace NostalgIA.EditorTools.Levels
         /// <summary>Nombre de la instancia en el Tutorial.</summary>
         public const string TutorialGateName = "LevelGate_Verano";
 
+        /// <summary>Crea la carpeta (y sus padres) si no existe.</summary>
+        public static void EnsureFolder(string path)
+        {
+            if (AssetDatabase.IsValidFolder(path)) return;
+            string parent = System.IO.Path.GetDirectoryName(path).Replace('\\', '/');
+            EnsureFolder(parent);
+            AssetDatabase.CreateFolder(parent, System.IO.Path.GetFileName(path));
+        }
+
         // ================================================================== prefab
         /// <summary>Crea o reemplaza el prefab de la puerta y sus assets.</summary>
         [MenuItem(MenuRoot + "Construir prefab de puerta de nivel", priority = 300)]
         public static GameObject BuildPrefab()
         {
-            Phase1Builder.EnsureFolder(MaterialsFolder);
-            Phase1Builder.EnsureFolder(MeshesFolder);
-            Phase1Builder.EnsureFolder("Assets/_Project/Prefabs/Level");
+            EnsureFolder(MaterialsFolder);
+            EnsureFolder(MeshesFolder);
+            EnsureFolder("Assets/_Project/Prefabs/Level");
 
             Material portal = Mat("M_LevelGate_Portal", "NOS/LevelGatePortal", m => { });
             Material trim = Mat("M_LevelGate_Trim", "NOS/LevelGateGlow", m =>

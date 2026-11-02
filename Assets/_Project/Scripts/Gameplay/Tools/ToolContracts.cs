@@ -2,7 +2,7 @@
 // NostalgIA — Jugabilidad (NostalgIA.Gameplay)
 // Archivo: ToolContracts.cs
 // Propósito: contrato común de las herramientas y entrada ya filtrada por el
-// controlador (TDD §6.1 y §7.3, tarea F1-A08).
+// controlador.
 // -----------------------------------------------------------------------------
 
 using NostalgIA.Core.Events;
@@ -12,7 +12,7 @@ namespace NostalgIA.Gameplay.Tools
 {
     /// <summary>
     /// Entrada de herramienta de un frame, ya resuelta por <see cref="ToolController"/> según la
-    /// herramienta activa y el enfriamiento (TDD §7.3).
+    /// herramienta activa y el enfriamiento.
     /// </summary>
     /// <remarks>
     /// Las acciones <c>Absorb</c>, <c>Fire</c> y <c>Grapple</c> comparten controles (clic derecho
@@ -40,7 +40,7 @@ namespace NostalgIA.Gameplay.Tools
         public static ToolInput None => default;
     }
 
-    /// <summary>Contrato común de las herramientas intercambiables del dron (TDD §6.1).</summary>
+    /// <summary>Contrato común de las herramientas intercambiables del dron.</summary>
     public interface ITool
     {
         /// <summary>Identificador de la herramienta.</summary>

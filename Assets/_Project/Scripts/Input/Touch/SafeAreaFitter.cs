@@ -2,7 +2,7 @@
 // NostalgIA — Entrada (NostalgIA.Input)
 // Archivo: SafeAreaFitter.cs
 // Propósito: ajustar un panel al área segura de la pantalla (recortes, bordes
-// redondeados) (TDD §7.5, tarea F1-A05).
+// redondeados).
 // -----------------------------------------------------------------------------
 
 using UnityEngine;

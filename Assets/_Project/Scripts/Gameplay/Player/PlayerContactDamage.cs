@@ -2,7 +2,7 @@
 // NostalgIA — Jugabilidad (NostalgIA.Gameplay)
 // Archivo: PlayerContactDamage.cs
 // Propósito: aplicar al jugador el daño de los peligros que toca (enemigos,
-// lava electrónica) (TDD §5.2, tarea F1-A11).
+// lava electrónica).
 // -----------------------------------------------------------------------------
 
 using System.Collections.Generic;

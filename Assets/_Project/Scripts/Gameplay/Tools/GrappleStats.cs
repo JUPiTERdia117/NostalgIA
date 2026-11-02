@@ -1,7 +1,7 @@
 // -----------------------------------------------------------------------------
 // NostalgIA — Jugabilidad (NostalgIA.Gameplay)
 // Archivo: GrappleStats.cs
-// Propósito: parámetros de diseño del gancho (TDD §10, tarea F1-A15).
+// Propósito: parámetros de diseño del gancho.
 // -----------------------------------------------------------------------------
 
 using UnityEngine;

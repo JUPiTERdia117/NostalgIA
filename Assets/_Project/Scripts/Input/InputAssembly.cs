@@ -7,13 +7,12 @@ namespace NostalgIA.Input
 {
     /// <summary>
     /// Marcador del ensamblado <c>NostalgIA.Input</c>, que alojará el <c>InputReader</c>, los
-    /// controles táctiles y la resolución del esquema activo (TDD §7).
+    /// controles táctiles y la resolución del esquema activo.
     /// </summary>
     /// <remarks>
-    /// Unity no compila un ensamblado definido por <c>.asmdef</c> si no contiene scripts. En este
-    /// módulo se decidió incluir este marcador desde la Fase 0 para que el ensamblado exista, las
-    /// referencias entre ensamblados queden establecidas y el validador del proyecto pueda
-    /// comprobar las reglas de dependencia desde el inicio.
+    /// Unity no compila un ensamblado definido por <c>.asmdef</c> si no contiene scripts. Por eso
+    /// incluyo este marcador: así el ensamblado existe y las referencias entre ensamblados quedan
+    /// establecidas.
     /// </remarks>
     public static class InputAssembly
     {

@@ -2,7 +2,7 @@
 // NostalgIA — Presentación (NostalgIA.Presentation)
 // Archivo: ParticleBudget.cs
 // Propósito: reduce emisión y tope de partículas decorativas en móvil
-// (TDD §8.2: multiplicador 0,4).
+// (multiplicador 0,4).
 // -----------------------------------------------------------------------------
 
 using UnityEngine;

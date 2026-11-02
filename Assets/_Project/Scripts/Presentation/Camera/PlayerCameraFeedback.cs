@@ -2,11 +2,11 @@
 // NostalgIA — Presentación (NostalgIA.Presentation)
 // Archivo: PlayerCameraFeedback.cs
 // Propósito: retroalimentación de cámara del jugador (FOV, balanceo, inclinación
-// y sacudida por choque) leída del estado de locomoción (TDD §4.1 y §5.1).
+// y sacudida por choque) leída del estado de locomoción.
 //
 // Atribución: las curvas de FOV, balanceo, inclinación y sacudida se derivan de
 // «EasyPeasy First Person Controller» (ver CREDITS.md), separadas del motor por
-// el equipo de NostalgIA para cumplir el principio P1 del TDD.
+// el equipo de NostalgIA para separar la cámara de la jugabilidad.
 // -----------------------------------------------------------------------------
 
 using NostalgIA.Core.Events;

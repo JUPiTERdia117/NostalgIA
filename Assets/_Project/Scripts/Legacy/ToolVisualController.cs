@@ -189,7 +189,7 @@ public class ToolVisualController : MonoBehaviour
     private Material vacuumTubeMaterial;
     private const int TubeSegments = 20;
 
-    // Efecto de viento heredado (solo si no existe el vórtice de la Fase 1).
+    // Efecto de viento heredado (solo si no existe el vórtice de partículas).
     private ParticleSystem suctionWindParticles;
     private ParticleSystemRenderer suctionWindRenderer;
     private Material windParticleMaterial;
@@ -275,7 +275,7 @@ public class ToolVisualController : MonoBehaviour
 
         SetupNozzleTip();
         SetupVacuumTubeRenderer();
-        // Si la herramienta ya tiene el vórtice de partículas de la Fase 1 (SuctionVortexFx, con
+        // Si la herramienta ya tiene el vórtice de partículas (SuctionVortexFx, con
         // material como asset), no se crea el viento heredado.
         if (GetComponentInChildren<NostalgIA.Presentation.VFX.SuctionVortexFx>(true) == null)
             SetupSuctionWindEffect();

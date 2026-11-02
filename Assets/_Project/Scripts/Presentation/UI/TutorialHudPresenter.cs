@@ -3,7 +3,7 @@
 // Archivo: TutorialHudPresenter.cs
 // Propósito: HUD provisional del Tutorial (vida, estrellas, herramienta,
 // notificaciones) y guía de siete pasos, alimentados solo por eventos
-// (tarea F1-A16; el HUD definitivo llega en la Fase 4).
+// (el HUD definitivo llega después).
 // -----------------------------------------------------------------------------
 
 using NostalgIA.Core.Events;
@@ -24,8 +24,7 @@ namespace NostalgIA.Presentation.UI
     /// la escena conserva todas las referencias a los textos e imágenes). El resto de aquel
     /// controlador monolítico se repartió: la reaparición en <c>RespawnService</c>, las
     /// coordenadas de checkpoints en la propia escena y la disposición del HUD, que antes se
-    /// reajustaba por código en cada arranque, quedó aplicada en el editor por el constructor de
-    /// la Fase 1.
+    /// reajustaba por código en cada arranque, quedó aplicada en el editor.
     /// </para>
     /// <para>
     /// <b>Sin sondeo ni basura.</b> Cada dato se actualiza al recibir su evento. Los textos con
@@ -40,13 +39,13 @@ namespace NostalgIA.Presentation.UI
     /// malla del gráfico como sucia y obliga a regenerarla. Por eso, en este módulo el color de la
     /// línea de acento y del destello de daño se escribe solo cuando cambia de estado, y la
     /// animación por frame modifica únicamente <see cref="CanvasRenderer.SetAlpha"/>, que es un
-    /// multiplicador aplicado al dibujar y no regenera vértices (auditoría QA de la Fase 1).
+    /// multiplicador aplicado al dibujar y no regenera vértices.
     /// </para>
     /// <para>
     /// <b>Glifos.</b> La fuente de interfaz actual (Liberation Sans) cubre el conjunto WGL4, pero
     /// no los símbolos ★, ✓ ni ✦ del prototipo, que se dibujaban como cuadros vacíos. Usamos sus
     /// equivalentes disponibles: ♦ (estrella), √ (completado) y » (aviso). La fuente monoespaciada
-    /// definitiva de la Guía de estilo §7 llega con el HUD de la Fase 4.
+    /// definitiva llega con el HUD final.
     /// </para>
     /// </remarks>
     [DisallowMultipleComponent]

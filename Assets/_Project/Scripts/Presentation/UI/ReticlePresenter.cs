@@ -2,7 +2,7 @@
 // NostalgIA — Presentación (NostalgIA.Presentation)
 // Archivo: ReticlePresenter.cs
 // Propósito: retícula central con sus cuatro estados y el enfriamiento de las
-// herramientas (GDD 5.1, TDD §6.2 y §12).
+// herramientas.
 // -----------------------------------------------------------------------------
 
 using NostalgIA.Core.Events;
@@ -19,12 +19,12 @@ namespace NostalgIA.Presentation.UI
     /// </summary>
     /// <remarks>
     /// <para>
-    /// Estados (TDD §6.2): Ninguno (blanco), Absorbible (cian), Anclaje (naranja) y Fuera de
+    /// Estados: Ninguno (blanco), Absorbible (cian), Anclaje (naranja) y Fuera de
     /// alcance (gris translúcido). Además del color, cada estado cambia la escala, para que la
-    /// retícula sea legible sin depender solo del color (accesibilidad, TDD §12).
+    /// retícula sea legible sin depender solo del color (accesibilidad).
     /// </para>
     /// <para>
-    /// Fuera de alcance la retícula se muestra como <b>cruz en aspa</b> (Guía de estilo §7): en
+    /// Fuera de alcance la retícula se muestra como <b>cruz en aspa</b>: en
     /// lugar de dibujar una segunda figura, giramos 45° la raíz escalada, de modo que las cuatro
     /// marcas en «+» pasan a formar una «×». Escala y giro se combinan en una sola escritura de
     /// <see cref="Transform"/>, que no reconstruye la malla del lienzo.

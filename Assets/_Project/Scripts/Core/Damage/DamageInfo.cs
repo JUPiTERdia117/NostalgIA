@@ -1,7 +1,7 @@
 // -----------------------------------------------------------------------------
 // NostalgIA — Núcleo (NostalgIA.Core)
 // Archivo: DamageInfo.cs
-// Propósito: descripción inmutable de un golpe (TDD §5.2, tarea F1-A11).
+// Propósito: descripción inmutable de un golpe.
 // -----------------------------------------------------------------------------
 
 using NostalgIA.Core.Events;

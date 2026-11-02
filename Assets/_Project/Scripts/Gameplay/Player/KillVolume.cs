@@ -1,8 +1,7 @@
 // -----------------------------------------------------------------------------
 // NostalgIA — Jugabilidad (NostalgIA.Gameplay)
 // Archivo: KillVolume.cs
-// Propósito: volumen de vacío que mata al jugador al entrar (TDD §5.2,
-// tarea F1-A11).
+// Propósito: volumen de vacío que mata al jugador al entrar.
 // -----------------------------------------------------------------------------
 
 using NostalgIA.Core;

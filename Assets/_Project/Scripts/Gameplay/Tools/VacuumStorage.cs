@@ -1,7 +1,7 @@
 // -----------------------------------------------------------------------------
 // NostalgIA — Jugabilidad (NostalgIA.Gameplay)
 // Archivo: VacuumStorage.cs
-// Propósito: almacén FIFO de la aspiradora (GDD 2.3 A, TDD §6.3, tarea F1-A09).
+// Propósito: almacén FIFO de la aspiradora.
 // -----------------------------------------------------------------------------
 
 using System.Collections.Generic;
@@ -15,7 +15,7 @@ namespace NostalgIA.Gameplay.Tools
     /// </summary>
     /// <remarks>
     /// <para>
-    /// El prototipo usaba una pila (LIFO), contraria al GDD. Una <see cref="Queue{T}"/> con
+    /// El prototipo usaba una pila (LIFO), contraria al diseño. Una <see cref="Queue{T}"/> con
     /// capacidad reservada ofrece encolar, desencolar y consultar el frente en O(1) sin asignar
     /// memoria mientras no se supere la capacidad inicial.
     /// </para>

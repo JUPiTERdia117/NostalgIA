@@ -2,7 +2,7 @@
 // NostalgIA — Jugabilidad (NostalgIA.Gameplay)
 // Archivo: AimService.cs
 // Propósito: muestra de puntería única por frame compartida por las herramientas
-// y la retícula (TDD §6.2, tarea F1-A07).
+// y la retícula.
 // -----------------------------------------------------------------------------
 
 using NostalgIA.Core;

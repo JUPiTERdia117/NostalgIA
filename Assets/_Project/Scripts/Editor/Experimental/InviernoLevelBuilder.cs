@@ -10,7 +10,6 @@ using System.IO;
 using System.Linq;
 using NostalgIA.Core;
 using NostalgIA.EditorTools.Levels;
-using NostalgIA.EditorTools.Setup;
 using NostalgIA.Gameplay.Level;
 using NostalgIA.Gameplay.Player;
 using NostalgIA.Gameplay.Tools;
@@ -37,7 +36,6 @@ namespace NostalgIA.EditorTools.Experimental
         private const string LevelsMenuRoot = "NostalgIA/Niveles/";
         private const string ExperimentalMenuRoot = "NostalgIA/Experimental/";
         public const string ScenePath = SceneNames.Paths.InviernoIA;
-        public const string AutoBuildMarkerPath = "Temp/invierno_level4_autobuild.once";
 
         /// <summary>
         /// Región propia del Nivel 4 a 9 km del origen para que nunca se encime con Tutorial (0 km),
@@ -73,27 +71,6 @@ namespace NostalgIA.EditorTools.Experimental
         private static Mesh tvWallScreenMeshA;
         private static Mesh tvWallScreenMeshB;
 
-        // ================================================================== auto-ejecución única al recargar el editor
-        [InitializeOnLoadMethod]
-        private static void CheckPendingAutoBuild()
-        {
-            if (!File.Exists(AutoBuildMarkerPath)) return;
-            EditorApplication.delayCall += TryRunPendingAutoBuild;
-        }
-
-        private static void TryRunPendingAutoBuild()
-        {
-            if (!File.Exists(AutoBuildMarkerPath)) return;
-            if (EditorApplication.isPlayingOrWillChangePlaymode || EditorApplication.isCompiling || EditorApplication.isUpdating)
-            {
-                EditorApplication.delayCall += TryRunPendingAutoBuild;
-                return;
-            }
-
-            File.Delete(AutoBuildMarkerPath);
-            BuildAndConnectChain();
-        }
-
         // ================================================================== menús
         [MenuItem(LevelsMenuRoot + "Construir Nivel 4 — Invierno (Laberinto TV + IA)", priority = 306)]
         public static void BuildMenu() => Build();
@@ -113,9 +90,9 @@ namespace NostalgIA.EditorTools.Experimental
             if (SceneManager.GetActiveScene().isDirty && !EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo())
                 return;
 
-            Phase1Builder.EnsureFolder(MaterialsRoot);
-            Phase1Builder.EnsureFolder(MeshesRoot);
-            Phase1Builder.EnsureFolder("Assets/_Project/Rendering/Volumes");
+            LevelGateBuilder.EnsureFolder(MaterialsRoot);
+            LevelGateBuilder.EnsureFolder(MeshesRoot);
+            LevelGateBuilder.EnsureFolder("Assets/_Project/Rendering/Volumes");
 
             CreateMaterials();
             CreateVolumeProfile();
@@ -1238,7 +1215,7 @@ namespace NostalgIA.EditorTools.Experimental
             var bootstrap = new GameObject("LevelBootstrap");
             bootstrap.AddComponent<StandaloneLevelContent>().Configure(standalone);
 
-            var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(Phase1Builder.Paths.Player);
+            var prefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/_Project/Prefabs/Player/Player.prefab");
             if (prefab != null)
             {
                 var player = (GameObject)PrefabUtility.InstantiatePrefab(prefab, scene);

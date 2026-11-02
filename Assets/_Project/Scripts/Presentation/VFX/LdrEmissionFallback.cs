@@ -19,7 +19,7 @@ namespace NostalgIA.Presentation.VFX
     /// <para>
     /// El problema que resolví: los cubos absorbibles usan una emisión HDR muy fuerte (el canal azul
     /// vale ≈ 29,6) para que el Bloom de la Estación les dibuje un halo grande. En PC, con HDR, ese
-    /// 29,6 llega entero al Bloom. En móvil no usamos HDR (decisión del TDD §8.4 para ahorrar memoria)
+    /// 29,6 llega entero al Bloom. En móvil no usamos HDR (para ahorrar memoria)
     /// y la imagen se guarda con 8 bits por canal, así que cada canal se recorta a 1:
     /// (0,70; 1,03; 29,6) → (0,70; 1; 1). Eso es un blanco azulado que apenas pasa el umbral del Bloom
     /// y el cubo se veía "apagado". Como el editor usa la calidad de la plataforma activa al dar Play

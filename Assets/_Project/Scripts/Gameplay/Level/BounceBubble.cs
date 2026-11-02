@@ -22,8 +22,8 @@ namespace NostalgIA.Gameplay.Level
     /// diseño de niveles) y calcular la velocidad con la gravedad de <c>PlayerSettings</c>.
     /// </para>
     /// <para>
-    /// El collider está en la capa <c>Trigger</c>, que solo interactúa con <c>Player</c>
-    /// (TDD §13). Un enfriamiento corto evita rebotes múltiples en el mismo contacto.
+    /// El collider está en la capa <c>Trigger</c>, que solo interactúa con <c>Player</c>.
+    /// Un enfriamiento corto evita rebotes múltiples en el mismo contacto.
     /// La parte visual (deformación y partículas) escucha <see cref="BubbleBounced"/>.
     /// </para>
     /// </remarks>

@@ -2,7 +2,7 @@
 // NostalgIA — Jugabilidad (NostalgIA.Gameplay)
 // Archivo: GrappleTool.cs
 // Propósito: gancho con la física de tracción validada en el prototipo,
-// parametrizada en GrappleStats (GDD 2.3 B, TDD §6.4, tarea F1-A10).
+// parametrizada en GrappleStats.
 // -----------------------------------------------------------------------------
 
 using NostalgIA.Core;
@@ -356,7 +356,7 @@ namespace NostalgIA.Gameplay.Tools
             EventBus<GrappleReleased>.Raise(new GrappleReleased(velocity));
         }
 
-        /// <summary>Aplica una mejora de alcance (Fase 2).</summary>
+        /// <summary>Aplica una mejora de alcance.</summary>
         public void SetRange(float range) => currentRange = Mathf.Max(1f, range);
     }
 }

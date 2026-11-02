@@ -2,7 +2,7 @@
 // NostalgIA — Presentación (NostalgIA.Presentation)
 // Archivo: DebrisBurstEmitter.cs
 // Propósito: estallido de fragmentos en pool al romperse un objeto
-// (TDD §8.5.1; sustituye a CreatePrimitive + Destroy del prototipo).
+// (sustituye a CreatePrimitive + Destroy del prototipo).
 // -----------------------------------------------------------------------------
 
 using NostalgIA.Core.Events;
@@ -27,7 +27,7 @@ namespace NostalgIA.Presentation.VFX
     /// de 0,25 m; impulso <c>J = ‖û + 0,6·ŷ‖⁻¹(û + 0,6·ŷ)·U(4, 8)</c> N·s con <c>û</c> aleatorio en
     /// la esfera unitaria (sesgo hacia arriba), y velocidad angular aleatoria de hasta 12 rad/s.
     /// Los fragmentos están en la capa <c>Debris</c>, que no colisiona con el jugador, los
-    /// enemigos ni los proyectiles (TDD §13).
+    /// enemigos ni los proyectiles.
     /// </para>
     /// </remarks>
     public sealed class DebrisBurstEmitter : MonoBehaviour

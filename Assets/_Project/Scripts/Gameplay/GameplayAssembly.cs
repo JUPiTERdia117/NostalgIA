@@ -7,13 +7,13 @@ namespace NostalgIA.Gameplay
 {
     /// <summary>
     /// Marcador del ensamblado <c>NostalgIA.Gameplay</c>, que alojará el motor del jugador, las
-    /// herramientas, la vida, los enemigos y la lógica de las Estaciones (TDD §5, §6 y §9).
+    /// herramientas, la vida, los enemigos y la lógica de las Estaciones.
     /// </summary>
     /// <remarks>
     /// Este ensamblado solo puede referenciar a <c>NostalgIA.Core</c> y <c>NostalgIA.Input</c>.
     /// Se excluye a propósito <c>NostalgIA.Presentation</c>: la jugabilidad comunica sus cambios
     /// publicando eventos y nunca invoca directamente partículas, audio, materiales ni interfaz
-    /// (principio P1 del TDD). El marcador garantiza que el ensamblado exista desde la Fase 0.
+    /// El marcador garantiza que el ensamblado exista aunque todavía no tenga otros scripts.
     /// </remarks>
     public static class GameplayAssembly
     {

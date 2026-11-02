@@ -2,7 +2,7 @@
 // NostalgIA — Entrada (NostalgIA.Input)
 // Archivo: DynamicTouchStick.cs
 // Propósito: pad de movimiento táctil que aparece donde el dedo toca la mitad
-// izquierda de la pantalla (TDD §7.5, tarea F1-A05).
+// izquierda de la pantalla.
 // -----------------------------------------------------------------------------
 
 using NostalgIA.Core.Services;
@@ -29,7 +29,7 @@ namespace NostalgIA.Input.TouchControls
     /// <c>p</c>, el desplazamiento <c>d = p − o</c> se limita al radio <c>r</c>:
     /// <c>d' = d · min(1, r / |d|)</c>. El valor enviado es <c>d' / r</c>, un vector de magnitud
     /// ≤ 1 como el de un stick físico. Correr se activa cuando la componente vertical normalizada
-    /// supera el umbral (GDD: «llevar el pad izquierdo hasta arriba»).
+    /// supera el umbral («llevar el pad izquierdo hasta arriba»).
     /// </para>
     /// <para>
     /// El componente se coloca en una zona transparente que cubre la mitad izquierda del lienzo;

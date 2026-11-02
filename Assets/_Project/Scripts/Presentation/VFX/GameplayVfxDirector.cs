@@ -2,7 +2,7 @@
 // NostalgIA — Presentación (NostalgIA.Presentation)
 // Archivo: GameplayVfxDirector.cs
 // Propósito: ráfagas de partículas reactivas a eventos de jugabilidad: salida de
-// objetos, anclaje del gancho, estrellas y checkpoints (TDD §8.2 y §8.6).
+// objetos, anclaje del gancho, estrellas y checkpoints.
 // -----------------------------------------------------------------------------
 
 using NostalgIA.Core.Events;
@@ -32,7 +32,7 @@ namespace NostalgIA.Presentation.VFX
     /// </para>
     /// <para>
     /// La cantidad de partículas por ráfaga se escala en móvil por
-    /// <see cref="mobileBurstMultiplier"/> (TDD §8.2: presupuesto de 1 000 partículas en móvil).
+    /// <see cref="mobileBurstMultiplier"/> (presupuesto de 1 000 partículas en móvil).
     /// </para>
     /// </remarks>
     public sealed class GameplayVfxDirector : MonoBehaviour
@@ -51,10 +51,10 @@ namespace NostalgIA.Presentation.VFX
         [SerializeField, Min(1)] private int collectCount = 36;
 
         [Header("Plataforma")]
-        [Tooltip("Multiplicador de partículas en móvil (TDD §8.2: 0,4).")]
+        [Tooltip("Multiplicador de partículas en móvil (0,4).")]
         [SerializeField, Range(0.1f, 1f)] private float mobileBurstMultiplier = 0.4f;
 
-        [Header("Colores semánticos (Guía de estilo §3)")]
+        [Header("Colores semánticos")]
         [SerializeField] private Color starColor = new Color(1f, 0.82f, 0.4f, 1f);        // #FFD166
         [SerializeField] private Color checkpointColor = new Color(0.22f, 0.9f, 0.3f, 1f); // #38E54D
 

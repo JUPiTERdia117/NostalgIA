@@ -2,8 +2,8 @@
 // NostalgIA — Núcleo (NostalgIA.Core)
 // Archivo: BootSceneLoader.cs
 // Propósito: componente de la escena 00_Boot. Carga de forma asíncrona la primera
-// escena jugable. En la Fase 1 esta escena instanciará además el prefab persistente
-// GameRoot con los servicios del juego (TDD §3).
+// escena jugable. Esta escena instancia además el prefab persistente
+// GameRoot con los servicios del juego.
 // -----------------------------------------------------------------------------
 
 using UnityEngine;

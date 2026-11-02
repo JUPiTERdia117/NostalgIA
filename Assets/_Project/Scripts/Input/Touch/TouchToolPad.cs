@@ -2,7 +2,7 @@
 // NostalgIA — Entrada (NostalgIA.Input)
 // Archivo: TouchToolPad.cs
 // Propósito: pad derecho de herramienta cuyo gesto cambia según la herramienta
-// activa (GDD 2.3, TDD §7.5, tarea F1-A05).
+// activa.
 // -----------------------------------------------------------------------------
 
 using NostalgIA.Core.Events;
@@ -18,7 +18,7 @@ namespace NostalgIA.Input.TouchControls
     /// Botón contextual de herramienta para pantallas táctiles.
     /// </summary>
     /// <remarks>
-    /// <para>Comportamiento (TDD §7.5):</para>
+    /// <para>Comportamiento:</para>
     /// <list type="bullet">
     /// <item><b>Aspiradora:</b> mantener más de <c>holdThreshold</c> segundos = <c>Absorb</c> hasta soltar;
     /// un toque más corto = <c>Fire</c> al soltar. Mientras el dedo sigue abajo, el pad también es un

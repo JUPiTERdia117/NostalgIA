@@ -1,8 +1,7 @@
 // -----------------------------------------------------------------------------
 // NostalgIA — Jugabilidad (NostalgIA.Gameplay)
 // Archivo: VacuumStats.cs
-// Propósito: parámetros de diseño de la Aspiradora Lanzadora (TDD §10,
-// tarea F1-A15).
+// Propósito: parámetros de diseño de la Aspiradora Lanzadora.
 // -----------------------------------------------------------------------------
 
 using UnityEngine;
@@ -15,7 +14,7 @@ namespace NostalgIA.Gameplay.Tools
     /// <remarks>
     /// Valores por defecto tomados del prototipo. La capacidad base es 20 porque el Tutorial
     /// sobrescribía en su escena la capacidad del prefab (5); la revisión de balance queda para
-    /// la congelación de mecánicas de la Fase 2.
+    /// la congelación de mecánicas.
     /// </remarks>
     [CreateAssetMenu(menuName = "NostalgIA/Herramientas/Vacuum Stats", fileName = "VacuumStats")]
     public sealed class VacuumStats : ScriptableObject

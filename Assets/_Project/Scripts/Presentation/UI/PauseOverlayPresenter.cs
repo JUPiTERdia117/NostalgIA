@@ -2,7 +2,7 @@
 // NostalgIA — Presentación (NostalgIA.Presentation)
 // Archivo: PauseOverlayPresenter.cs
 // Propósito: capa de pausa con resumen de controles por esquema y botón para
-// continuar, visible solo en GameState.Paused (TDD §3.2, Guía de estilo §7).
+// continuar, visible solo en GameState.Paused.
 // -----------------------------------------------------------------------------
 
 using System.Text;

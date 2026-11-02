@@ -2,7 +2,7 @@
 // NostalgIA — Núcleo (NostalgIA.Core)
 // Archivo: Layers.cs
 // Propósito: fuente única de verdad para los índices, nombres y máscaras de las
-// capas físicas definidas en el TDD (§13).
+// capas físicas del proyecto.
 // -----------------------------------------------------------------------------
 
 using System.Collections.Generic;
@@ -10,7 +10,7 @@ using System.Collections.Generic;
 namespace NostalgIA.Core
 {
     /// <summary>
-    /// Índices de las capas físicas del proyecto, según la tabla del TDD (§13).
+    /// Índices de las capas físicas del proyecto.
     /// </summary>
     /// <remarks>
     /// En este módulo se decidió identificar las capas por <b>índice</b> y no por nombre.
@@ -108,8 +108,8 @@ namespace NostalgIA.Core
 
         /// <summary>
         /// Tabla de nombres esperados indexada por capa (32 posiciones). Las posiciones que el
-        /// proyecto no utiliza contienen <c>null</c>. La usa el validador del proyecto para
-        /// comprobar la configuración de Tags and Layers.
+        /// proyecto no utiliza contienen <c>null</c>. Sirve para comprobar la configuración de
+        /// Tags and Layers.
         /// </summary>
         /// <remarks>
         /// El arreglo se crea una única vez al cargar la clase y se expone como

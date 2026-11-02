@@ -1,8 +1,7 @@
 // -----------------------------------------------------------------------------
 // NostalgIA — Jugabilidad (NostalgIA.Gameplay)
 // Archivo: GameRoot.cs
-// Propósito: raíz persistente de servicios: estado de juego, entrada y pools
-// (TDD §3.1 y §3.2, tarea F1-A14).
+// Propósito: raíz persistente de servicios: estado de juego, entrada y pools.
 // -----------------------------------------------------------------------------
 
 using NostalgIA.Core;
@@ -36,7 +35,7 @@ namespace NostalgIA.Gameplay.Bootstrap
     /// globales) se registran por su cuenta en su <c>Awake</c>, sin que este ensamblado los conozca.
     /// </para>
     /// <para>
-    /// <b>Estados.</b> Mientras no existan el menú principal y la selección de estación (Fase 4),
+    /// <b>Estados.</b> Mientras no existan el menú principal y la selección de estación,
     /// cargar <c>00_Boot</c> lleva al estado <see cref="GameState.Boot"/> y cualquier otra escena
     /// al estado <see cref="GameState.Playing"/>. La pausa se alterna con la acción <c>Pause</c>.
     /// </para>
@@ -78,7 +77,7 @@ namespace NostalgIA.Gameplay.Bootstrap
             }
             else
             {
-                Debug.LogWarning("[GameRoot] No existe Resources/GameRoot; se crea una raíz mínima. Ejecute NostalgIA › Fase 1 › Montar todo.");
+                Debug.LogWarning("[GameRoot] No existe Resources/GameRoot; se crea una raíz mínima. Revise que el prefab GameRoot esté en Prefabs/Core/Resources.");
                 new GameObject("GameRoot").AddComponent<GameRoot>();
             }
         }
