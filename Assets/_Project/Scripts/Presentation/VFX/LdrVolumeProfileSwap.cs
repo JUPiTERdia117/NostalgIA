@@ -25,8 +25,13 @@ namespace NostalgIA.Presentation.VFX
     /// <para>
     /// VP_Primavera_LDR es una copia del perfil de Primavera con el Bloom ajustado para ese caso:
     /// umbral 0,55 (en vez de 0,9), intensidad 1,1 (en vez de 0,6) y dispersión 0,7 (en vez de 0,65).
-    /// El perfil de PC no se toca. Hago el cambio una sola vez en <c>Awake</c> sobre
-    /// <see cref="Volume.sharedProfile"/>; los dos perfiles son assets, así que no creo nada en ejecución.
+    /// El perfil de PC no se toca. Cambio <see cref="Volume.sharedProfile"/> entre los dos assets, así
+    /// que no creo nada en ejecución.
+    /// </para>
+    /// <para>
+    /// Antes lo decidía una sola vez en <c>Awake</c>; ahora también escucho cuando cambia el asset de
+    /// URP activo (cambio de calidad en el menú de opciones, o el editor regresando a la calidad de PC
+    /// al dar Play) y vuelvo a elegir el perfil. Por eso guardo el perfil original (HDR) al despertar.
     /// </para>
     /// </remarks>
     [DisallowMultipleComponent]
@@ -36,11 +41,28 @@ namespace NostalgIA.Presentation.VFX
         [Tooltip("Perfil ajustado para pipelines sin HDR (umbral de Bloom más bajo).")]
         [SerializeField] private VolumeProfile ldrProfile;
 
-        /// <summary>Si la calidad actual no tiene HDR y hay un perfil LDR asignado, lo pongo en el Volume.</summary>
+        private Volume volume;
+        private VolumeProfile hdrProfile;
+
+        /// <summary>Guardo el perfil original (el de HDR) y elijo el que toca con la calidad actual.</summary>
         private void Awake()
         {
-            if (ldrProfile == null || !LdrEmissionFallback.PipelineIsLdr()) return;
-            GetComponent<Volume>().sharedProfile = ldrProfile;
+            volume = GetComponent<Volume>();
+            hdrProfile = volume.sharedProfile;
+            Refresh();
+        }
+
+        private void OnEnable() => RenderPipelineManager.activeRenderPipelineAssetChanged += OnPipelineChanged;
+
+        private void OnDisable() => RenderPipelineManager.activeRenderPipelineAssetChanged -= OnPipelineChanged;
+
+        private void OnPipelineChanged(RenderPipelineAsset previous, RenderPipelineAsset next) => Refresh();
+
+        /// <summary>Pone el perfil LDR si la calidad actual no tiene HDR, o regresa al original si sí tiene.</summary>
+        public void Refresh()
+        {
+            if (volume == null || ldrProfile == null) return;
+            volume.sharedProfile = LdrEmissionFallback.PipelineIsLdr() ? ldrProfile : hdrProfile;
         }
     }
 }

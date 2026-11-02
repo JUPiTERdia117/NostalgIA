@@ -30,7 +30,8 @@ namespace NostalgIA.Presentation.VFX
     /// (0,08; 0,78; 1). Después del recorte conserva el tono cian y ese canal 1 sigue pasando el
     /// umbral, así que el halo aparece. Cambio el <see cref="Renderer.sharedMaterial"/> por otro asset
     /// que ya existe (no creo materiales en ejecución) y así el objeto sigue en el SRP Batcher.
-    /// La revisión se hace una sola vez, en <c>Awake</c>.
+    /// Reviso en <c>Awake</c> y otra vez cada que cambia el asset de URP activo (cambio de calidad),
+    /// regresando al material original si la nueva calidad sí tiene HDR.
     /// </para>
     /// </remarks>
     [DisallowMultipleComponent]
@@ -58,8 +59,23 @@ namespace NostalgIA.Presentation.VFX
         private void Awake()
         {
             if (targetRenderer == null) targetRenderer = GetComponent<Renderer>();
-            if (targetRenderer == null || ldrMaterial == null) return;
-            if (PipelineIsLdr()) targetRenderer.sharedMaterial = ldrMaterial;
+            if (targetRenderer != null) hdrMaterial = targetRenderer.sharedMaterial;
+            Refresh();
+        }
+
+        private Material hdrMaterial;
+
+        private void OnEnable() => RenderPipelineManager.activeRenderPipelineAssetChanged += OnPipelineChanged;
+
+        private void OnDisable() => RenderPipelineManager.activeRenderPipelineAssetChanged -= OnPipelineChanged;
+
+        private void OnPipelineChanged(RenderPipelineAsset previous, RenderPipelineAsset next) => Refresh();
+
+        /// <summary>Usa el material LDR sin HDR y el original con HDR.</summary>
+        public void Refresh()
+        {
+            if (targetRenderer == null || ldrMaterial == null || hdrMaterial == null) return;
+            targetRenderer.sharedMaterial = PipelineIsLdr() ? ldrMaterial : hdrMaterial;
         }
     }
 }
