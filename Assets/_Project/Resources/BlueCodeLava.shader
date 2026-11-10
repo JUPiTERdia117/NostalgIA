@@ -169,10 +169,9 @@ Shader "Tutorial/BlueCodeLava"
 
             half4 Frag(Varyings input) : SV_Target
             {
-                // 1) Coordenada base: posición de mundo en el plano del piso (x, z) por la escala.
-                //    Al no depender de las UV, un plano de 10 m y uno de 200 m tienen letras del mismo tamaño.
-                float2 worldUV = input.positionWS.xz * _WorldScale;
-
+                
+                 // En vez de input.positionWS.xz:
+                float2 worldUV = input.uv * _WorldScale * 10.0;
                 // 2) Desplazamiento en el tiempo. _Time.y son los segundos desde que arrancó el juego.
                 float scroll = _Time.y * _ScrollSpeed;
                 // Estiro la rejilla: 6 columnas y 10 filas por unidad de worldUV. Con _WorldScale = 0,35
