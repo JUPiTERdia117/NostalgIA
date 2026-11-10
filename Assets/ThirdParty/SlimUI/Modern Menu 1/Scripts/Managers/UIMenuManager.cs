@@ -146,6 +146,16 @@ namespace SlimUI.ModernMenu{
 		public void  DisablePlayCampaign(){
 			playMenu.SetActive(false);
 		}
+		
+		public void Position4(){
+			DisablePlayCampaign();
+			CameraObject.SetFloat("Animate",3);
+		}
+		
+		public void Position3(){
+			DisablePlayCampaign();
+			CameraObject.SetFloat("Animate",0);
+		}
 
 		public void Position2(){
 			DisablePlayCampaign();
@@ -247,11 +257,13 @@ namespace SlimUI.ModernMenu{
 			DisablePlayCampaign();
 		}
 
-		public void ExtrasMenu(){
+		public void LevelsMenu(){
 			playMenu.SetActive(false);
 			if(extrasMenu) extrasMenu.SetActive(true);
 			exitMenu.SetActive(false);
 		}
+
+	
 
 		public void QuitGame(){
 			#if UNITY_EDITOR
