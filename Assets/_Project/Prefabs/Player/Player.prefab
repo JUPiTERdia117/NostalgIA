@@ -5307,6 +5307,7 @@ GameObject:
   - component: {fileID: 6328000485065431171}
   - component: {fileID: 7780696818781313431}
   - component: {fileID: 9128528107762250470}
+  - component: {fileID: 5501928374650192837}
   m_Layer: 6
   m_Name: Tool
   m_TagString: Untagged
@@ -6097,3 +6098,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 91e59c6da0544b73b447d98d3b2c8fc5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: NostalgIA.Gameplay::NostalgIA.Gameplay.Player.DuplicatePlayerGuard
+--- !u!114 &5501928374650192837
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8645152226666509418}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0474f924b33e44ec281004b9907f33c2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  startClip: {fileID: 8300000, guid: b9a288d50d7c240d7b3a998cabd48f43, type: 3}
+  loopClip: {fileID: 8300000, guid: bd611a1423edc4b9f92d605e6a2c57fe, type: 3}
+  endClip: {fileID: 8300000, guid: 41c5e048384304fae9e0c688fdf96078, type: 3}
+  volume: 0.8
+  fadeTime: 0.06
