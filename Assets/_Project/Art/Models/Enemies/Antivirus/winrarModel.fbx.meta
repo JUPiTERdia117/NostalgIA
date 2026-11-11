@@ -3,7 +3,17 @@ guid: 017941ca37aa09008a1c6ad326bea8e5
 ModelImporter:
   serializedVersion: 24200
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Dientes
+    second: {fileID: 2100000, guid: 41e56f82ed680220585e37a93da6c7fd, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: body
+    second: {fileID: 2100000, guid: c8291e1354b8d3ba8953ed59a7b2dbf5, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0
