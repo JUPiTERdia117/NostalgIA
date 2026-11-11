@@ -5122,6 +5122,7 @@ GameObject:
   - component: {fileID: 1936790533599824975}
   - component: {fileID: 4763264352384977089}
   - component: {fileID: 3871245519006427731}
+  - component: {fileID: 6203948571029384756}
   m_Layer: 6
   m_Name: Player
   m_TagString: Player
@@ -6115,3 +6116,20 @@ MonoBehaviour:
   endClip: {fileID: 8300000, guid: 41c5e048384304fae9e0c688fdf96078, type: 3}
   volume: 0.8
   fadeTime: 0.06
+--- !u!114 &6203948571029384756
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7243138653710705996}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c2ce76a9059bf410f96b5c4b7b962b4d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  footstep: {fileID: 202406593149995430, guid: ff1250fdfab64814bcdf7ccde7aa98b5, type: 2}
+  stepDistance: 2
+  land: {fileID: 790041869801421236, guid: 7e92c27091ef4b0494096a5ef75e46fa, type: 2}
+  slide: {fileID: 389180604098807366, guid: 00210a1bfc114e9fb321235bffa404a3, type: 2}
+  vacuumFull: {fileID: 861664330938876554, guid: 891bc132daa04ccc9987e8501ba54b78, type: 2}

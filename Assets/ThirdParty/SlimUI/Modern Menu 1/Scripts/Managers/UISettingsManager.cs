@@ -2,6 +2,7 @@
 using System.Collections;
 using UnityEngine.UI;
 using TMPro;
+using NostalgIA.Presentation.Audio;
 
 namespace SlimUI.ModernMenu{
 	public class UISettingsManager : MonoBehaviour {
@@ -46,6 +47,8 @@ namespace SlimUI.ModernMenu{
 
 		// sliders
 		public GameObject musicSlider;
+		[Tooltip("Deslizador del volumen de efectos (NostalgIA).")]
+		public GameObject sfxSlider;
 		public GameObject sensitivityXSlider;
 		public GameObject sensitivityYSlider;
 		public GameObject mouseSmoothSlider;
@@ -69,33 +72,36 @@ namespace SlimUI.ModernMenu{
 			}
 
 			// check slider values
-			musicSlider.GetComponent<Slider>().value = PlayerPrefs.GetFloat("MusicVolume");
+			// NostalgIA: los volúmenes viven en GameAudio (mixer del juego); 0,5 = volumen original.
+			musicSlider.GetComponent<Slider>().value = GameAudio.MusicVolume;
+			if(sfxSlider != null) sfxSlider.GetComponent<Slider>().value = GameAudio.SfxVolume;
 			sensitivityXSlider.GetComponent<Slider>().value = PlayerPrefs.GetFloat("XSensitivity");
 			sensitivityYSlider.GetComponent<Slider>().value = PlayerPrefs.GetFloat("YSensitivity");
 			mouseSmoothSlider.GetComponent<Slider>().value = PlayerPrefs.GetFloat("MouseSmoothing");
 
 			// check full screen
 			if(Screen.fullScreen == true){
-				fullscreentext.GetComponent<TMP_Text>().text = "on";
+				fullscreentext.GetComponent<TMP_Text>().text = "encendido";
 			}
 			else if(Screen.fullScreen == false){
-				fullscreentext.GetComponent<TMP_Text>().text = "off";
+				fullscreentext.GetComponent<TMP_Text>().text = "apagado";
 			}
 
 			// check hud value
 			if(PlayerPrefs.GetInt("ShowHUD")==0){
-				showhudtext.GetComponent<TMP_Text>().text = "off";
+				showhudtext.GetComponent<TMP_Text>().text = "apagado";
 			}
 			else{
-				showhudtext.GetComponent<TMP_Text>().text = "on";
+				showhudtext.GetComponent<TMP_Text>().text = "encendido";
 			}
 
-			// check tool tip value
-			if(PlayerPrefs.GetInt("ToolTips")==0){
-				tooltipstext.GetComponent<TMP_Text>().text = "off";
+			// check tool tip value (NostalgIA: la escena del menú quitó esta opción, por eso reviso que exista)
+			if(tooltipstext == null){}
+			else if(PlayerPrefs.GetInt("ToolTips")==0){
+				tooltipstext.GetComponent<TMP_Text>().text = "apagado";
 			}
 			else{
-				tooltipstext.GetComponent<TMP_Text>().text = "on";
+				tooltipstext.GetComponent<TMP_Text>().text = "encendido";
 			}
 
 			// check shadow distance/enabled
@@ -148,34 +154,34 @@ namespace SlimUI.ModernMenu{
 
 			// check vsync
 			if(QualitySettings.vSyncCount == 0){
-				vsynctext.GetComponent<TMP_Text>().text = "off";
+				vsynctext.GetComponent<TMP_Text>().text = "apagado";
 			}
 			else if(QualitySettings.vSyncCount == 1){
-				vsynctext.GetComponent<TMP_Text>().text = "on";
+				vsynctext.GetComponent<TMP_Text>().text = "encendido";
 			}
 
 			// check mouse inverse
 			if(PlayerPrefs.GetInt("Inverted")==0){
-				invertmousetext.GetComponent<TMP_Text>().text = "off";
+				invertmousetext.GetComponent<TMP_Text>().text = "apagado";
 			}
 			else if(PlayerPrefs.GetInt("Inverted")==1){
-				invertmousetext.GetComponent<TMP_Text>().text = "on";
+				invertmousetext.GetComponent<TMP_Text>().text = "encendido";
 			}
 
 			// check motion blur
 			if(PlayerPrefs.GetInt("MotionBlur")==0){
-				motionblurtext.GetComponent<TMP_Text>().text = "off";
+				motionblurtext.GetComponent<TMP_Text>().text = "apagado";
 			}
 			else if(PlayerPrefs.GetInt("MotionBlur")==1){
-				motionblurtext.GetComponent<TMP_Text>().text = "on";
+				motionblurtext.GetComponent<TMP_Text>().text = "encendido";
 			}
 
 			// check ambient occlusion
 			if(PlayerPrefs.GetInt("AmbientOcclusion")==0){
-				ambientocclusiontext.GetComponent<TMP_Text>().text = "off";
+				ambientocclusiontext.GetComponent<TMP_Text>().text = "apagado";
 			}
 			else if(PlayerPrefs.GetInt("AmbientOcclusion")==1){
-				ambientocclusiontext.GetComponent<TMP_Text>().text = "on";
+				ambientocclusiontext.GetComponent<TMP_Text>().text = "encendido";
 			}
 
 			// check texture quality
@@ -210,16 +216,21 @@ namespace SlimUI.ModernMenu{
 			Screen.fullScreen = !Screen.fullScreen;
 
 			if(Screen.fullScreen == true){
-				fullscreentext.GetComponent<TMP_Text>().text = "on";
+				fullscreentext.GetComponent<TMP_Text>().text = "encendido";
 			}
 			else if(Screen.fullScreen == false){
-				fullscreentext.GetComponent<TMP_Text>().text = "off";
+				fullscreentext.GetComponent<TMP_Text>().text = "apagado";
 			}
 		}
 
+		// NostalgIA: el deslizador de música controla el grupo Music del mixer (toda la música del juego).
 		public void MusicSlider (){
-			//PlayerPrefs.SetFloat("MusicVolume", sliderValue);
-			PlayerPrefs.SetFloat("MusicVolume", musicSlider.GetComponent<Slider>().value);
+			GameAudio.SetMusicVolume(musicSlider.GetComponent<Slider>().value);
+		}
+
+		// NostalgIA: el deslizador de efectos controla el grupo SFX del mixer (todos los efectos).
+		public void SfxSlider (){
+			if(sfxSlider != null) GameAudio.SetSfxVolume(sfxSlider.GetComponent<Slider>().value);
 		}
 
 		public void SensitivityXSlider (){
@@ -239,11 +250,11 @@ namespace SlimUI.ModernMenu{
 		public void ShowHUD (){
 			if(PlayerPrefs.GetInt("ShowHUD")==0){
 				PlayerPrefs.SetInt("ShowHUD",1);
-				showhudtext.GetComponent<TMP_Text>().text = "on";
+				showhudtext.GetComponent<TMP_Text>().text = "encendido";
 			}
 			else if(PlayerPrefs.GetInt("ShowHUD")==1){
 				PlayerPrefs.SetInt("ShowHUD",0);
-				showhudtext.GetComponent<TMP_Text>().text = "off";
+				showhudtext.GetComponent<TMP_Text>().text = "apagado";
 			}
 		}
 
@@ -251,22 +262,22 @@ namespace SlimUI.ModernMenu{
 		public void MobileSFXMute (){
 			if(PlayerPrefs.GetInt("Mobile_MuteSfx")==0){
 				PlayerPrefs.SetInt("Mobile_MuteSfx",1);
-				mobileSFXtext.GetComponent<TMP_Text>().text = "on";
+				mobileSFXtext.GetComponent<TMP_Text>().text = "encendido";
 			}
 			else if(PlayerPrefs.GetInt("Mobile_MuteSfx")==1){
 				PlayerPrefs.SetInt("Mobile_MuteSfx",0);
-				mobileSFXtext.GetComponent<TMP_Text>().text = "off";
+				mobileSFXtext.GetComponent<TMP_Text>().text = "apagado";
 			}
 		}
 
 		public void MobileMusicMute (){
 			if(PlayerPrefs.GetInt("Mobile_MuteMusic")==0){
 				PlayerPrefs.SetInt("Mobile_MuteMusic",1);
-				mobileMusictext.GetComponent<TMP_Text>().text = "on";
+				mobileMusictext.GetComponent<TMP_Text>().text = "encendido";
 			}
 			else if(PlayerPrefs.GetInt("Mobile_MuteMusic")==1){
 				PlayerPrefs.SetInt("Mobile_MuteMusic",0);
-				mobileMusictext.GetComponent<TMP_Text>().text = "off";
+				mobileMusictext.GetComponent<TMP_Text>().text = "apagado";
 			}
 		}
 
@@ -274,11 +285,11 @@ namespace SlimUI.ModernMenu{
 		public void ToolTips (){
 			if(PlayerPrefs.GetInt("ToolTips")==0){
 				PlayerPrefs.SetInt("ToolTips",1);
-				tooltipstext.GetComponent<TMP_Text>().text = "on";
+				tooltipstext.GetComponent<TMP_Text>().text = "encendido";
 			}
 			else if(PlayerPrefs.GetInt("ToolTips")==1){
 				PlayerPrefs.SetInt("ToolTips",0);
-				tooltipstext.GetComponent<TMP_Text>().text = "off";
+				tooltipstext.GetComponent<TMP_Text>().text = "apagado";
 			}
 		}
 
@@ -353,55 +364,55 @@ namespace SlimUI.ModernMenu{
 		public void vsync (){
 			if(QualitySettings.vSyncCount == 0){
 				QualitySettings.vSyncCount = 1;
-				vsynctext.GetComponent<TMP_Text>().text = "on";
+				vsynctext.GetComponent<TMP_Text>().text = "encendido";
 			}
 			else if(QualitySettings.vSyncCount == 1){
 				QualitySettings.vSyncCount = 0;
-				vsynctext.GetComponent<TMP_Text>().text = "off";
+				vsynctext.GetComponent<TMP_Text>().text = "apagado";
 			}
 		}
 
 		public void InvertMouse (){
 			if(PlayerPrefs.GetInt("Inverted")==0){
 				PlayerPrefs.SetInt("Inverted",1);
-				invertmousetext.GetComponent<TMP_Text>().text = "on";
+				invertmousetext.GetComponent<TMP_Text>().text = "encendido";
 			}
 			else if(PlayerPrefs.GetInt("Inverted")==1){
 				PlayerPrefs.SetInt("Inverted",0);
-				invertmousetext.GetComponent<TMP_Text>().text = "off";
+				invertmousetext.GetComponent<TMP_Text>().text = "apagado";
 			}
 		}
 
 		public void MotionBlur (){
 			if(PlayerPrefs.GetInt("MotionBlur")==0){
 				PlayerPrefs.SetInt("MotionBlur",1);
-				motionblurtext.GetComponent<TMP_Text>().text = "on";
+				motionblurtext.GetComponent<TMP_Text>().text = "encendido";
 			}
 			else if(PlayerPrefs.GetInt("MotionBlur")==1){
 				PlayerPrefs.SetInt("MotionBlur",0);
-				motionblurtext.GetComponent<TMP_Text>().text = "off";
+				motionblurtext.GetComponent<TMP_Text>().text = "apagado";
 			}
 		}
 
 		public void AmbientOcclusion (){
 			if(PlayerPrefs.GetInt("AmbientOcclusion")==0){
 				PlayerPrefs.SetInt("AmbientOcclusion",1);
-				ambientocclusiontext.GetComponent<TMP_Text>().text = "on";
+				ambientocclusiontext.GetComponent<TMP_Text>().text = "encendido";
 			}
 			else if(PlayerPrefs.GetInt("AmbientOcclusion")==1){
 				PlayerPrefs.SetInt("AmbientOcclusion",0);
-				ambientocclusiontext.GetComponent<TMP_Text>().text = "off";
+				ambientocclusiontext.GetComponent<TMP_Text>().text = "apagado";
 			}
 		}
 
 		public void CameraEffects (){
 			if(PlayerPrefs.GetInt("CameraEffects")==0){
 				PlayerPrefs.SetInt("CameraEffects",1);
-				cameraeffectstext.GetComponent<TMP_Text>().text = "on";
+				cameraeffectstext.GetComponent<TMP_Text>().text = "encendido";
 			}
 			else if(PlayerPrefs.GetInt("CameraEffects")==1){
 				PlayerPrefs.SetInt("CameraEffects",0);
-				cameraeffectstext.GetComponent<TMP_Text>().text = "off";
+				cameraeffectstext.GetComponent<TMP_Text>().text = "apagado";
 			}
 		}
 

@@ -285,7 +285,7 @@ namespace SlimUI.ModernMenu{
 				loadingBar.value = progress;
 
 				if (operation.progress >= 0.9f && waitForInput){
-					loadPromptText.text = "Press " + userPromptKey.ToString().ToUpper() + " to continue";
+					loadPromptText.text = "Presiona " + userPromptKey.ToString().ToUpper() + " para continuar";
 					loadingBar.value = 1;
 
 					if (Input.GetKeyDown(userPromptKey)){

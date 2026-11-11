@@ -63,6 +63,7 @@ namespace NostalgIA.Presentation.Audio
             source.playOnAwake = false;
             source.spatialBlend = 0f;
             source.volume = volume;
+            source.outputAudioMixerGroup = GameAudio.Sfx; // lo controla el deslizador de efectos
             return source;
         }
 
