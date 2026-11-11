@@ -4,7 +4,7 @@
 //
 // Es el material base de las piezas modulares de las Estaciones (pisos, muros, techos
 // de ProBuilder). Sustituye al gris por defecto de ProBuilder y le da al Tutorial su
-// look Webcore: baldosas azules, rejilla de neón, código en los muros y una banda de
+// look Webcore: un color base, rejilla de neón, código en los muros y una banda de
 // escaneo que sube.
 //
 // El shader está repartido en tres archivos:
@@ -14,14 +14,11 @@
 //
 // Las fórmulas principales (el detalle está en StationKitForwardPass.hlsl):
 //   - Proyección por eje dominante: cada cara usa el plano de mundo hacia el que mira.
-//   - Tono por baldosa: hash(floor(posición · escala)).
 //   - Rejilla con antialiasing: 1 − saturate((|frac(p − 0,5) − 0,5| − ancho/2) / fwidth(p)).
 //   - Banda de escaneo: exp(−8 · frac(0,1·y − 0,1·velocidad·t)).
 //
 // Rendimiento: todas las propiedades están en UnityPerMaterial (mismo bloque en los cuatro
-// pases), así que el SRP Batcher agrupa todas las piezas. Si a algún objeto le pongo un
-// MaterialPropertyBlock para variarle un color, ese objeto sale del SRP Batcher; lo
-// reservo para casos puntuales.
+// pases), así que el SRP Batcher agrupa todas las piezas.
 // =============================================================================
 
 Shader "NOS/StationKit"
@@ -29,31 +26,17 @@ Shader "NOS/StationKit"
     Properties
     {
         // Todos los colores y valores se pueden mover en el Inspector sin tocar código.
-        [Header(Piso)]
-        _FloorColorA ("Tono A del piso", Color) = (0.039, 0.165, 0.62, 1)
-        _FloorColorB ("Tono B del piso", Color) = (0.024, 0.063, 0.169, 1)
-        _CeilingColor ("Techo (caras hacia abajo)", Color) = (0.024, 0.063, 0.169, 1)
-
         [Header(Muros)]
-        _WallColorBottom ("Base del muro", Color) = (0.549, 0.561, 0.588, 1)
-        _WallColorTop ("Parte alta del muro", Color) = (0.039, 0.165, 0.62, 1)
-        _WallHeight ("Altura del gradiente (m)", Float) = 6
+        _WallColorTop ("Color base (muros, piso y techo)", Color) = (0.039, 0.165, 0.62, 1)
 
         [Header(Rejilla y codigo)]
         [HDR] _LineColor ("Color emisivo de rejilla y código", Color) = (0.227, 0.42, 1, 1)
-        _GridScale ("Celdas por metro", Float) = 1
         _LineWidth ("Ancho de línea (fracción de celda)", Range(0.005, 0.2)) = 0.03
         _LineEmission ("Emisión de la rejilla", Range(0, 4)) = 0.6
         _CodeDensity ("Densidad de código en muros", Range(0, 1)) = 0.35
         _CodeEmission ("Emisión del código", Range(0, 4)) = 0.5
         _ScanSpeed ("Velocidad de escaneo (m/s)", Float) = 1.5
         _ScanEmission ("Emisión de la banda de escaneo", Range(0, 2)) = 0.25
-
-        [Header(Superficie)]
-        _PixelsPerMeter ("Grano: píxeles por metro", Float) = 32
-        _GrainStrength ("Intensidad del grano", Range(0, 0.2)) = 0.04
-        _Smoothness ("Brillo", Range(0, 1)) = 0.3
-        _DamagePulseTint ("Respuesta al pulso de daño", Range(0, 1)) = 0.35
     }
 
     SubShader
@@ -66,7 +49,10 @@ Shader "NOS/StationKit"
             "IgnoreProjector" = "True"
             "Queue" = "Geometry"
         }
-        LOD 300
+        // LOD 200: el costo real del shader es bajo (sin texturas, un par de hashes). Con 300 el
+        // Inspector mostraba en Android el aviso genérico "Shader might be expensive", que Unity
+        // decide solo por este número y no por lo que hace el shader.
+        LOD 200
 
         // ---------------------------------------------------------------------
         // Pase principal: iluminación Forward / Forward+.

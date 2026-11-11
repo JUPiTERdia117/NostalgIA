@@ -13,8 +13,7 @@ namespace NostalgIA.Presentation.CameraFX
 {
     /// <summary>
     /// Anima el peso del <see cref="Volume"/> de retroalimentación (viñeta roja, aberración
-    /// cromática y desaturación) y publica el mismo valor como variable global de shader
-    /// <c>_NOS_DamagePulse</c>, que los materiales del entorno usan para teñir su emisión.
+    /// cromática y desaturación) cuando el jugador recibe daño o muere.
     /// </summary>
     /// <remarks>
     /// <para>
@@ -33,9 +32,8 @@ namespace NostalgIA.Presentation.CameraFX
     /// <item><b>Reaparición</b>: desvanecimiento lineal a 0 en <see cref="respawnFadeDuration"/>.</item>
     /// </list>
     /// <para>
-    /// Cuando <c>w = 0</c> el Volume se desactiva para que URP no lo evalúe en cada frame, y la
-    /// variable global solo se escribe mientras hay animación. Se usa tiempo sin escalar para
-    /// que la pausa no congele un destello a medias.
+    /// Cuando <c>w = 0</c> el Volume se desactiva para que URP no lo evalúe en cada frame. Se usa
+    /// tiempo sin escalar para que la pausa no congele un destello a medias.
     /// </para>
     /// </remarks>
     [DisallowMultipleComponent]
@@ -49,9 +47,6 @@ namespace NostalgIA.Presentation.CameraFX
 
         [Tooltip("Duración del desvanecimiento tras reaparecer.")]
         [SerializeField, Min(0.05f)] private float respawnFadeDuration = 0.5f;
-
-        /// <summary>Identificador cacheado de la variable global (evita buscar la cadena cada frame).</summary>
-        private static readonly int DamagePulseId = Shader.PropertyToID("_NOS_DamagePulse");
 
         /// <summary>Modo de la animación en curso.</summary>
         private enum Mode { Idle, DamagePulse, DeathHold, RespawnFade }
@@ -74,7 +69,7 @@ namespace NostalgIA.Presentation.CameraFX
             EventBus<PlayerRespawned>.Subscribe(OnPlayerRespawned);
         }
 
-        /// <summary>Cancela suscripciones y limpia la variable global para no dejar la escena teñida.</summary>
+        /// <summary>Cancela suscripciones y apaga el efecto para no dejar la pantalla teñida.</summary>
         private void OnDisable()
         {
             EventBus<PlayerDamaged>.Unsubscribe(OnPlayerDamaged);
@@ -125,11 +120,10 @@ namespace NostalgIA.Presentation.CameraFX
             }
         }
 
-        /// <summary>Escribe el peso en el Volume y en la variable global de shader.</summary>
+        /// <summary>Escribe el peso en el Volume.</summary>
         private void ApplyWeight(float weight)
         {
             CurrentWeight = weight;
-            Shader.SetGlobalFloat(DamagePulseId, weight);
             if (feedbackVolume == null) return;
             feedbackVolume.weight = weight;
             bool active = weight > 0.0001f;

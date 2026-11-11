@@ -4,12 +4,10 @@
 //
 // Este es el piso letal del Tutorial: una alberca azul rey llena de código de
 // terminal que corre hacia abajo, como si el suelo fuera una pantalla de datos.
-// Es un activo final: solo le agregué estos comentarios, el código y el aspecto
-// quedaron exactamente igual.
 //
 // Cómo está armado (todo en el fragment shader, sin texturas):
-//   1. Uso la posición de MUNDO (x, z) como coordenada, no las UV de la malla. Así da
-//      igual cuánto estire el plano de lava: los caracteres siempre miden lo mismo.
+//   1. Uso las UV del plano como coordenada: _Columns × _Rows caracteres cubren el plano
+//      entero (multiplicados por _WorldScale). Si se estira el plano, se estiran los caracteres.
 //   2. Divido el plano en celdas; cada celda es un carácter. Con hashes decido qué
 //      celdas llevan texto, con qué sangría y con qué carácter, para que se lea como
 //      bloques de código con números de línea a la izquierda.
@@ -34,16 +32,14 @@ Shader "Tutorial/BlueCodeLava"
         _GlowIntensity ("Code Glow Intensity", Range(0.5, 5.0)) = 2.0
         // Qué tan rápido baja el código. Negativo lo hace subir.
         _ScrollSpeed ("Scroll Speed (Down)", Float) = 1.6
-        // Escala del texto en el mundo: más alto = caracteres más chicos y más densos.
+        // Escala del texto: multiplica columnas y filas. Más alto = caracteres más chicos y más densos.
         _WorldScale ("Code Scale (World Units)", Float) = 0.35
-        // Ojo: _Columns, _Rows, _BorderWidth, _BorderColor y _DotColor están declaradas,
-        // pero el fragment shader actual no las lee. Las dejé para no romper los materiales
-        // que ya las guardan; moverlas en el Inspector no cambia nada en pantalla.
-        _Columns ("Text Columns", Float) = 28.0
-        _Rows ("Text Rows", Float) = 56.0
-        _BorderWidth ("Edge Border Width", Range(0.0, 0.15)) = 0.04
-        _BorderColor ("Border Color", Color) = (0.01, 0.03, 0.08, 1.0)
-        _DotColor ("Border Indicator Light Color", Color) = (0.2, 0.9, 1.0, 1.0)
+        // Cuántos caracteres caben a lo ancho (columnas) y a lo largo (filas) del plano con escala 1.
+        // Para que los caracteres no se vean aplastados, la proporción columnas/filas debe parecerse
+        // a la del plano: en un plano cuadrado, el doble de filas que de columnas da caracteres
+        // el doble de anchos que de altos.
+        _Columns ("Text Columns", Float) = 60.0
+        _Rows ("Text Rows", Float) = 100.0
     }
 
     SubShader
@@ -82,9 +78,6 @@ Shader "Tutorial/BlueCodeLava"
                 float _WorldScale;
                 float _Columns;
                 float _Rows;
-                float _BorderWidth;
-                float4 _BorderColor;
-                float4 _DotColor;
             CBUFFER_END
 
             struct Attributes
@@ -174,10 +167,11 @@ Shader "Tutorial/BlueCodeLava"
                 float2 worldUV = input.uv * _WorldScale * 10.0;
                 // 2) Desplazamiento en el tiempo. _Time.y son los segundos desde que arrancó el juego.
                 float scroll = _Time.y * _ScrollSpeed;
-                // Estiro la rejilla: 6 columnas y 10 filas por unidad de worldUV. Con _WorldScale = 0,35
-                // cada carácter mide 1/(6·0,35) ≈ 0,48 m de ancho y 1/(10·0,35) ≈ 0,29 m de alto.
+                // Rejilla de caracteres: a lo ancho del plano caben _Columns · _WorldScale caracteres y a lo
+                // largo _Rows · _WorldScale (antes estaba fija en 60 × 100 y estas dos propiedades no hacían nada).
                 // Sumarle scroll·8 a la coordenada vertical hace que el texto avance 8 filas por unidad de scroll.
-                float2 codeCoords = float2(worldUV.x * 6.0, worldUV.y * 10.0 + scroll * 8.0);
+                float2 charGrid = input.uv * _WorldScale * float2(max(_Columns, 1.0), max(_Rows, 1.0));
+                float2 codeCoords = float2(charGrid.x, charGrid.y + scroll * 8.0);
 
                 float2 cell = floor(codeCoords);   // Qué carácter (columna, fila) es este píxel.
                 float2 local = frac(codeCoords);   // Dónde está el píxel dentro de ese carácter, de 0 a 1.
@@ -225,7 +219,7 @@ Shader "Tutorial/BlueCodeLava"
 
                 // 4) Capa de fondo: otra rejilla corrida 3,5 columnas y que baja a 4,5 en vez de 8.
                 //    Como se mueve más lento, el ojo la interpreta como más profunda (paralaje).
-                float2 bgCoords = float2(worldUV.x * 6.0 + 3.5, worldUV.y * 10.0 + scroll * 4.5);
+                float2 bgCoords = float2(charGrid.x + 3.5, charGrid.y + scroll * 4.5);
                 float2 bgCell = floor(bgCoords);
                 float2 bgLocal = frac(bgCoords);
                 float bgRand = Hash21(bgCell + 19.3);   // +19,3 para que no coincida con el hash de la capa de enfrente.

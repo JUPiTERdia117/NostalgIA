@@ -7,14 +7,13 @@
 //     que mira (piso/techo → XZ, muro → ZY o XY). Las piezas del kit son cajas alineadas
 //     a los ejes, así que no necesito mezclar tres proyecciones como en un triplanar
 //     completo; con elegir una me ahorro dos tercios del trabajo.
-//   - Pisos: baldosas de 1 m con tono distinto por baldosa (hash) y grano pixelado.
-//   - Muros: degradado de abajo hacia arriba, segmentos de "código" que brillan y una
-//     banda de escaneo que sube por la pared.
-//   - Rejilla de neón con antialiasing calculado (fwidth) en todas las caras.
+//   - Todas las caras: un solo color base y una rejilla de neón de 1 m con antialiasing
+//     calculado (fwidth).
+//   - Muros: además, segmentos de "código" que brillan y una banda de escaneo que sube.
 //   - Luz Blinn-Phong de URP: luz principal con sombras, luces adicionales (Forward+),
 //     luz ambiental (armónicos esféricos o lightmaps horneados) y niebla.
 //
-// Costo aproximado por píxel: unos 4 hashes PCG, una rejilla y la iluminación Blinn-Phong.
+// Costo aproximado por píxel: dos hashes PCG (solo en muros), una rejilla y la iluminación Blinn-Phong.
 // No lee ninguna textura, así que no gasta ancho de banda de memoria (lo más caro en un
 // teléfono).
 // =============================================================================
@@ -113,71 +112,44 @@ KitPattern EvaluateKitPattern(float3 positionWS, half3 normalWS)
     // Coordenada 2D en metros sobre el plano elegido: XZ para pisos, ZY para muros que miran a X, XY para los que miran a Z.
     float2 planeUV = horizontal ? positionWS.xz : (absNormal.x > absNormal.z ? positionWS.zy : positionWS.xy);
 
-    // Cuántos metros de superficie cubre un píxel de pantalla: fwidth = |∂p/∂x| + |∂p/∂y|
-    // (cuánto cambia la coordenada al pasar al píxel vecino). Lo uso para apagar los detalles que
-    // ya son más chicos que un píxel: si una celda mide menos de dos píxeles, su color aleatorio
-    // cambia de un frame a otro al moverse la cámara y se ve como "nieve" que parpadea.
+    // Todas las caras usan el mismo color base.
+    pattern.albedo = _WallColorTop.rgb;
+
+    // Rejilla de neón: una línea cada metro, con antialiasing (ver NOS_GridLines).
+    half grid = (half)NOS_GridLines(planeUV, _LineWidth);
+    pattern.emission = _LineColor.rgb * (grid * _LineEmission);
+    if (horizontal) return pattern;
+
+    // ---- Solo muros: código y banda de escaneo ----
+
+    // Cuántos metros de superficie cubre un píxel de pantalla: fwidth = |∂p/∂x| + |∂p/∂y|.
+    // Lo uso para apagar el código cuando sus caracteres ya son más chicos que dos píxeles;
+    // si no, su patrón aleatorio parpadea como "nieve" al mover la cámara.
     float2 footprint = fwidth(planeUV);
     float pixelMeters = max(footprint.x, footprint.y);
 
-    // Grano pixelado: un valor aleatorio por cuadrito de 1/_PixelsPerMeter m, centrado en 0
-    // (hash − 0,5 va de −0,5 a 0,5, así aclara y oscurece por igual).
-    // grainFade vale 1 mientras el cuadrito ocupa 2 píxeles o más y llega a 0 cuando ocupa 1 o menos.
-    half grainFade = (half)saturate(2.0 - 2.0 * pixelMeters * _PixelsPerMeter);
-    half grain = (half)(NOS_Hash21(floor(planeUV * _PixelsPerMeter)) - 0.5) * _GrainStrength * grainFade;
+    // Segmentos de "código": divido el muro en filas de 1/8 m y segmentos de 1/4 m. Cada segmento
+    // se enciende si su hash supera (1 − densidad): con densidad 0,35 se enciende el 35 %.
+    // step(a, b) devuelve 1 si b ≥ a y 0 si no; es un "if" sin ramificación.
+    float2 codeCell = floor(planeUV * float2(4.0, 8.0));
+    half segmentOn = (half)step(1.0 - _CodeDensity, NOS_Hash21(codeCell + 41.0));
+    float2 inCell = frac(planeUV * float2(4.0, 8.0));
+    // Corto cada segmento en "caracteres" de 1/24 m; el 35 % quedan apagados y parecen espacios entre letras.
+    half character = (half)step(0.35, NOS_Hash21(floor(planeUV * float2(24.0, 8.0)) + 7.0));
+    // Solo dibujo la mitad central de la fila (de 0,25 a 0,75) para dejar interlineado.
+    half rowGap = (half)step(0.25, inCell.y) * (half)step(inCell.y, 0.75);
+    half codeFade = (half)saturate(2.0 - 2.0 * pixelMeters * 24.0);
+    half code = segmentOn * character * rowGap * codeFade;
 
-    // Rejilla de neón: una línea cada 1/_GridScale metros, con antialiasing (ver NOS_GridLines).
-    half grid = (half)NOS_GridLines(planeUV * _GridScale, _LineWidth);
+    // Banda de escaneo que sube por la pared:
+    //   fase = frac(0,1·y − 0,1·velocidad·t) se repite cada 10 m de altura y baja con el tiempo,
+    //   así el punto donde fase = 0 (el frente de la banda) va subiendo.
+    //   exp(−8·fase) vale 1 justo en el frente y se apaga rápido hacia arriba (1 m arriba ya vale 0,45).
+    float scanPhase = frac(positionWS.y * 0.1 - _Time.y * _ScanSpeed * 0.1);
+    half scan = (half)exp(-8.0 * scanPhase);
 
-    if (horizontal)
-    {
-        // Baldosas: cada celda elige un tono, pero solo entre 3 niveles para que parezca paleta limitada de los 2000.
-        float cellValue = NOS_Hash21(floor(planeUV * _GridScale) + 17.0);  // Sumo 17 para que este hash no coincida con el del grano.
-        half tone = (half)(floor(cellValue * 3.0) / 2.0);                    // floor(0..2,99)/2 → niveles 0, 0,5 y 1.
-        half3 floorColor = lerp(_FloorColorA.rgb, _FloorColorB.rgb, tone);
-        // Si la normal apunta hacia abajo es un techo y uso su color.
-        half3 baseColor = normalWS.y >= 0.0h ? floorColor : _CeilingColor.rgb;
-        pattern.albedo = saturate(baseColor + grain);                        // saturate recorta a [0, 1] por si el grano se pasa.
-        pattern.emission = _LineColor.rgb * (grid * _LineEmission);
-    }
-    else
-    {
-        // Degradado del muro: 0 en el piso (y = 0) y 1 a la altura _WallHeight.
-        half heightT = (half)NOS_InverseLerp01(0.0, max(_WallHeight, 0.01), positionWS.y);
-        half3 wallColor = lerp(_WallColorBottom.rgb, _WallColorTop.rgb, heightT);
-        pattern.albedo = saturate(wallColor + grain);
-
-        // Segmentos de "código": divido el muro en filas de 1/8 m y segmentos de 1/4 m. Cada segmento
-        // se enciende si su hash supera (1 − densidad): con densidad 0,35 se enciende el 35 %.
-        // step(a, b) devuelve 1 si b ≥ a y 0 si no; es un "if" sin ramificación.
-        float2 codeCell = floor(planeUV * float2(4.0, 8.0));
-        half segmentOn = (half)step(1.0 - _CodeDensity, NOS_Hash21(codeCell + 41.0));
-        float2 inCell = frac(planeUV * float2(4.0, 8.0));
-        // Corto cada segmento en "caracteres" de 1/24 m; el 35 % quedan apagados y parecen espacios entre letras.
-        half character = (half)step(0.35, NOS_Hash21(floor(planeUV * float2(24.0, 8.0)) + 7.0));
-        // Solo dibujo la mitad central de la fila (de 0,25 a 0,75) para dejar interlineado.
-        half rowGap = (half)step(0.25, inCell.y) * (half)step(inCell.y, 0.75);
-        // Igual que con el grano: cuando un carácter de 1/24 m ocupa menos de dos píxeles (muros
-        // lejanos o vistos muy de lado), apago el código y queda solo la rejilla, que sí tiene antialiasing.
-        half codeFade = (half)saturate(2.0 - 2.0 * pixelMeters * 24.0);
-        half code = segmentOn * character * rowGap * codeFade;
-
-        // Banda de escaneo que sube por la pared:
-        //   fase = frac(0,1·y − 0,1·velocidad·t) se repite cada 10 m de altura y baja con el tiempo,
-        //   así el punto donde fase = 0 (el frente de la banda) va subiendo.
-        //   exp(−8·fase) vale 1 justo en el frente y se apaga rápido hacia arriba (1 m arriba ya vale 0,45;
-        //   3 m arriba, 0,09). Justo debajo del frente la fase vale casi 1, por eso el corte inferior es nítido.
-        float scanPhase = frac(positionWS.y * 0.1 - _Time.y * _ScanSpeed * 0.1);
-        half scan = (half)exp(-8.0 * scanPhase);
-
-        // Emisión del muro = rejilla + código (que se aviva cuando pasa la banda) + la banda misma.
-        pattern.emission = _LineColor.rgb * (grid * _LineEmission + code * _CodeEmission * (0.35h + scan) + scan * _ScanEmission);
-    }
-
-    // Pulso de daño: PostFXController escribe _NOS_DamagePulse (0 a 1) cuando golpean al jugador.
-    // Mezclo la emisión hacia un rojo que sigue la rejilla (grid + 0,15 para que también se tiñan las celdas).
-    half pulse = (half)saturate(_NOS_DamagePulse) * _DamagePulseTint;
-    pattern.emission = lerp(pattern.emission, half3(1.0h, 0.15h, 0.2h) * (grid + 0.15h), pulse);
+    // Emisión del muro = rejilla + código (que se aviva cuando pasa la banda) + la banda misma.
+    pattern.emission += _LineColor.rgb * (code * _CodeEmission * (0.35h + scan) + scan * _ScanEmission);
     return pattern;
 }
 
@@ -205,8 +177,8 @@ void StationKitFragment(
     // Lleno los datos de superficie que espera la iluminación Blinn-Phong de URP.
     SurfaceData surfaceData = (SurfaceData)0;
     surfaceData.albedo = pattern.albedo;
-    surfaceData.specular = half3(0.2h, 0.2h, 0.2h) * _Smoothness;  // Reflejo gris neutro, más fuerte cuanto más pulido.
-    surfaceData.smoothness = _Smoothness;
+    surfaceData.specular = half3(0.06h, 0.06h, 0.06h);              // Reflejo gris neutro y suave (antes lo daba el "Brillo" en 0,3).
+    surfaceData.smoothness = 0.3h;
     surfaceData.normalTS = half3(0.0h, 0.0h, 1.0h);                // Sin mapa de normales: la normal "plana" (0, 0, 1).
     surfaceData.emission = pattern.emission;
     surfaceData.occlusion = 1.0h;
