@@ -1,8 +1,12 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using UnityEngine.UI;
 using TMPro;
 using UnityEngine.SceneManagement;
+using UnityEngine.InputSystem;
+using NostalgIA.Core.Events;
+using NostalgIA.Core.Services;
+using NostalgIA.Input;
 
 namespace SlimUI.ModernMenu{
 	public class UIMenuManager : MonoBehaviour {
@@ -285,10 +289,10 @@ namespace SlimUI.ModernMenu{
 				loadingBar.value = progress;
 
 				if (operation.progress >= 0.9f && waitForInput){
-					loadPromptText.text = "Presiona " + userPromptKey.ToString().ToUpper() + " para continuar";
+					loadPromptText.text = GetLoadPromptText();
 					loadingBar.value = 1;
 
-					if (Input.GetKeyDown(userPromptKey)){
+					if (ShouldContinueFromLoadingScreen()){
 						operation.allowSceneActivation = true;
 					}
                 }else if(operation.progress >= 0.9f && !waitForInput){
@@ -297,6 +301,50 @@ namespace SlimUI.ModernMenu{
 
 				yield return null;
 			}
+		}
+
+		private string GetLoadPromptText(){
+			InputScheme scheme = ResolveCurrentInputScheme();
+			switch (scheme){
+				case InputScheme.Touch:
+					return "Toca la pantalla para continuar";
+				case InputScheme.Gamepad:
+					return "Presiona A para continuar";
+				default:
+					string keyName = (userPromptKey == KeyCode.Return || userPromptKey == KeyCode.KeypadEnter)
+						? "ENTER"
+						: userPromptKey.ToString().ToUpper();
+					return "Presiona " + keyName + " para continuar";
+			}
+		}
+
+		private static InputScheme ResolveCurrentInputScheme(){
+			if (ServiceLocator.TryGet(out InputReader reader)){
+				return reader.CurrentScheme;
+			}
+			if (Gamepad.current != null && Gamepad.current.native){
+				return InputScheme.Gamepad;
+			}
+			return Application.isMobilePlatform ? InputScheme.Touch : InputScheme.KeyboardMouse;
+		}
+
+		private bool ShouldContinueFromLoadingScreen(){
+			if (Input.GetKeyDown(userPromptKey) || Input.GetKeyDown(KeyCode.JoystickButton0) || Input.GetMouseButtonDown(0)){
+				return true;
+			}
+			if (Input.touchCount > 0 && Input.GetTouch(0).phase == UnityEngine.TouchPhase.Began){
+				return true;
+			}
+			if (Gamepad.current != null && Gamepad.current.buttonSouth.wasPressedThisFrame){
+				return true;
+			}
+			if (Touchscreen.current != null && Touchscreen.current.primaryTouch.press.wasPressedThisFrame){
+				return true;
+			}
+			if (Pointer.current != null && Pointer.current.press.wasPressedThisFrame && Application.isMobilePlatform){
+				return true;
+			}
+			return false;
 		}
 	}
 }
