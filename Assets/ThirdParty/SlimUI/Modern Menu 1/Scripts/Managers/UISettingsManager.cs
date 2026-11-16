@@ -4,6 +4,7 @@ using UnityEngine.UI;
 using TMPro;
 using NostalgIA.Presentation.Audio;
 using NostalgIA.Presentation.VFX;
+using NostalgIA.Input;
 
 namespace SlimUI.ModernMenu{
 	public class UISettingsManager : MonoBehaviour {
@@ -55,8 +56,6 @@ namespace SlimUI.ModernMenu{
 		public GameObject mouseSmoothSlider;
 
 		private float sliderValue = 0.0f;
-		private float sliderValueXSensitivity = 0.0f;
-		private float sliderValueYSensitivity = 0.0f;
 		private float sliderValueSmoothing = 0.0f;
 		
 
@@ -76,8 +75,10 @@ namespace SlimUI.ModernMenu{
 			// NostalgIA: los volúmenes viven en GameAudio (mixer del juego); 0,5 = volumen original.
 			musicSlider.GetComponent<Slider>().value = GameAudio.MusicVolume;
 			if(sfxSlider != null) sfxSlider.GetComponent<Slider>().value = GameAudio.SfxVolume;
-			sensitivityXSlider.GetComponent<Slider>().value = PlayerPrefs.GetFloat("XSensitivity");
-			sensitivityYSlider.GetComponent<Slider>().value = PlayerPrefs.GetFloat("YSensitivity");
+			// NostalgIA: la sensibilidad vive en LookSettings (la usa InputReader y el menú de pausa).
+			// Antes solo se guardaba al arrastrar y el juego nunca leía el valor.
+			SetupSensitivitySlider(sensitivityXSlider, LookSettings.SensitivityX, value => LookSettings.SensitivityX = value);
+			SetupSensitivitySlider(sensitivityYSlider, LookSettings.SensitivityY, value => LookSettings.SensitivityY = value);
 			mouseSmoothSlider.GetComponent<Slider>().value = PlayerPrefs.GetFloat("MouseSmoothing");
 
 			// check full screen
@@ -118,12 +119,7 @@ namespace SlimUI.ModernMenu{
 			}
 
 			// check mouse inverse
-			if(PlayerPrefs.GetInt("Inverted")==0){
-				invertmousetext.GetComponent<TMP_Text>().text = "apagado";
-			}
-			else if(PlayerPrefs.GetInt("Inverted")==1){
-				invertmousetext.GetComponent<TMP_Text>().text = "encendido";
-			}
+			invertmousetext.GetComponent<TMP_Text>().text = LookSettings.Invert ? "encendido" : "apagado";
 
 			// check motion blur
 			if(PlayerPrefs.GetInt("MotionBlur")==0){
@@ -147,8 +143,6 @@ namespace SlimUI.ModernMenu{
 
 		public void Update (){
 			//sliderValue = musicSlider.GetComponent<Slider>().value;
-			sliderValueXSensitivity = sensitivityXSlider.GetComponent<Slider>().value;
-			sliderValueYSensitivity = sensitivityYSlider.GetComponent<Slider>().value;
 			sliderValueSmoothing = mouseSmoothSlider.GetComponent<Slider>().value;
 		}
 
@@ -173,12 +167,24 @@ namespace SlimUI.ModernMenu{
 			if(sfxSlider != null) GameAudio.SetSfxVolume(sfxSlider.GetComponent<Slider>().value);
 		}
 
+		// NostalgIA: el EventTrigger de cada deslizador llama a estos dos al arrastrar.
+		// El valor ya se guarda con onValueChanged (SetupSensitivitySlider); los dejo para no romper esa llamada.
 		public void SensitivityXSlider (){
-			PlayerPrefs.SetFloat("XSensitivity", sliderValueXSensitivity);
+			LookSettings.SensitivityX = sensitivityXSlider.GetComponent<Slider>().value;
 		}
 
 		public void SensitivityYSlider (){
-			PlayerPrefs.SetFloat("YSensitivity", sliderValueYSensitivity);
+			LookSettings.SensitivityY = sensitivityYSlider.GetComponent<Slider>().value;
+		}
+
+		// NostalgIA: rango de 1 a 10 (5 = sensibilidad original) y guardado al mover el deslizador.
+		private static void SetupSensitivitySlider (GameObject sliderObject, float value, UnityEngine.Events.UnityAction<float> onChange){
+			if(sliderObject == null) return;
+			Slider slider = sliderObject.GetComponent<Slider>();
+			slider.minValue = LookSettings.Min;
+			slider.maxValue = LookSettings.Max;
+			slider.SetValueWithoutNotify(value);
+			slider.onValueChanged.AddListener(onChange);
 		}
 
 		public void SensitivitySmoothing (){
@@ -312,15 +318,10 @@ namespace SlimUI.ModernMenu{
 			}
 		}
 
+		// NostalgIA: la inversión vive en LookSettings para que el juego la lea sin consultar PlayerPrefs cada frame.
 		public void InvertMouse (){
-			if(PlayerPrefs.GetInt("Inverted")==0){
-				PlayerPrefs.SetInt("Inverted",1);
-				invertmousetext.GetComponent<TMP_Text>().text = "encendido";
-			}
-			else if(PlayerPrefs.GetInt("Inverted")==1){
-				PlayerPrefs.SetInt("Inverted",0);
-				invertmousetext.GetComponent<TMP_Text>().text = "apagado";
-			}
+			LookSettings.Invert = !LookSettings.Invert;
+			invertmousetext.GetComponent<TMP_Text>().text = LookSettings.Invert ? "encendido" : "apagado";
 		}
 
 		public void MotionBlur (){

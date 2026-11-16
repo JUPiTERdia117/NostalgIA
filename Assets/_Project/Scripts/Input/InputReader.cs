@@ -427,7 +427,9 @@ namespace NostalgIA.Input
             touchStickAngularVelocity.y = AccelerateAxis(virtualLookStick.y, touchStickAngularVelocity.y, touchStickMaxSpeedY, deltaTime);
             result += touchStickAngularVelocity * deltaTime;
 
-            if (invertY) result.y = -result.y;
+            // 5) Ajustes del jugador: sensibilidad por eje e inversión vertical (menús).
+            result = Vector2.Scale(result, LookSettings.Multiplier);
+            if (invertY != LookSettings.Invert) result.y = -result.y;
             return result;
         }
 
