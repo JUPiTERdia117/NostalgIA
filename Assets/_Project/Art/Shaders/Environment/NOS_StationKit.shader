@@ -59,6 +59,13 @@ Shader "NOS/StationKit"
             #pragma multi_compile_fragment _ _SCREEN_SPACE_OCCLUSION
             #pragma multi_compile_instancing
 
+            // Luz horneada: sin esto las luces Baked (como las LavaGlow) nunca se ven en
+            // muros y pisos, porque su luz vive solo en los lightmaps.
+            #pragma multi_compile _ LIGHTMAP_ON
+            #pragma multi_compile _ DIRLIGHTMAP_COMBINED
+            #pragma multi_compile _ SHADOWS_SHADOWMASK
+            #pragma multi_compile _ LIGHTMAP_SHADOW_MIXING
+
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
             #include "Assets/_Project/Art/Shaders/Include/NostalgIA_Common.hlsl"
 
@@ -66,6 +73,7 @@ Shader "NOS/StationKit"
             {
                 float4 positionOS : POSITION;
                 float3 normalOS   : NORMAL;
+                float2 staticLightmapUV : TEXCOORD1;
                 UNITY_VERTEX_INPUT_INSTANCE_ID
             };
 
@@ -74,6 +82,7 @@ Shader "NOS/StationKit"
                 float4 positionCS : SV_POSITION;
                 float3 positionWS : TEXCOORD0;
                 half3 normalWS    : TEXCOORD1;
+                DECLARE_LIGHTMAP_OR_SH(staticLightmapUV, vertexSH, 2);
                 UNITY_VERTEX_INPUT_INSTANCE_ID
             };
 
@@ -85,6 +94,8 @@ Shader "NOS/StationKit"
                 output.positionWS = TransformObjectToWorld(input.positionOS.xyz);
                 output.positionCS = TransformWorldToHClip(output.positionWS);
                 output.normalWS = TransformObjectToWorldNormal(input.normalOS);
+                OUTPUT_LIGHTMAP_UV(input.staticLightmapUV, unity_LightmapST, output.staticLightmapUV);
+                OUTPUT_SH(output.normalWS, output.vertexSH);
                 return output;
             }
 
@@ -124,8 +135,9 @@ Shader "NOS/StationKit"
                 light.viewDirectionWS = GetWorldSpaceNormalizeViewDir(pos);
                 light.shadowCoord = TransformWorldToShadowCoord(pos);
                 light.normalizedScreenSpaceUV = GetNormalizedScreenSpaceUV(input.positionCS);
-                light.bakedGI = SampleSH(normalWS);                     // Luz ambiental.
-                light.shadowMask = 1;
+                // Luz horneada: lightmap en objetos estáticos, armónicos esféricos en dinámicos.
+                light.bakedGI = SAMPLE_GI(input.staticLightmapUV, input.vertexSH, normalWS);
+                light.shadowMask = SAMPLE_SHADOWMASK(input.staticLightmapUV);
 
                 SurfaceData surface = (SurfaceData)0;
                 surface.albedo = _WallColorTop.rgb;

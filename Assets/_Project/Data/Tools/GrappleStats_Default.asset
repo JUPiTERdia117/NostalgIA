@@ -17,8 +17,8 @@ MonoBehaviour:
   maxPullDuration: 3
   overshootDistance: 2
   gravity: 2
-  pullAcceleration: 70
-  pullSpeed: 26
+  pullAcceleration: 35
+  pullSpeed: 25
   pullRampTime: 0.08
   airControl: 8
   steerAcceleration: 30
@@ -27,7 +27,7 @@ MonoBehaviour:
   releaseAirAcceleration: 18
   releaseAirControlTime: 1.2
   releaseMomentumRetention: 0.85
-  launchLift: 4
+  launchLift: 3
   jumpLaunchSpeed: 6.5
   jumpForwardBoost: 2.5
   arrivalLift: 5
