@@ -3,6 +3,7 @@ using System.Collections;
 using UnityEngine.UI;
 using TMPro;
 using NostalgIA.Presentation.Audio;
+using NostalgIA.Presentation.VFX;
 
 namespace SlimUI.ModernMenu{
 	public class UISettingsManager : MonoBehaviour {
@@ -104,52 +105,8 @@ namespace SlimUI.ModernMenu{
 				tooltipstext.GetComponent<TMP_Text>().text = "encendido";
 			}
 
-			// check shadow distance/enabled
-			if(platform == Platform.Desktop){
-				if(PlayerPrefs.GetInt("Shadows") == 0){
-					QualitySettings.shadowCascades = 0;
-					QualitySettings.shadowDistance = 0;
-					shadowofftextLINE.gameObject.SetActive(true);
-					shadowlowtextLINE.gameObject.SetActive(false);
-					shadowhightextLINE.gameObject.SetActive(false);
-				}
-				else if(PlayerPrefs.GetInt("Shadows") == 1){
-					QualitySettings.shadowCascades = 2;
-					QualitySettings.shadowDistance = 75;
-					shadowofftextLINE.gameObject.SetActive(false);
-					shadowlowtextLINE.gameObject.SetActive(true);
-					shadowhightextLINE.gameObject.SetActive(false);
-				}
-				else if(PlayerPrefs.GetInt("Shadows") == 2){
-					QualitySettings.shadowCascades = 4;
-					QualitySettings.shadowDistance = 500;
-					shadowofftextLINE.gameObject.SetActive(false);
-					shadowlowtextLINE.gameObject.SetActive(false);
-					shadowhightextLINE.gameObject.SetActive(true);
-				}
-			}else if(platform == Platform.Mobile){
-				if(PlayerPrefs.GetInt("MobileShadows") == 0){
-					QualitySettings.shadowCascades = 0;
-					QualitySettings.shadowDistance = 0;
-					mobileShadowofftextLINE.gameObject.SetActive(true);
-					mobileShadowlowtextLINE.gameObject.SetActive(false);
-					mobileShadowhightextLINE.gameObject.SetActive(false);
-				}
-				else if(PlayerPrefs.GetInt("MobileShadows") == 1){
-					QualitySettings.shadowCascades = 2;
-					QualitySettings.shadowDistance = 75;
-					mobileShadowofftextLINE.gameObject.SetActive(false);
-					mobileShadowlowtextLINE.gameObject.SetActive(true);
-					mobileShadowhightextLINE.gameObject.SetActive(false);
-				}
-				else if(PlayerPrefs.GetInt("MobileShadows") == 2){
-					QualitySettings.shadowCascades = 4;
-					QualitySettings.shadowDistance = 100;
-					mobileShadowofftextLINE.gameObject.SetActive(false);
-					mobileShadowlowtextLINE.gameObject.SetActive(false);
-					mobileShadowhightextLINE.gameObject.SetActive(true);
-				}
-			}
+			// NostalgIA: las sombras las define el preset de «Calidad gráfica» (GameGraphics).
+			// Los QualitySettings.shadow* del original no afectan a URP y aquí solo estorbaban.
 
 
 			// check vsync
@@ -184,25 +141,8 @@ namespace SlimUI.ModernMenu{
 				ambientocclusiontext.GetComponent<TMP_Text>().text = "encendido";
 			}
 
-			// check texture quality
-			if(PlayerPrefs.GetInt("Textures") == 0){
-				QualitySettings.globalTextureMipmapLimit = 2;
-				texturelowtextLINE.gameObject.SetActive(true);
-				texturemedtextLINE.gameObject.SetActive(false);
-				texturehightextLINE.gameObject.SetActive(false);
-			}
-			else if(PlayerPrefs.GetInt("Textures") == 1){
-				QualitySettings.globalTextureMipmapLimit = 1;
-				texturelowtextLINE.gameObject.SetActive(false);
-				texturemedtextLINE.gameObject.SetActive(true);
-				texturehightextLINE.gameObject.SetActive(false);
-			}
-			else if(PlayerPrefs.GetInt("Textures") == 2){
-				QualitySettings.globalTextureMipmapLimit = 0;
-				texturelowtextLINE.gameObject.SetActive(false);
-				texturemedtextLINE.gameObject.SetActive(false);
-				texturehightextLINE.gameObject.SetActive(true);
-			}
+			// NostalgIA: la fila de texturas es la «Calidad gráfica» y marca el preset guardado.
+			ShowGraphicsLine(GameGraphics.Current);
 		}
 
 		public void Update (){
@@ -416,28 +356,27 @@ namespace SlimUI.ModernMenu{
 			}
 		}
 
+		// NostalgIA: los botones bajo/medio/alto de «Calidad gráfica» aplican el preset completo
+		// (resolución, texturas, HDR, Bloom y sombras) con GameGraphics.
 		public void TexturesLow (){
-			PlayerPrefs.SetInt("Textures",0);
-			QualitySettings.globalTextureMipmapLimit = 2;
-			texturelowtextLINE.gameObject.SetActive(true);
-			texturemedtextLINE.gameObject.SetActive(false);
-			texturehightextLINE.gameObject.SetActive(false);
+			GameGraphics.Set(GraphicsPreset.Low);
+			ShowGraphicsLine(GraphicsPreset.Low);
 		}
 
 		public void TexturesMed (){
-			PlayerPrefs.SetInt("Textures",1);
-			QualitySettings.globalTextureMipmapLimit = 1;
-			texturelowtextLINE.gameObject.SetActive(false);
-			texturemedtextLINE.gameObject.SetActive(true);
-			texturehightextLINE.gameObject.SetActive(false);
+			GameGraphics.Set(GraphicsPreset.Medium);
+			ShowGraphicsLine(GraphicsPreset.Medium);
 		}
 
 		public void TexturesHigh (){
-			PlayerPrefs.SetInt("Textures",2);
-			QualitySettings.globalTextureMipmapLimit = 0;
-			texturelowtextLINE.gameObject.SetActive(false);
-			texturemedtextLINE.gameObject.SetActive(false);
-			texturehightextLINE.gameObject.SetActive(true);
+			GameGraphics.Set(GraphicsPreset.High);
+			ShowGraphicsLine(GraphicsPreset.High);
+		}
+
+		private void ShowGraphicsLine (GraphicsPreset preset){
+			if(texturelowtextLINE != null) texturelowtextLINE.SetActive(preset == GraphicsPreset.Low);
+			if(texturemedtextLINE != null) texturemedtextLINE.SetActive(preset == GraphicsPreset.Medium);
+			if(texturehightextLINE != null) texturehightextLINE.SetActive(preset == GraphicsPreset.High);
 		}
 	}
 }
