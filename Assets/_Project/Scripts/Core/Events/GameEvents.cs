@@ -512,6 +512,25 @@ namespace NostalgIA.Core.Events
         }
     }
 
+    /// <summary>Un enemigo ejecutó su ataque (disparo, mordida o salto). Publican los controladores de enemigos.</summary>
+    public readonly struct EnemyAttacked : IGameEvent
+    {
+        /// <summary>Tipo de enemigo que realizó el ataque.</summary>
+        public readonly EnemyKind Kind;
+        /// <summary>Posición donde ocurrió el ataque.</summary>
+        public readonly Vector3 Position;
+        /// <summary>Indica si el propio enemigo ya reprodujo su clip de audio localmente.</summary>
+        public readonly bool PlayedLocally;
+
+        /// <summary>Crea el evento.</summary>
+        public EnemyAttacked(EnemyKind kind, Vector3 position, bool playedLocally = false)
+        {
+            Kind = kind;
+            Position = position;
+            PlayedLocally = playedLocally;
+        }
+    }
+
     /// <summary>Golpe de área del Antivirus. Publica su comportamiento.</summary>
     public readonly struct AntivirusSlam : IGameEvent
     {

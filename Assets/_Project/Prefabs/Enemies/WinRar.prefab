@@ -170,6 +170,8 @@ MonoBehaviour:
   lungeArcHeight: 1.6
   lungeOvershoot: 1.5
   recoveryTime: 0.5
+  biteClip: {fileID: 8300000, guid: 5fdd713c21a14ffda9740a64e6f22ca7, type: 3}
+  biteVolume: 0.9
 --- !u!95 &-2643063712497664203
 Animator:
   serializedVersion: 7

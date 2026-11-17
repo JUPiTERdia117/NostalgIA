@@ -1,4 +1,6 @@
+using NostalgIA.Core.Events;
 using NostalgIA.Gameplay.Player;
+using NostalgIA.Presentation.Audio;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
@@ -47,12 +49,19 @@ public class BugEnemyController : MonoBehaviour
     [Tooltip("Optional Animator bool parameter set when the enemy dies.")]
     [SerializeField] private string deadParameter = "IsDead";
 
+    [Header("Audio")]
+    [Tooltip("Sonido cuando el WinRar muerde (Anon - Mimi Chomp).")]
+    [SerializeField] private AudioClip biteClip;
+    [SerializeField, Range(0f, 1f)] private float biteVolume = 0.9f;
+
     private PlayerHealth player;
     private NavMeshAgent navMeshAgent;
     private EnemyHealth health;
+    private AudioSource audioSource;
     private bool isAttacking;
     private bool isLunging;
     private float lastAttackTime = -99f;
+    private float lastBiteSoundTime = -99f;
     private Vector3 originalScale;
     private int movingParameterHash;
     private int attackTriggerHash;
@@ -74,6 +83,7 @@ public class BugEnemyController : MonoBehaviour
 
         CacheAnimatorParameters();
         originalScale = transform.localScale;
+        SetupAudioSource();
 
         if (navMeshAgent != null)
         {
@@ -82,6 +92,35 @@ public class BugEnemyController : MonoBehaviour
         }
 
         FindPlayer();
+    }
+
+    private void SetupAudioSource()
+    {
+        if (!TryGetComponent(out audioSource))
+        {
+            audioSource = gameObject.AddComponent<AudioSource>();
+        }
+        audioSource.playOnAwake = false;
+        audioSource.loop = false;
+        audioSource.spatialBlend = 0.2f;
+        audioSource.minDistance = 4f;
+        audioSource.maxDistance = 35f;
+        audioSource.rolloffMode = AudioRolloffMode.Linear;
+        audioSource.outputAudioMixerGroup = GameAudio.Sfx;
+    }
+
+    private void PlayBiteSound()
+    {
+        if (Time.time - lastBiteSoundTime < 0.25f) return;
+        lastBiteSoundTime = Time.time;
+
+        bool playedLocally = false;
+        if (biteClip != null && audioSource != null)
+        {
+            audioSource.PlayOneShot(biteClip, biteVolume);
+            playedLocally = true;
+        }
+        EventBus<EnemyAttacked>.Raise(new EnemyAttacked(EnemyKind.Antivirus, transform.position, playedLocally));
     }
 
     private void Start()
@@ -249,6 +288,7 @@ public class BugEnemyController : MonoBehaviour
 
         // 2. LANZAMIENTO / EMBESTIDA (LUNGE): Salto físico hacia el jugador
         isLunging = true;
+        PlayBiteSound();
         bool wasNavAgentEnabled = navMeshAgent != null && navMeshAgent.enabled;
         if (navMeshAgent != null)
         {
@@ -322,6 +362,7 @@ public class BugEnemyController : MonoBehaviour
     private void DealLethalDamage(PlayerHealth target)
     {
         if (target == null || target.IsDead) return;
+        PlayBiteSound();
         int damage = oneHitKill ? 99 : attackDamage;
         target.TakeDamage(damage);
         Debug.Log($"[BugEnemyController] ¡WinRar se lanzó con éxito sobre el jugador e infligió {damage} de daño letal (1 golpe = muerte)!");

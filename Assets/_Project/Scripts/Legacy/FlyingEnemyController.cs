@@ -1,4 +1,6 @@
+using NostalgIA.Core.Events;
 using NostalgIA.Gameplay.Player;
+using NostalgIA.Presentation.Audio;
 using System.Collections;
 using UnityEngine;
 
@@ -32,8 +34,14 @@ public class FlyingEnemyController : MonoBehaviour
     [SerializeField] private int projectileDamage = 1;
     [SerializeField] private float projectileSpeed = 12f;
 
+    [Header("Audio")]
+    [Tooltip("Sonido cuando el email dispara (Universfield - Arcade Shot).")]
+    [SerializeField] private AudioClip shootClip;
+    [SerializeField, Range(0f, 1f)] private float shootVolume = 0.85f;
+
     private PlayerHealth player;
     private EnemyHealth health;
+    private AudioSource audioSource;
     private float nextFireTime;
     private bool isCharging;
     private Vector3 originalScale;
@@ -44,7 +52,23 @@ public class FlyingEnemyController : MonoBehaviour
         health = GetComponent<EnemyHealth>();
         originalScale = transform.localScale;
         spawnPosition = transform.position;
+        SetupAudioSource();
         FindPlayer();
+    }
+
+    private void SetupAudioSource()
+    {
+        if (!TryGetComponent(out audioSource))
+        {
+            audioSource = gameObject.AddComponent<AudioSource>();
+        }
+        audioSource.playOnAwake = false;
+        audioSource.loop = false;
+        audioSource.spatialBlend = 0.25f;
+        audioSource.minDistance = 4f;
+        audioSource.maxDistance = 35f;
+        audioSource.rolloffMode = AudioRolloffMode.Linear;
+        audioSource.outputAudioMixerGroup = GameAudio.Sfx;
     }
 
     private void Start()
@@ -205,6 +229,14 @@ public class FlyingEnemyController : MonoBehaviour
             EnemyProjectile proj = sphere.AddComponent<EnemyProjectile>();
             proj.Initialize(direction, projectileDamage, projectileSpeed);
         }
+
+        bool playedLocally = false;
+        if (shootClip != null && audioSource != null)
+        {
+            audioSource.PlayOneShot(shootClip, shootVolume);
+            playedLocally = true;
+        }
+        EventBus<EnemyAttacked>.Raise(new EnemyAttacked(EnemyKind.SpamMail, origin, playedLocally));
 
         Debug.Log($"[FlyingEnemyController] ¡Calavera flotante disparó un proyectil hacia el jugador!");
     }

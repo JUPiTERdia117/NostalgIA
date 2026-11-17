@@ -45,7 +45,17 @@ namespace NostalgIA.Presentation.Audio
         /// <summary>Pequeño margen para programar los clips en el reloj de audio.</summary>
         private const double ScheduleDelay = 0.02;
 
+        /// <summary>Punto de inicio al usar un solo clip (salta el silencio inicial del archivo).</summary>
+        private const float SingleClipStartOffset = 0.45f;
+        /// <summary>Inicio de la sección estable del bucle cuando se usa un solo clip.</summary>
+        private const float SingleClipLoopStart = 1.0f;
+        /// <summary>Fin de la sección estable del bucle cuando se usa un solo clip.</summary>
+        private const float SingleClipLoopEnd = 3.15f;
+
         private AudioSource start, loop, end;
+        private bool suctionActive;
+
+        private bool HasThreePartClips => startClip != null && loopClip != null && endClip != null;
 
         /// <summary>Crea las tres fuentes (2D: el sonido es del jugador).</summary>
         private void Awake()
@@ -72,6 +82,7 @@ namespace NostalgIA.Presentation.Audio
         private void OnDisable()
         {
             EventBus<SuctionStateChanged>.Unsubscribe(OnSuctionStateChanged);
+            suctionActive = false;
             start.Stop();
             loop.Stop();
             end.Stop();
@@ -79,14 +90,24 @@ namespace NostalgIA.Presentation.Audio
 
         private void OnSuctionStateChanged(in SuctionStateChanged evt)
         {
-            if (startClip == null || loopClip == null || endClip == null) return;
+            if (loopClip == null) return;
+            suctionActive = evt.Active;
             if (evt.Active) TurnOn();
             else TurnOff();
         }
 
-        /// <summary>Arranque y, justo al acabar, el bucle.</summary>
+        /// <summary>Arranque y, justo al acabar, el bucle (o reproducción directa si es un único clip).</summary>
         private void TurnOn()
         {
+            if (!HasThreePartClips)
+            {
+                loop.Stop();
+                loop.volume = volume;
+                loop.time = loopClip.length > SingleClipLoopEnd ? SingleClipStartOffset : 0f;
+                loop.Play();
+                return;
+            }
+
             // Si se estaba apagando, retomo el arranque desde el punto con volumen parecido.
             float offset = IsSounding(end) ? MirrorTime(end, startClip) : 0f;
 
@@ -99,6 +120,12 @@ namespace NostalgIA.Presentation.Audio
         /// <summary>Apagado; los demás clips se desvanecen.</summary>
         private void TurnOff()
         {
+            if (!HasThreePartClips)
+            {
+                FadeOut(loop);
+                return;
+            }
+
             // Si aún iba en el arranque, el apagado empieza desde el punto con volumen parecido.
             float offset = IsSounding(start) && start.time > 0f ? MirrorTime(start, endClip) : 0f;
 
@@ -134,9 +161,15 @@ namespace NostalgIA.Presentation.Audio
             if (source.volume >= volume) source.volume = volume * 0.999f;
         }
 
-        /// <summary>Baja el volumen de las fuentes que se desvanecen hasta detenerlas.</summary>
+        /// <summary>Baja el volumen de las fuentes que se desvanecen hasta detenerlas y mantiene el bucle estable.</summary>
         private void Update()
         {
+            if (suctionActive && !HasThreePartClips && loop.isPlaying && loopClip != null &&
+                loopClip.length > SingleClipLoopEnd && loop.time >= SingleClipLoopEnd)
+            {
+                loop.time = SingleClipLoopStart;
+            }
+
             Fade(start);
             Fade(loop);
             Fade(end);

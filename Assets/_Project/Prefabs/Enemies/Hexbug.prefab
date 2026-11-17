@@ -348,6 +348,8 @@ MonoBehaviour:
   detachPushback: 7
   contactDamage: 1
   meleeCooldown: 1
+  attackClip: {fileID: 8300000, guid: 07f7abd601f3f4fc59eebffd6e6d6648, type: 3}
+  attackVolume: 0.85
 --- !u!1 &765193363831824738
 GameObject:
   m_ObjectHideFlags: 0
