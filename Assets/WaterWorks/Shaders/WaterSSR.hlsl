@@ -6,18 +6,28 @@
 
 float SceneDepth(float2 UV)
 {
-	return LinearEyeDepth(SHADERGRAPH_SAMPLE_SCENE_DEPTH(UV), _ZBufferParams);
+#if defined(REQUIRE_DEPTH_TEXTURE)
+	float2 uv = ClampAndScaleUVForBilinear(UnityStereoTransformScreenSpaceTex(UV), _CameraDepthTexture_TexelSize.xy);
+	return LinearEyeDepth(SAMPLE_TEXTURE2D_X_LOD(_CameraDepthTexture, sampler_PointClamp, uv, 0).r, _ZBufferParams);
+#else
+	return LinearEyeDepth(0, _ZBufferParams);
+#endif
 }
 
 float3 SceneColor(float2 UV)
 {
-	return SHADERGRAPH_SAMPLE_SCENE_COLOR(UV);
+#if defined(REQUIRE_OPAQUE_TEXTURE)
+	float2 uv = ClampAndScaleUVForBilinear(UnityStereoTransformScreenSpaceTex(UV), _CameraOpaqueTexture_TexelSize.xy);
+	return SAMPLE_TEXTURE2D_X_LOD(_CameraOpaqueTexture, sampler_CameraOpaqueTexture, uv, 0).rgb;
+#else
+	return 0;
+#endif
 }
 
 float2 WorldToScreenPoint(float3 pos)
 {
 	pos = normalize(pos - _WorldSpaceCameraPos) * (_ProjectionParams.y + (_ProjectionParams.z - _ProjectionParams.y)) + _WorldSpaceCameraPos;
-	float3 toCam = mul(unity_WorldToCamera, pos);
+	float3 toCam = mul((float3x3)unity_WorldToCamera, pos);
 	float camPosZ = toCam.z;
 	float height = 2 * camPosZ / unity_CameraProjection._m11;
 	float width = _ScreenParams.x / _ScreenParams.y * height;
@@ -40,8 +50,8 @@ float3 DecodeNormal(float3 enc)
 
 float3 ReconstructPosFromDepth(float depth, float2 screenPos)
 {
-	float3 viewVector = mul(unity_CameraInvProjection, float4(screenPos.xy * 2 - 1, 0, -1));
-	float3 viewDirection = mul(unity_CameraToWorld, float4(viewVector, 0));
+	float3 viewVector = mul(unity_CameraInvProjection, float4(screenPos.xy * 2 - 1, 0, -1)).xyz;
+	float3 viewDirection = mul(unity_CameraToWorld, float4(viewVector, 0)).xyz;
 	float3 cameraDirection = (-1 * mul((float3x3)UNITY_MATRIX_M, transpose(mul(UNITY_MATRIX_I_M, UNITY_MATRIX_I_V))[2].xyz));
 
 	float ViewDotCam = dot(viewDirection, cameraDirection);
@@ -53,8 +63,8 @@ float3 ReconstructPosFromDepth(float depth, float2 screenPos)
 
 float ReconstructDepthFromPos(float3 pos, float2 screenPos)
 {
-	float3 viewVector = mul(unity_CameraInvProjection, float4(screenPos.xy * 2 - 1, 0, -1));
-	float3 viewDirection = mul(unity_CameraToWorld, float4(viewVector, 0));
+	float3 viewVector = mul(unity_CameraInvProjection, float4(screenPos.xy * 2 - 1, 0, -1)).xyz;
+	float3 viewDirection = mul(unity_CameraToWorld, float4(viewVector, 0)).xyz;
 	float3 cameraDirection = (-1 * mul((float3x3)UNITY_MATRIX_M, transpose(mul(UNITY_MATRIX_I_M, UNITY_MATRIX_I_V))[2].xyz));
 
 	float ViewDotCam = dot(viewDirection, cameraDirection);
@@ -68,9 +78,10 @@ float ReconstructDepthFromPos(float3 pos, float2 screenPos)
 
 void SSR_float(float3 viewDir, float stepSize, float4 screenPos, float samples, float thickness, float smoothness, float3 _normal, float3 _position, bool reconstructDepth, out float3 col)
 {
+	col = 0;
 	viewDir.x = -viewDir.x;
 
-	float3 reflectionPos = ReconstructPosFromDepth(SceneDepth(screenPos.xy), screenPos);
+	float3 reflectionPos = ReconstructPosFromDepth(SceneDepth(screenPos.xy), screenPos.xy);
 	float3 normal = SampleSceneNormals(screenPos.xy);
 	normal = float3(0, 1, 0);
 	normal = DecodeNormal(float3(0, 1, 0));
@@ -84,7 +95,7 @@ void SSR_float(float3 viewDir, float stepSize, float4 screenPos, float samples, 
 
 	float depth = SceneDepth(refScreenPos);
 
-	float3 depthPos = ReconstructPosFromDepth(depth, screenPos);
+	float3 depthPos = ReconstructPosFromDepth(depth, screenPos.xy);
 
 	if (reconstructDepth)
 	{
@@ -105,7 +116,7 @@ void SSR_float(float3 viewDir, float stepSize, float4 screenPos, float samples, 
 		dist = distance(_WorldSpaceCameraPos, reflectionPos);
 
 		depth = SceneDepth(refScreenPos);
-		depthPos = ReconstructPosFromDepth(depth, screenPos);
+		depthPos = ReconstructPosFromDepth(depth, screenPos.xy);
 		depthDist = distance(_WorldSpaceCameraPos, depthPos);
 
 		col = min(SceneColor(refScreenPos), 5);
@@ -148,7 +159,7 @@ void SSR_float(float3 viewDir, float stepSize, float4 screenPos, float samples, 
 
 	if (!foundSSR && 1 != 1)
 	{
-		reflectionPos = ReconstructPosFromDepth(SceneDepth(screenPos.xy), screenPos);
+		reflectionPos = ReconstructPosFromDepth(SceneDepth(screenPos.xy), screenPos.xy);
 		reflectionPos += normalize(reflection) * 11;
 		refScreenPos = WorldToScreenPoint(reflectionPos);
 
