@@ -7,8 +7,12 @@
 // -----------------------------------------------------------------------------
 
 using NostalgIA.Core.Events;
+using NostalgIA.Core.Game;
+using NostalgIA.Core.Levels;
 using NostalgIA.Core.Services;
 using NostalgIA.Core.State;
+using NostalgIA.Input;
+using UnityEngine.SceneManagement;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -52,6 +56,10 @@ namespace NostalgIA.Presentation.UI
     public sealed class TutorialHudPresenter : MonoBehaviour
     {
         // ------------------------------------------------------------------ referencias de escena
+        [Header("Copia del HUD")]
+        [Tooltip("Actívalo en la copia del HUD de otros niveles (Verano): se elimina si ya existe el HUD que viene del Tutorial.")]
+        [SerializeField] private bool onlyIfNoOtherHud;
+
         [Header("Estrellas")]
         [SerializeField, Min(1)] private int maxStars = 3;
         [SerializeField] private TextMeshProUGUI scoreText;
@@ -154,6 +162,8 @@ namespace NostalgIA.Presentation.UI
         private string[] pendingTitles;
         private string[] doneTitles;
         private string[] healthFormats;
+        private string[] platinumHealthFormats;
+        private CanvasGroup hudGroup;
         private string[] vacuumFormats;
         private string[] grappleReadyTexts;
         private string[] grappleCooldownFormats;
@@ -203,7 +213,7 @@ namespace NostalgIA.Presentation.UI
         private static readonly Color AccentPendingColor = new Color(1f, 0.8f, 0.15f, 1f);
         private static readonly Color AccentDoneColor = new Color(0.22f, 0.9f, 0.35f, 1f);
         private const float HurtPeakAlpha = 0.45f;
-        private const float DeathAlpha = 0.65f;
+        private const float DeathAlpha = 0.2f;
         private const float AccentDoneAlpha = 0.65f;
 
         // ------------------------------------------------------------------ ciclo de vida
@@ -218,19 +228,30 @@ namespace NostalgIA.Presentation.UI
                 doneTitles[i] = $"<color=#38E54D>√ {StepTags[i]}</color>  <color=#A8D5BA>{StepTitles[i]}</color>";
             }
 
+            // El HUD de Verano solo se usa si se entra a Verano desde el menú: si ya llegó el del
+            // Tutorial (cruzando la puerta), este sobra y se elimina antes de activarse.
+            if (onlyIfNoOtherHud && FindObjectsByType<TutorialHudPresenter>(FindObjectsSortMode.None).Length > 1)
+            {
+                GameObject canvasRoot = healthText != null ? healthText.canvas.rootCanvas.gameObject : null;
+                gameObject.SetActive(false);
+                if (canvasRoot != null) Destroy(canvasRoot);
+                Destroy(gameObject);
+                return;
+            }
+
+            // «Mostrar HUD»: se oculta todo el lienzo con un CanvasGroup (sin desactivarlo).
+            Canvas hudCanvas = healthText != null ? healthText.canvas.rootCanvas : null;
+            if (hudCanvas != null)
+            {
+                hudGroup = hudCanvas.GetComponent<CanvasGroup>();
+                if (hudGroup == null) hudGroup = hudCanvas.gameObject.AddComponent<CanvasGroup>();
+                hudGroup.blocksRaycasts = false;
+                OnHudSettingChanged(HudSettings.Show);
+            }
+
             BuildHealthFormats(heartsMax);
             starToastFormat = "♦ Estrella {0}/" + maxStars;
-
-            int schemes = SwitchHints.Length;
-            vacuumFormats = new string[schemes];
-            grappleReadyTexts = new string[schemes];
-            grappleCooldownFormats = new string[schemes];
-            for (int s = 0; s < schemes; s++)
-            {
-                vacuumFormats[s] = "<color=#00F5D4>● ASPIRADORA</color> <color=#A8DADC>{0}/{1}</color>" + SwitchHints[s];
-                grappleReadyTexts[s] = "<color=#00BBF9>● GANCHO</color> <color=#A8DADC>Listo</color>" + SwitchHints[s];
-                grappleCooldownFormats[s] = "<color=#FFB703>● GANCHO</color> <color=#99AABB>{0:1}s</color>" + SwitchHints[s];
-            }
+            BuildToolFormats();
 
             if (checkpointNotificationText != null)
             {
@@ -275,6 +296,9 @@ namespace NostalgIA.Presentation.UI
             EventBus<InputSchemeChanged>.Subscribe(OnSchemeChanged);
             EventBus<PromptTriggered>.Subscribe(OnPromptTriggered);
             EventBus<TutorialStepTriggered>.Subscribe(OnTutorialStepTriggered);
+            EventBus<UpgradeApplied>.Subscribe(OnUpgradeApplied);
+            HudSettings.Changed += OnHudSettingChanged;
+            if (ServiceLocator.TryGet(out InputReader reader)) reader.BindingsChanged += OnBindingsChanged;
         }
 
         /// <summary>Cancela suscripciones.</summary>
@@ -297,6 +321,9 @@ namespace NostalgIA.Presentation.UI
             EventBus<InputSchemeChanged>.Unsubscribe(OnSchemeChanged);
             EventBus<PromptTriggered>.Unsubscribe(OnPromptTriggered);
             EventBus<TutorialStepTriggered>.Unsubscribe(OnTutorialStepTriggered);
+            EventBus<UpgradeApplied>.Unsubscribe(OnUpgradeApplied);
+            HudSettings.Changed -= OnHudSettingChanged;
+            if (ServiceLocator.TryGet(out InputReader reader)) reader.BindingsChanged -= OnBindingsChanged;
         }
 
         /// <summary>Estado visual inicial.</summary>
@@ -377,8 +404,8 @@ namespace NostalgIA.Presentation.UI
             hearts = 0;
             RefreshHealth();
             hurtTimer = 0f;
+            // Tinte rojo leve: la pantalla de muerte (FlowScreensPresenter) deja ver el robot desarmado.
             SetHurtOverlay(DeathColor, DeathAlpha);
-            if (deathOverlay != null) deathOverlay.SetActive(true);
         }
 
         private void OnPlayerRespawned(in PlayerRespawned evt)
@@ -406,7 +433,10 @@ namespace NostalgIA.Presentation.UI
             stars = Mathf.Min(stars + 1, maxStars);
             RefreshHealth();
             RefreshScore();
-            ShowToastFormat(starToastFormat, stars);
+            Scene level = SceneManager.GetActiveScene();
+            string toast = $"♦ Estrella {StarTracker.Collected(level)}/{StarTracker.Total(level)}";
+            if (StarTracker.AllCollected(level)) toast += "  ·  ¡Nivel platinado!";
+            ShowToast(toast);
             if (stars >= 1) CompleteStep(4);
         }
 
@@ -592,31 +622,88 @@ namespace NostalgIA.Presentation.UI
         {
             heartsMax = Mathf.Max(1, max);
             healthFormats = new string[heartsMax + 1];
+            platinumHealthFormats = new string[heartsMax + 1];
             for (int hp = 0; hp <= heartsMax; hp++)
             {
                 string full = new string('♥', hp);
                 string empty = new string('♥', heartsMax - hp);
                 healthFormats[hp] = $"<color=#FF4D6D>{full}<color=#44333A>{empty}</color></color> <size=84%>{hp}/{heartsMax}</size>" +
                                     "     <color=#FFD166>♦</color> <size=88%>{0}/{1}</size>";
+                platinumHealthFormats[hp] = healthFormats[hp] + "  <color=#FFD166><size=80%>PLATINO</size></color>";
             }
         }
 
+        /// <summary>
+        /// Vida y estrellas. Las estrellas salen de <see cref="StarTracker"/> para el nivel activo
+        /// (cuántas tiene y cuántas se recogieron); con todas, se marca «PLATINO».
+        /// </summary>
         private void RefreshHealth()
         {
             if (healthText == null) return;
             int hp = Mathf.Clamp(hearts, 0, heartsMax);
-            healthText.SetText(healthFormats[hp], stars, maxStars);
+            Scene level = SceneManager.GetActiveScene();
+            string[] formats = StarTracker.AllCollected(level) ? platinumHealthFormats : healthFormats;
+            healthText.SetText(formats[hp], StarTracker.Collected(level), StarTracker.Total(level));
         }
 
         private void RefreshScore()
         {
-            if (scoreText != null && scoreText.gameObject.activeInHierarchy)
-                scoreText.SetText("♦ <color=#FFD166>{0}/{1}</color>", stars, maxStars);
+            if (scoreText == null || !scoreText.gameObject.activeInHierarchy) return;
+            Scene level = SceneManager.GetActiveScene();
+            scoreText.SetText("♦ <color=#FFD166>{0}/{1}</color>", StarTracker.Collected(level), StarTracker.Total(level));
+        }
+
+        /// <summary>Textos de la herramienta por esquema, con la tecla actual de cambiar herramienta.</summary>
+        private void BuildToolFormats()
+        {
+            int schemes = SwitchHints.Length;
+            vacuumFormats = new string[schemes];
+            grappleReadyTexts = new string[schemes];
+            grappleCooldownFormats = new string[schemes];
+            for (int s = 0; s < schemes; s++)
+            {
+                string hint = s == (int)InputScheme.KeyboardMouse ? WithKeyLabels(SwitchHints[s]) : SwitchHints[s];
+                vacuumFormats[s] = "<color=#00F5D4>● ASPIRADORA</color> <color=#A8DADC>{0}/{1}</color>" + hint;
+                grappleReadyTexts[s] = "<color=#00BBF9>● GANCHO</color> <color=#A8DADC>Listo</color>" + hint;
+                grappleCooldownFormats[s] = "<color=#FFB703>● GANCHO</color> <color=#99AABB>{0:1}s</color>" + hint;
+            }
+        }
+
+        /// <summary>Cambia [C] y [F] de los textos por las teclas que eligió el jugador.</summary>
+        private static string WithKeyLabels(string text)
+        {
+            if (!ServiceLocator.TryGet(out InputReader reader)) return text;
+            return text.Replace("<b>[C]</b>", "<b>[" + reader.GetKeyLabel(InputActionNames.Crouch) + "]</b>")
+                       .Replace("<b>[F]</b>", "<b>[" + reader.GetKeyLabel(InputActionNames.SwitchTool) + "]</b>");
+        }
+
+        /// <summary>El jugador cambió una tecla: se rehacen los textos que la muestran.</summary>
+        private void OnBindingsChanged()
+        {
+            BuildToolFormats();
+            RefreshTool();
+            RefreshGuide(false);
+        }
+
+        private void OnHudSettingChanged(bool show)
+        {
+            if (hudGroup != null) hudGroup.alpha = show ? 1f : 0f;
+        }
+
+        /// <summary>Al empezar un nivel con mejoras, la capacidad de la aspiradora cambia.</summary>
+        private void OnUpgradeApplied(in UpgradeApplied evt)
+        {
+            if (!ServiceLocator.TryGet(out IVacuumState vacuum)) return;
+            stored = vacuum.StoredCount;
+            capacity = vacuum.Capacity;
+            RefreshTool();
         }
 
         private void RefreshTool()
         {
             if (toolText == null) return;
+            // La capacidad puede cambiar por la mejora del nivel: se lee del estado real.
+            if (ServiceLocator.TryGet(out IVacuumState vacuum)) capacity = vacuum.Capacity;
             int s = (int)scheme;
             if (tool == ToolId.Vacuum) toolText.SetText(vacuumFormats[s], stored, capacity);
             else if (onCooldown) RefreshCooldownText();
@@ -722,6 +809,7 @@ namespace NostalgIA.Presentation.UI
             if (controlsText != null)
             {
                 string controls = done ? StepDoneControls : (customStepControls[currentStep] ?? StepControls[currentStep, (int)scheme]);
+                if (scheme == InputScheme.KeyboardMouse) controls = WithKeyLabels(controls);
                 controlsText.SetText(controls);
             }
             if (guideAccent != null)

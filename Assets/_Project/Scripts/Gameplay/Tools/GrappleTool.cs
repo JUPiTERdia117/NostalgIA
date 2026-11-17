@@ -93,6 +93,9 @@ namespace NostalgIA.Gameplay.Tools
         /// <inheritdoc />
         public float MaxRange => currentRange;
 
+        /// <summary>Alcance sin mejoras (el del asset de parámetros).</summary>
+        public float BaseRange => stats != null ? stats.maxRange : 30f;
+
         /// <summary>Parámetros activos.</summary>
         public GrappleStats Stats => stats;
 
@@ -162,7 +165,8 @@ namespace NostalgIA.Gameplay.Tools
             }
             if (nozzle == null) nozzle = transform;
             if (motor == null) motor = GetComponentInParent<PlayerMotor>();
-            currentRange = stats.maxRange;
+            // Si la mejora del nivel llegó antes de Awake (jugador desactivado al cargar), se respeta.
+            if (currentRange <= 0f) currentRange = stats.maxRange;
         }
 
         /// <summary>Se registra como estado del gancho.</summary>

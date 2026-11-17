@@ -57,6 +57,7 @@ namespace NostalgIA.Input.TouchControls
 
             EventBus<InputSchemeChanged>.Subscribe(OnSchemeChanged);
             EventBus<GameStateChanged>.Subscribe(OnStateChanged);
+            HudSettings.Changed += OnHudSettingChanged;
             Refresh();
         }
 
@@ -65,7 +66,10 @@ namespace NostalgIA.Input.TouchControls
         {
             EventBus<InputSchemeChanged>.Unsubscribe(OnSchemeChanged);
             EventBus<GameStateChanged>.Unsubscribe(OnStateChanged);
+            HudSettings.Changed -= OnHudSettingChanged;
         }
+
+        private void OnHudSettingChanged(bool show) => Refresh();
 
         private void OnSchemeChanged(in InputSchemeChanged evt)
         {
@@ -84,7 +88,9 @@ namespace NostalgIA.Input.TouchControls
         {
             bool visible = (scheme == InputScheme.Touch || (forceVisibleInEditor && Application.isEditor))
                            && state == GameState.Playing;
-            group.alpha = visible ? (settings != null ? settings.Opacity : 0.45f) : 0f;
+            // Con «Mostrar HUD» apagado los controles siguen funcionando, solo que no se dibujan.
+            bool drawn = visible && HudSettings.Show;
+            group.alpha = drawn ? (settings != null ? settings.Opacity : 0.45f) : 0f;
             group.interactable = visible;
             group.blocksRaycasts = visible;
         }

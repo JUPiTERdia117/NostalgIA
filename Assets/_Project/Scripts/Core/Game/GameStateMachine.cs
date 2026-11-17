@@ -21,7 +21,8 @@ namespace NostalgIA.Core.Game
     /// </para>
     /// <para>
     /// | Estado | <c>Time.timeScale</c> | Cursor |
-    /// | Playing / Respawning | 1 | bloqueado (PC) |
+    /// | Playing | 1 | bloqueado (PC) |
+    /// | Respawning (pantalla de muerte) | 1 | libre |
     /// | Paused | 0 | libre |
     /// | Loading | 1 | oculto |
     /// | Menús y resultados | 1 | libre |
@@ -65,7 +66,8 @@ namespace NostalgIA.Core.Game
         {
             Time.timeScale = State == GameState.Paused ? 0f : 1f;
 
-            bool lockCursor = IsInGameplay && !Application.isMobilePlatform;
+            // Al morir se muestra el botón «Reaparecer», así que en Respawning el cursor queda libre.
+            bool lockCursor = State == GameState.Playing && !Application.isMobilePlatform;
             Cursor.lockState = lockCursor ? CursorLockMode.Locked : CursorLockMode.None;
             Cursor.visible = !lockCursor && State != GameState.Loading;
         }

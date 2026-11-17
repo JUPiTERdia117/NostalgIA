@@ -211,6 +211,7 @@ namespace NostalgIA.Gameplay.Player
                 input.JumpPressed += OnJumpPressed;
                 input.CrouchPressed += OnCrouchPressed;
             }
+            EventBus<PlayerDied>.Subscribe(OnPlayerDied);
         }
 
         /// <summary>Cancela suscripciones y suelta el gancho.</summary>
@@ -221,6 +222,7 @@ namespace NostalgIA.Gameplay.Player
                 input.JumpPressed -= OnJumpPressed;
                 input.CrouchPressed -= OnCrouchPressed;
             }
+            EventBus<PlayerDied>.Unsubscribe(OnPlayerDied);
             CancelGrapple();
             ServiceLocator.Unregister<IPlayerMotionState>(this);
             ServiceLocator.Unregister(this);
@@ -997,6 +999,19 @@ namespace NostalgIA.Gameplay.Player
             ChangeState(LocomotionState.Airborne);
         }
 
+        /// <summary>
+        /// Al morir apago las físicas del jugador: suelto el gancho, anulo la velocidad y desactivo
+        /// el <see cref="CharacterController"/>. Sin él, <c>Update</c> no hace nada (ni gravedad, ni
+        /// movimiento, ni empujes de plataformas) y el cuerpo deja de chocar con el mundo hasta que
+        /// <see cref="ResetForRespawn"/> lo vuelve a encender.
+        /// </summary>
+        private void OnPlayerDied(in PlayerDied evt)
+        {
+            CancelGrapple();
+            velocity = Vector3.zero;
+            controller.enabled = false;
+        }
+
         /// <summary>Sustituye la velocidad (por ejemplo, rotada por un portal).</summary>
         public void SetVelocity(Vector3 newVelocity) => velocity = newVelocity;
 
@@ -1009,6 +1024,7 @@ namespace NostalgIA.Gameplay.Player
         /// </summary>
         public void ResetForRespawn(Vector3 position, Quaternion rotation)
         {
+            controller.enabled = true;   // Lo apagó OnPlayerDied; Teleport respeta el estado que encuentre.
             Teleport(position, rotation);
             tether = null;
             velocity = Vector3.zero;

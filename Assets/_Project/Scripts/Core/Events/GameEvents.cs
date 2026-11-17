@@ -873,4 +873,43 @@ namespace NostalgIA.Core.Events
             CustomControls = customControls ?? string.Empty;
         }
     }
+
+    // ===================================================================== Progreso
+
+    /// <summary>
+    /// Se completó un nivel: la pantalla de resultados lo muestra. Publica <c>LevelProgressService</c>.
+    /// </summary>
+    public readonly struct LevelCompleted : IGameEvent
+    {
+        /// <summary>Nombre del nivel que ve el jugador.</summary>
+        public readonly string Title;
+        /// <summary>Estrellas recogidas en esta partida.</summary>
+        public readonly int Stars;
+        /// <summary>Estrellas que tiene el nivel.</summary>
+        public readonly int TotalStars;
+        /// <summary>Duración de la partida del nivel, en segundos.</summary>
+        public readonly float TimeSeconds;
+        /// <summary><c>true</c> si hay un nivel siguiente (se puede continuar).</summary>
+        public readonly bool HasNextLevel;
+        /// <summary>Texto de la mejora obtenida para el nivel siguiente (vacío si no hay).</summary>
+        public readonly string UpgradeText;
+
+        public LevelCompleted(string title, int stars, int totalStars, float timeSeconds, bool hasNextLevel, string upgradeText)
+        {
+            Title = title;
+            Stars = stars;
+            TotalStars = totalStars;
+            TimeSeconds = timeSeconds;
+            HasNextLevel = hasNextLevel;
+            UpgradeText = upgradeText ?? string.Empty;
+        }
+
+        /// <summary>Indica si se recogieron todas las estrellas.</summary>
+        public bool IsPlatinum => TotalStars > 0 && Stars >= TotalStars;
+    }
+
+    /// <summary>
+    /// El jugador pulsó «Reaparecer» en la pantalla de muerte. Lo atiende <c>RespawnService</c>.
+    /// </summary>
+    public readonly struct RespawnRequested : IGameEvent { }
 }

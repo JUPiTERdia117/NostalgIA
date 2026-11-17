@@ -69,6 +69,12 @@ namespace NostalgIA.Gameplay.Tools
         private int activePullCount;
 
         private VacuumStorage storage;
+
+        /// <summary>
+        /// Capacidad pedida antes de <c>Awake</c>: en los niveles que se abren solos el jugador espera
+        /// desactivado y la mejora del nivel llega antes de que la aspiradora exista.
+        /// </summary>
+        private int pendingCapacity;
         private bool equipped;
         private bool suctioning;
         private Vector3 eyePosition;
@@ -114,7 +120,7 @@ namespace NostalgIA.Gameplay.Tools
                 stats = ScriptableObject.CreateInstance<VacuumStats>();
             }
             if (nozzle == null) nozzle = transform;
-            storage = new VacuumStorage(stats.baseCapacity);
+            storage = new VacuumStorage(pendingCapacity > 0 ? pendingCapacity : stats.baseCapacity);
             activePulls = new Absorbable[Mathf.Max(1, stats.maxSimultaneousPulls)];
         }
 
@@ -308,7 +314,11 @@ namespace NostalgIA.Gameplay.Tools
         }
 
         /// <summary>Aplica una mejora de capacidad.</summary>
-        public void SetCapacity(int capacity) => storage.SetCapacity(capacity);
+        public void SetCapacity(int capacity)
+        {
+            if (storage == null) pendingCapacity = capacity; // todavía no pasa Awake
+            else storage.SetCapacity(capacity);
+        }
 
         /// <summary>
         /// Lleva los objetos almacenados a la escena del nivel nuevo al cruzar una puerta de nivel;

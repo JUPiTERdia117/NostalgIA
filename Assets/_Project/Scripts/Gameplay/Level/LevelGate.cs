@@ -224,9 +224,17 @@ namespace NostalgIA.Gameplay.Level
         }
 
         private bool IsPendingGoalOnly =>
-            string.IsNullOrEmpty(destinationSceneName) &&
-            string.IsNullOrEmpty(destinationScenePath) &&
-            pendingNextLevelReturnPoint != null;
+            finalGoal ||
+            (string.IsNullOrEmpty(destinationSceneName) &&
+             string.IsNullOrEmpty(destinationScenePath) &&
+             pendingNextLevelReturnPoint != null);
+
+        /// <summary>
+        /// <c>true</c> si la puerta lleva a un nivel que no existe en esta versión (no está en
+        /// <see cref="LevelCatalog"/>): entonces es la meta final del juego. No se precarga nada y,
+        /// al cruzarla, se publica <see cref="StationCompleted"/> para mostrar los resultados.
+        /// </summary>
+        private bool finalGoal;
 
         // ------------------------------------------------------------------ ciclo de vida
         /// <summary>Cachea referencias (búsquedas solo en la inicialización) y programa la precarga.</summary>
@@ -250,6 +258,10 @@ namespace NostalgIA.Gameplay.Level
             for (int i = 0, j = 0; i < all.Length; i++) if (all[i].gameObject.scene == source) persistent[j++] = all[i];
 
             timer = preloadDelay;
+
+            // Solo existen Tutorial y Verano: una puerta hacia otro nivel es la meta final.
+            finalGoal = !string.IsNullOrEmpty(destinationSceneName) && !LevelCatalog.IsPlayable(destinationSceneName);
+            if (finalGoal) phase = Phase.Done;
         }
 
         /// <summary>Restaura la prioridad de carga y cancela la suscripción.</summary>
@@ -373,7 +385,7 @@ namespace NostalgIA.Gameplay.Level
                     motor.SetVelocity(Vector3.zero);
                 }
                 EventBus<StationCompleted>.Raise(new StationCompleted(pendingStationIndex, 1, Time.timeSinceLevelLoad));
-                if (!string.IsNullOrEmpty(pendingCompletionMessage))
+                if (!finalGoal && !string.IsNullOrEmpty(pendingCompletionMessage))
                 {
                     EventBus<HudMessageRequested>.Raise(new HudMessageRequested(pendingCompletionMessage));
                 }
