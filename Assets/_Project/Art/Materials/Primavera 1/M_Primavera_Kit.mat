@@ -25,24 +25,14 @@ Material:
     m_TexEnvs: []
     m_Ints: []
     m_Floats:
-    - _CodeDensity: 0.35
-    - _CodeEmission: 0.5
-    - _DamagePulseTint: 0.35
-    - _GrainStrength: 0.04
-    - _GridScale: 1
-    - _LineEmission: 0.6
-    - _LineWidth: 0.03
-    - _PixelsPerMeter: 32
+    - _CodeDensity: 0.267
+    - _CodeEmission: 1.39
+    - _LineEmission: 1.63
+    - _LineWidth: 0.0223
     - _ScanEmission: 0.25
     - _ScanSpeed: 1.5
-    - _Smoothness: 0.3
-    - _WallHeight: 6
     m_Colors:
-    - _CeilingColor: {r: 0.024, g: 0.06299998, b: 0.16899997, a: 1}
-    - _FloorColorA: {r: 0.039, g: 0.16499996, b: 0.62, a: 1}
-    - _FloorColorB: {r: 0.024, g: 0.06299998, b: 0.16899997, a: 1}
-    - _LineColor: {r: 0.227, g: 0.42, b: 1, a: 1}
-    - _WallColorBottom: {r: 0.54899997, g: 0.561, b: 0.58799994, a: 1}
-    - _WallColorTop: {r: 0.039, g: 0.16499996, b: 0.62, a: 1}
+    - _LineColor: {r: 0.6274533, g: 0.6420177, b: 2.6082377, a: 1}
+    - _WallColorTop: {r: 0.29369885, g: 0.3852947, b: 0.8301887, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

@@ -6,6 +6,12 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
+    path: Assets/_Project/Scenes/Menu.unity
+    guid: fe6e8cbfec3d4454aaaabd09fd8f0a7e
+  - enabled: 0
+    path: Assets/_Project/Scenes/Stations/50_Estacion_Final.unity
+    guid: 05ee5f6bf7bb24684a61d3dfcc6cecf3
+  - enabled: 1
     path: Assets/_Project/Scenes/00_Boot.unity
     guid: 37638b69c6ab4ee3a35d5846f3cc444f
   - enabled: 1
@@ -17,15 +23,12 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/_Project/Scenes/Stations/20_Verano_Frutiger.unity
     guid: 94cd38f1c184648efb7445db0f307729
-  - enabled: 1
+  - enabled: 0
     path: Assets/_Project/Scenes/Stations/dreamcore.unity
     guid: 7d3c01e84a294b4ea91230d7c2a51f30
-  - enabled: 1
+  - enabled: 0
     path: Assets/_Project/Scenes/Stations/40_Invierno_IA.unity
     guid: 6702c69c3717745f2807053feb00b53b
-  - enabled: 1
-    path: Assets/_Project/Scenes/Stations/50_Estacion_Final.unity
-    guid: 05ee5f6bf7bb24684a61d3dfcc6cecf3
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   m_UseUCBPForAssetBundles: 0

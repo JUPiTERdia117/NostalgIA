@@ -10,6 +10,7 @@ using NostalgIA.Core.Game;
 using NostalgIA.Core.Pooling;
 using NostalgIA.Core.Services;
 using NostalgIA.Gameplay.Level;
+using NostalgIA.Gameplay.Player;
 using NostalgIA.Input;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -35,9 +36,9 @@ namespace NostalgIA.Gameplay.Bootstrap
     /// globales) se registran por su cuenta en su <c>Awake</c>, sin que este ensamblado los conozca.
     /// </para>
     /// <para>
-    /// <b>Estados.</b> Mientras no existan el menú principal y la selección de estación,
-    /// cargar <c>00_Boot</c> lleva al estado <see cref="GameState.Boot"/> y cualquier otra escena
-    /// al estado <see cref="GameState.Playing"/>. La pausa se alterna con la acción <c>Pause</c>.
+    /// <b>Estados.</b> Cargar <c>00_Boot</c> lleva al estado <see cref="GameState.Boot"/>, una escena con jugador al estado
+    /// <see cref="GameState.Playing"/> y una escena sin jugador (un menú) al estado
+    /// <see cref="GameState.MainMenu"/>. La pausa se alterna con la acción <c>Pause</c>.
     /// </para>
     /// </remarks>
     [DefaultExecutionOrder(-1000)]
@@ -136,11 +137,25 @@ namespace NostalgIA.Gameplay.Bootstrap
             Instance = null;
         }
 
-        /// <summary>Asigna el estado según la escena cargada (solo cargas únicas, no aditivas).</summary>
+        /// <summary>
+        /// Asigna el estado según la escena cargada (solo cargas únicas, no aditivas):
+        /// <c>00_Boot</c> → Boot; una escena con jugador (<see cref="PlayerMotor"/>) → Playing;
+        /// cualquier otra, como un menú, → MainMenu.
+        /// </summary>
+        /// <remarks>
+        /// Antes toda escena que no fuera Boot pasaba a Playing, y Playing bloquea y esconde el cursor
+        /// en PC, así que en una escena de menú no se podía hacer clic en ningún botón. Ahora reviso si
+        /// la escena tiene jugador (incluido el que espera desactivado en los niveles que se abren
+        /// solos): si no lo tiene, es un menú y el cursor queda libre.
+        /// </remarks>
         private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
         {
             if (mode == LoadSceneMode.Additive) return;
-            stateMachine.ChangeState(scene.name == SceneNames.Boot ? GameState.Boot : GameState.Playing);
+            GameState next;
+            if (scene.name == SceneNames.Boot) next = GameState.Boot;
+            else if (FindAnyObjectByType<PlayerMotor>(FindObjectsInactive.Include) != null) next = GameState.Playing;
+            else next = GameState.MainMenu;
+            stateMachine.ChangeState(next);
         }
 
         /// <summary>Devuelve a sus pools los objetos en uso al descargar una escena.</summary>

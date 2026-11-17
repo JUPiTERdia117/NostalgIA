@@ -1,8 +1,8 @@
 // -----------------------------------------------------------------------------
 // NostalgIA — Presentación (NostalgIA.Presentation)
 // Archivo: PauseOverlayPresenter.cs
-// Propósito: capa de pausa con resumen de controles por esquema y botón para
-// continuar, visible solo en GameState.Paused.
+// Propósito: capa de pausa con resumen de controles por esquema, botón para
+// continuar y ajustes del juego, visible solo en GameState.Paused.
 // -----------------------------------------------------------------------------
 
 using System.Text;
@@ -44,6 +44,8 @@ namespace NostalgIA.Presentation.UI
         [SerializeField] private Button resumeButton;
         [SerializeField] private Button nextLevelButton;
         [SerializeField] private TextMeshProUGUI nextLevelLabel;
+        [Tooltip("Columna de ajustes (los mismos del menú principal).")]
+        [SerializeField] private PauseSettingsPanel settings;
 
         /// <summary>Acciones listadas en la capa, en orden de lectura.</summary>
         private static readonly string[] ListedActions =
@@ -74,7 +76,11 @@ namespace NostalgIA.Presentation.UI
             EventBus<GameStateChanged>.Subscribe(OnGameStateChanged);
             EventBus<InputSchemeChanged>.Subscribe(OnSchemeChanged);
             EventBus<NextLevelStatusReported>.Subscribe(OnNextLevelStatusReported);
-            if (ServiceLocator.TryGet(out InputReader reader)) scheme = reader.CurrentScheme;
+            if (ServiceLocator.TryGet(out InputReader reader))
+            {
+                scheme = reader.CurrentScheme;
+                reader.BindingsChanged += OnBindingsChanged;
+            }
             bool paused = ServiceLocator.TryGet(out GameStateMachine machine) && machine.State == GameState.Paused;
             SetVisible(paused);
         }
@@ -85,6 +91,14 @@ namespace NostalgIA.Presentation.UI
             EventBus<GameStateChanged>.Unsubscribe(OnGameStateChanged);
             EventBus<InputSchemeChanged>.Unsubscribe(OnSchemeChanged);
             EventBus<NextLevelStatusReported>.Unsubscribe(OnNextLevelStatusReported);
+            if (ServiceLocator.TryGet(out InputReader reader)) reader.BindingsChanged -= OnBindingsChanged;
+        }
+
+        /// <summary>El jugador cambió una tecla en los ajustes: se rehace la lista de controles.</summary>
+        private void OnBindingsChanged()
+        {
+            BuildTexts();
+            if (canvas.enabled) RefreshTexts();
         }
 
         private void OnGameStateChanged(in GameStateChanged evt) => SetVisible(evt.Current == GameState.Paused);
@@ -187,8 +201,14 @@ namespace NostalgIA.Presentation.UI
         {
             if (canvas == null) return;
             canvas.enabled = visible;
-            if (!visible) return;
+            if (!visible)
+            {
+                // Al cerrar la pausa se escriben en disco los ajustes que se hayan cambiado.
+                if (settings != null) settings.Save();
+                return;
+            }
             RefreshTexts();
+            if (settings != null) settings.Refresh();
             // Seleccionamos el botón para que el mando pueda pulsarlo sin apuntar.
             if (resumeButton != null && EventSystem.current != null)
                 EventSystem.current.SetSelectedGameObject(resumeButton.gameObject);

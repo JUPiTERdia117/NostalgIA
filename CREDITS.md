@@ -2,7 +2,7 @@
 
 **Proyecto:** *NostalgIA* — Fundamentos Técnicos de VFX  
 **Equipo:** Integrante 1 (Ingeniería de Gameplay, Físicas, IA y Optimización) · Integrante 2 (Technical Artist)  
-**Última actualización:** 26 de octubre de 2026
+**Última actualización:** 11 de noviembre de 2026
 
 Este registro cumple la restricción 2 de los requisitos del curso: todo contenido externo se modifica de forma significativa y se documenta con su atribución. Cada activo nuevo se registra aquí **en el mismo *commit* en que se incorpora al proyecto**.
 
@@ -21,6 +21,7 @@ Este registro cumple la restricción 2 de los requisitos del curso: todo conteni
 | Shader del rayo de herramienta | `Assets/_Project/Resources/ToolRay.shader` | Shader HLSL para URP | Unity / HLSL |
 | Código C# | `Assets/_Project/Scripts/` | Arquitectura, jugabilidad, herramientas de editor y pruebas | Unity / C# |
 | Niveles | `Assets/_Project/Scenes/` | Geometría modular con ProBuilder; sin `Terrain` | Unity / ProBuilder |
+| Sonido de la aspiradora (arranque, bucle y apagado) | `Assets/_Project/Art/SFX/Aspiradora/` | Grabado y editado por el equipo | Logic Pro |
 
 ---
 
@@ -32,16 +33,19 @@ Este registro cumple la restricción 2 de los requisitos del curso: todo conteni
 | TextMesh Pro — recursos esenciales | `Assets/TextMesh Pro/` | Unity Technologies | Unity Companion License | Sin modificar; recurso de la interfaz de usuario |
 | Fuente Liberation Sans (incluida en TextMesh Pro) | `Assets/TextMesh Pro/Fonts/` | Red Hat, Inc. | SIL Open Font License 1.1 | Sin modificar; se sustituirá por las fuentes definitivas de la interfaz |
 | Paquetes de Unity (URP, Input System, ProBuilder, AI Navigation, Timeline, Test Framework) | `Packages/manifest.json` | Unity Technologies | Unity Companion License | Dependencias del motor; no se redistribuyen modificadas |
+| Modern Menu 1 (menú principal) | `Assets/ThirdParty/SlimUI/` | SlimUI — Unity Asset Store | Standard Unity Asset Store EULA | Textos de la interfaz y de los ajustes traducidos al español; menú integrado con la escena `Menu` y la carga de niveles |
 
 ---
 
 ## 3. Audio
 
-Aún no se ha incorporado audio. Cada clip se registrará con esta estructura:
+El sonido de la aspiradora es propio (sección 1). Los efectos de movimiento y el aviso de depósito lleno vienen de los paquetes de Kenney, todos CC0; solo se copiaron al proyecto los clips que se usan. Cada efecto está armado como un Audio Random Container en `Assets/_Project/Audio/Presets/` y se toca desde `Assets/_Project/Scripts/Presentation/Audio/GameSfx.cs`.
 
 | Clip | Ruta | Autor / origen | Licencia | Modificación (edición, mezcla, procesado) |
 | :--- | :--- | :--- | :--- | :--- |
-| — | — | — | — | — |
+| Interface Sounds (1 clip: depósito de la aspiradora lleno) | `Assets/_Project/Art/SFX/Kenney/interface-sounds/` | Kenney (kenney.nl), copia de github.com/Calinou/kenney-interface-sounds | CC0 1.0 | Variación aleatoria de tono y volumen en su preset; sin editar el archivo todavía |
+| Impact Sounds (8 clips: pasos y aterrizaje) | `Assets/_Project/Art/SFX/Kenney/impact-sounds/` | Kenney (kenney.nl), copia de github.com/Boyquotes/kenney-impact-sounds-for-godot | CC0 1.0 | Variación aleatoria de tono y volumen en su preset; sin editar el archivo todavía |
+| RPG Audio (1 clip: deslizamiento) | `Assets/_Project/Art/SFX/Kenney/rpg-audio/` | Kenney (kenney.nl), copia de github.com/Boyquotes/kenney-rpg-audio-for-godot | CC0 1.0 | Variación aleatoria de tono y volumen en su preset; sin editar el archivo todavía |
 
 Licencias aceptadas para audio externo: CC0, CC BY (con atribución en esta tabla) o licencias comerciales que permitan uso en videojuegos.
 
