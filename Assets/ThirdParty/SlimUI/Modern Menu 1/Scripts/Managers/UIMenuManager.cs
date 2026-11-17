@@ -83,6 +83,10 @@ namespace SlimUI.ModernMenu{
         public AudioSource sliderSound;
         [Tooltip("The GameObject holding the Audio Source component for the SWOOSH SOUND when switching to the Settings Screen")]
         public AudioSource swooshSound;
+        [Tooltip("Sonido al hacer clic sobre cualquier botón del menú de inicio (Rohhsadotcom - Digital confirmation bleep).")]
+        public AudioClip buttonClickClip;
+
+        private float lastButtonClickTime = -99f;
 
 		void Start(){
 			CameraObject = transform.GetComponent<Animator>();
@@ -94,6 +98,38 @@ namespace SlimUI.ModernMenu{
 			mainMenu.SetActive(true);
 
 			SetThemeColors();
+			RegisterMenuButtonClickSounds();
+		}
+
+		private void RegisterMenuButtonClickSounds()
+		{
+			Button[] buttons = GetComponentsInChildren<Button>(true);
+			for (int i = 0; i < buttons.Length; i++)
+			{
+				if (buttons[i] != null)
+				{
+					buttons[i].onClick.AddListener(PlayButtonClick);
+				}
+			}
+		}
+
+		public void PlayButtonClick()
+		{
+			if (Time.unscaledTime - lastButtonClickTime < 0.05f) return;
+			lastButtonClickTime = Time.unscaledTime;
+
+			if (swooshSound != null)
+			{
+				if (buttonClickClip != null)
+				{
+					swooshSound.pitch = 1f;
+					swooshSound.PlayOneShot(buttonClickClip, 0.85f);
+				}
+				else
+				{
+					swooshSound.Play();
+				}
+			}
 		}
 
 		void SetThemeColors()
@@ -244,7 +280,7 @@ namespace SlimUI.ModernMenu{
 		}
 
 		public void PlaySwoosh(){
-			swooshSound.Play();
+			PlayButtonClick();
 		}
 
 		// Are You Sure - Quit Panel Pop Up

@@ -43,16 +43,24 @@ namespace NostalgIA.Presentation.Audio
         [SerializeField] private AudioResource land;
         [SerializeField] private AudioResource slide;
 
-        [Header("Aspiradora")]
+        [Header("Aspiradora y Herramientas")]
         [SerializeField] private AudioResource vacuumFull;
         [Tooltip("Sonido al disparar un objeto con la aspiradora (SoundReality - Gunshot).")]
         [SerializeField] private AudioResource launch;
+        [Tooltip("Sonido al cambiar de modo de herramienta (freesound_Community - break_robot).")]
+        [SerializeField] private AudioResource toolSwitch;
+        [Tooltip("Sonido al usar el gancho (freesound_Community - grappling hook).")]
+        [SerializeField] private AudioResource grappleFire;
 
         [Header("Nivel y Jugador")]
         [Tooltip("Sonido al recoger una estrella (KoiRoylers - Get Coin).")]
         [SerializeField] private AudioResource starCollect;
         [Tooltip("Sonido al saltar en una burbuja trampolín (freesound_community - Boing).")]
         [SerializeField] private AudioResource bubbleBounce;
+        [Tooltip("Sonido al caer sobre el agua (freesound_community - Splash).")]
+        [SerializeField] private AudioResource waterSplash;
+        [Tooltip("Sonido al activar un checkpoint (freesound_Community - futuristic_city_terminal).")]
+        [SerializeField] private AudioResource checkpointActivate;
         [Tooltip("Sonido cuando el jugador muere (freesound_community - Videogame Death Sound).")]
         [SerializeField] private AudioResource playerDeath;
 
@@ -64,11 +72,19 @@ namespace NostalgIA.Presentation.Audio
         [Tooltip("Sonido cuando ataca una araña (DavidDumaisAudio - Small Monster Attack).")]
         [SerializeField] private AudioResource spiderAttack;
 
+        private const float ContinuousWalkStart = 1.90f;
+        private const float ContinuousWalkEnd = 9.65f;
+
         private AudioSource footstepSource, landSource, slideSource, fullSource;
-        private AudioSource launchSource, starSource, bubbleSource, deathSource;
+        private AudioSource launchSource, toolSwitchSource, grappleSource;
+        private AudioSource starSource, bubbleSource, waterSplashSource, checkpointSource, deathSource;
         private AudioSource emailShootSource, winrarBiteSource, spiderAttackSource;
 
+        private AudioClip continuousWalkClip;
         private bool grounded;
+        private bool initialToolReceived;
+        private float lastWaterSplashTime = float.NegativeInfinity;
+        private float walkStopTimer;
         private Vector3 lastPosition;
         private float walked;
 
@@ -76,12 +92,22 @@ namespace NostalgIA.Presentation.Audio
         private void Awake()
         {
             footstepSource = CreateSource(footstep);
+            if (footstep is AudioClip clip && clip.length > 2f)
+            {
+                continuousWalkClip = clip;
+                footstepSource.clip = clip;
+                footstepSource.loop = true;
+            }
             landSource = CreateSource(land);
             slideSource = CreateSource(slide);
             fullSource = CreateSource(vacuumFull);
             launchSource = CreateSource(launch);
+            toolSwitchSource = CreateSource(toolSwitch);
+            grappleSource = CreateSource(grappleFire);
             starSource = CreateSource(starCollect);
             bubbleSource = CreateSource(bubbleBounce);
+            waterSplashSource = CreateSource(waterSplash);
+            checkpointSource = CreateSource(checkpointActivate);
             deathSource = CreateSource(playerDeath);
             emailShootSource = CreateSource(emailShoot);
             winrarBiteSource = CreateSource(winrarBite);
@@ -101,13 +127,18 @@ namespace NostalgIA.Presentation.Audio
 
         private void OnEnable()
         {
+            initialToolReceived = false;
             EventBus<LocomotionStateChanged>.Subscribe(OnLocomotion);
             EventBus<PlayerLanded>.Subscribe(OnLanded);
             EventBus<SlideStarted>.Subscribe(OnSlide);
             EventBus<VacuumFull>.Subscribe(OnVacuumFull);
             EventBus<ObjectLaunched>.Subscribe(OnObjectLaunched);
+            EventBus<ToolSwitched>.Subscribe(OnToolSwitched);
+            EventBus<GrappleFired>.Subscribe(OnGrappleFired);
             EventBus<StarCollected>.Subscribe(OnStarCollected);
             EventBus<BubbleBounced>.Subscribe(OnBubbleBounced);
+            EventBus<ShallowWaterEntered>.Subscribe(OnWaterEntered);
+            EventBus<CheckpointActivated>.Subscribe(OnCheckpointActivated);
             EventBus<PlayerDied>.Subscribe(OnPlayerDied);
             EventBus<EnemyAttacked>.Subscribe(OnEnemyAttacked);
         }
@@ -119,20 +150,57 @@ namespace NostalgIA.Presentation.Audio
             EventBus<SlideStarted>.Unsubscribe(OnSlide);
             EventBus<VacuumFull>.Unsubscribe(OnVacuumFull);
             EventBus<ObjectLaunched>.Unsubscribe(OnObjectLaunched);
+            EventBus<ToolSwitched>.Unsubscribe(OnToolSwitched);
+            EventBus<GrappleFired>.Unsubscribe(OnGrappleFired);
             EventBus<StarCollected>.Unsubscribe(OnStarCollected);
             EventBus<BubbleBounced>.Unsubscribe(OnBubbleBounced);
+            EventBus<ShallowWaterEntered>.Unsubscribe(OnWaterEntered);
+            EventBus<CheckpointActivated>.Unsubscribe(OnCheckpointActivated);
             EventBus<PlayerDied>.Unsubscribe(OnPlayerDied);
             EventBus<EnemyAttacked>.Unsubscribe(OnEnemyAttacked);
+            if (footstepSource != null) footstepSource.Stop();
         }
 
         // ------------------------------------------------------------------ pasos
-        /// <summary>Suma la distancia caminada en el suelo y toca un paso cada tantos metros.</summary>
+        /// <summary>Suma la distancia caminada en el suelo y toca los pasos (o bucle continuo del robot).</summary>
         private void Update()
         {
             Vector3 delta = transform.position - lastPosition;
             lastPosition = transform.position;
             delta.y = 0f;
             float distance = delta.magnitude;
+
+            if (continuousWalkClip != null)
+            {
+                float dt = Time.deltaTime;
+                bool isWalkingNow = grounded && dt > 0f && Time.timeScale > 0f && distance <= 2f && (distance / dt) > 0.4f;
+                if (isWalkingNow)
+                {
+                    walkStopTimer = 0.08f;
+                    if (!footstepSource.isPlaying)
+                    {
+                        if (footstepSource.time < ContinuousWalkStart || footstepSource.time >= ContinuousWalkEnd)
+                        {
+                            footstepSource.time = ContinuousWalkStart;
+                        }
+                        footstepSource.volume = 1f;
+                        footstepSource.Play();
+                    }
+                    else if (footstepSource.time >= ContinuousWalkEnd || footstepSource.time < ContinuousWalkStart)
+                    {
+                        footstepSource.time = ContinuousWalkStart;
+                    }
+                }
+                else
+                {
+                    walkStopTimer -= Time.unscaledDeltaTime;
+                    if (walkStopTimer <= 0f && footstepSource.isPlaying)
+                    {
+                        footstepSource.Pause();
+                    }
+                }
+                return;
+            }
 
             // Un salto grande en un solo cuadro es un teletransporte (reaparición), no un paso.
             if (!grounded || distance > 2f || Time.timeScale == 0f) return;
@@ -147,22 +215,50 @@ namespace NostalgIA.Presentation.Audio
         {
             grounded = e.Current == LocomotionState.Grounded || e.Current == LocomotionState.Crouching;
             // El primer paso suena medio paso después de aterrizar o empezar a caminar.
-            if (!grounded) walked = stepDistance * 0.5f;
+            if (!grounded)
+            {
+                walked = stepDistance * 0.5f;
+                if (continuousWalkClip != null && footstepSource != null && footstepSource.isPlaying)
+                {
+                    footstepSource.Pause();
+                }
+            }
         }
 
         // ------------------------------------------------------------------ eventos
-        /// <summary>El aterrizaje suena más fuerte cuanto más rápido caía (los aterrizajes suaves no suenan).</summary>
+        /// <summary>El aterrizaje suena más fuerte cuanto más rápido caía (los aterrizajes suaves o en agua no suenan a concreto).</summary>
         private void OnLanded(in PlayerLanded e)
         {
-            if (e.ImpactSpeed < 3f) return;
+            if (e.ImpactSpeed < 3f || Time.time - lastWaterSplashTime < 0.6f) return;
             Play(landSource, Mathf.InverseLerp(3f, 15f, e.ImpactSpeed) * 0.7f + 0.3f);
         }
 
         private void OnSlide(in SlideStarted e) => Play(slideSource);
         private void OnVacuumFull(in VacuumFull e) => Play(fullSource);
         private void OnObjectLaunched(in ObjectLaunched e) => Play(launchSource);
+
+        private void OnToolSwitched(in ToolSwitched e)
+        {
+            // Se ignora la selección automática inicial al arrancar la escena.
+            if (!initialToolReceived)
+            {
+                initialToolReceived = true;
+                return;
+            }
+            Play(toolSwitchSource);
+        }
+
+        private void OnGrappleFired(in GrappleFired e) => Play(grappleSource);
         private void OnStarCollected(in StarCollected e) => Play(starSource);
         private void OnBubbleBounced(in BubbleBounced e) => Play(bubbleSource);
+
+        private void OnWaterEntered(in ShallowWaterEntered e)
+        {
+            lastWaterSplashTime = Time.time;
+            Play(waterSplashSource);
+        }
+
+        private void OnCheckpointActivated(in CheckpointActivated e) => Play(checkpointSource);
         private void OnPlayerDied(in PlayerDied e) => Play(deathSource);
 
         private void OnEnemyAttacked(in EnemyAttacked e)

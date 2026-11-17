@@ -5291,14 +5291,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c2ce76a9059bf410f96b5c4b7b962b4d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  footstep: {fileID: 202406593149995430, guid: ff1250fdfab64814bcdf7ccde7aa98b5, type: 2}
+  footstep: {fileID: 8300000, guid: 124645b23f6b178fd8f6758aefeb81e8, type: 3}
   stepDistance: 2
   land: {fileID: 790041869801421236, guid: 7e92c27091ef4b0494096a5ef75e46fa, type: 2}
   slide: {fileID: 389180604098807366, guid: 00210a1bfc114e9fb321235bffa404a3, type: 2}
   vacuumFull: {fileID: 861664330938876554, guid: 891bc132daa04ccc9987e8501ba54b78, type: 2}
   launch: {fileID: 8300000, guid: 6bda74706c30c18788300cc31e2e2175, type: 3}
+  toolSwitch: {fileID: 8300000, guid: 314b7b002a7c3d1cdb1aa42d929447fa, type: 3}
+  grappleFire: {fileID: 8300000, guid: e122d9627f343211db300e1bf5184bd9, type: 3}
   starCollect: {fileID: 8300000, guid: 4aaa1c4a5a80abccdb366da2e9eca2a6, type: 3}
   bubbleBounce: {fileID: 8300000, guid: 0a08bdfcdf604b0859c18e1b261684b2, type: 3}
+  waterSplash: {fileID: 8300000, guid: 210e7b09c354a3ab7b04f8c9dac795b8, type: 3}
+  checkpointActivate: {fileID: 8300000, guid: 8f76ed216dc5f6d4f895daac2bc7d97c, type: 3}
   playerDeath: {fileID: 8300000, guid: b2a3588382056281d89e9d9e566c2f18, type: 3}
   emailShoot: {fileID: 8300000, guid: 8afd20d6df3e895f5846e79c1629bb90, type: 3}
   winrarBite: {fileID: 8300000, guid: 5fdd713c21a14ffda9740a64e6f22ca7, type: 3}
