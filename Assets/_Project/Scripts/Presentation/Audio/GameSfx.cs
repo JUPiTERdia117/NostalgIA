@@ -45,8 +45,28 @@ namespace NostalgIA.Presentation.Audio
 
         [Header("Aspiradora")]
         [SerializeField] private AudioResource vacuumFull;
+        [Tooltip("Sonido al disparar un objeto con la aspiradora (SoundReality - Gunshot).")]
+        [SerializeField] private AudioResource launch;
+
+        [Header("Nivel y Jugador")]
+        [Tooltip("Sonido al recoger una estrella (KoiRoylers - Get Coin).")]
+        [SerializeField] private AudioResource starCollect;
+        [Tooltip("Sonido al saltar en una burbuja trampolín (freesound_community - Boing).")]
+        [SerializeField] private AudioResource bubbleBounce;
+        [Tooltip("Sonido cuando el jugador muere (freesound_community - Videogame Death Sound).")]
+        [SerializeField] private AudioResource playerDeath;
+
+        [Header("Enemigos (Respaldo 2D)")]
+        [Tooltip("Sonido cuando el email dispara (Universfield - Arcade Shot).")]
+        [SerializeField] private AudioResource emailShoot;
+        [Tooltip("Sonido cuando el WinRar muerde (Anon - Mimi Chomp).")]
+        [SerializeField] private AudioResource winrarBite;
+        [Tooltip("Sonido cuando ataca una araña (DavidDumaisAudio - Small Monster Attack).")]
+        [SerializeField] private AudioResource spiderAttack;
 
         private AudioSource footstepSource, landSource, slideSource, fullSource;
+        private AudioSource launchSource, starSource, bubbleSource, deathSource;
+        private AudioSource emailShootSource, winrarBiteSource, spiderAttackSource;
 
         private bool grounded;
         private Vector3 lastPosition;
@@ -59,6 +79,13 @@ namespace NostalgIA.Presentation.Audio
             landSource = CreateSource(land);
             slideSource = CreateSource(slide);
             fullSource = CreateSource(vacuumFull);
+            launchSource = CreateSource(launch);
+            starSource = CreateSource(starCollect);
+            bubbleSource = CreateSource(bubbleBounce);
+            deathSource = CreateSource(playerDeath);
+            emailShootSource = CreateSource(emailShoot);
+            winrarBiteSource = CreateSource(winrarBite);
+            spiderAttackSource = CreateSource(spiderAttack);
             lastPosition = transform.position;
         }
 
@@ -78,6 +105,11 @@ namespace NostalgIA.Presentation.Audio
             EventBus<PlayerLanded>.Subscribe(OnLanded);
             EventBus<SlideStarted>.Subscribe(OnSlide);
             EventBus<VacuumFull>.Subscribe(OnVacuumFull);
+            EventBus<ObjectLaunched>.Subscribe(OnObjectLaunched);
+            EventBus<StarCollected>.Subscribe(OnStarCollected);
+            EventBus<BubbleBounced>.Subscribe(OnBubbleBounced);
+            EventBus<PlayerDied>.Subscribe(OnPlayerDied);
+            EventBus<EnemyAttacked>.Subscribe(OnEnemyAttacked);
         }
 
         private void OnDisable()
@@ -86,6 +118,11 @@ namespace NostalgIA.Presentation.Audio
             EventBus<PlayerLanded>.Unsubscribe(OnLanded);
             EventBus<SlideStarted>.Unsubscribe(OnSlide);
             EventBus<VacuumFull>.Unsubscribe(OnVacuumFull);
+            EventBus<ObjectLaunched>.Unsubscribe(OnObjectLaunched);
+            EventBus<StarCollected>.Unsubscribe(OnStarCollected);
+            EventBus<BubbleBounced>.Unsubscribe(OnBubbleBounced);
+            EventBus<PlayerDied>.Unsubscribe(OnPlayerDied);
+            EventBus<EnemyAttacked>.Unsubscribe(OnEnemyAttacked);
         }
 
         // ------------------------------------------------------------------ pasos
@@ -123,6 +160,27 @@ namespace NostalgIA.Presentation.Audio
 
         private void OnSlide(in SlideStarted e) => Play(slideSource);
         private void OnVacuumFull(in VacuumFull e) => Play(fullSource);
+        private void OnObjectLaunched(in ObjectLaunched e) => Play(launchSource);
+        private void OnStarCollected(in StarCollected e) => Play(starSource);
+        private void OnBubbleBounced(in BubbleBounced e) => Play(bubbleSource);
+        private void OnPlayerDied(in PlayerDied e) => Play(deathSource);
+
+        private void OnEnemyAttacked(in EnemyAttacked e)
+        {
+            if (e.PlayedLocally) return;
+            switch (e.Kind)
+            {
+                case EnemyKind.SpamMail:
+                    Play(emailShootSource);
+                    break;
+                case EnemyKind.Antivirus:
+                    Play(winrarBiteSource);
+                    break;
+                case EnemyKind.Bug:
+                    Play(spiderAttackSource);
+                    break;
+            }
+        }
 
         /// <summary>
         /// Toca el siguiente sonido del preset. Con un Audio Random Container en modo manual, cada

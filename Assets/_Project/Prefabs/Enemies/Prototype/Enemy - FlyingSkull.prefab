@@ -420,6 +420,8 @@ MonoBehaviour:
   chargeTime: 0.5
   projectileDamage: 1
   projectileSpeed: 12
+  shootClip: {fileID: 8300000, guid: 8afd20d6df3e895f5846e79c1629bb90, type: 3}
+  shootVolume: 0.85
 --- !u!1 &6974524690074462520
 GameObject:
   m_ObjectHideFlags: 0

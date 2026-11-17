@@ -5296,6 +5296,13 @@ MonoBehaviour:
   land: {fileID: 790041869801421236, guid: 7e92c27091ef4b0494096a5ef75e46fa, type: 2}
   slide: {fileID: 389180604098807366, guid: 00210a1bfc114e9fb321235bffa404a3, type: 2}
   vacuumFull: {fileID: 861664330938876554, guid: 891bc132daa04ccc9987e8501ba54b78, type: 2}
+  launch: {fileID: 8300000, guid: 6bda74706c30c18788300cc31e2e2175, type: 3}
+  starCollect: {fileID: 8300000, guid: 4aaa1c4a5a80abccdb366da2e9eca2a6, type: 3}
+  bubbleBounce: {fileID: 8300000, guid: 0a08bdfcdf604b0859c18e1b261684b2, type: 3}
+  playerDeath: {fileID: 8300000, guid: b2a3588382056281d89e9d9e566c2f18, type: 3}
+  emailShoot: {fileID: 8300000, guid: 8afd20d6df3e895f5846e79c1629bb90, type: 3}
+  winrarBite: {fileID: 8300000, guid: 5fdd713c21a14ffda9740a64e6f22ca7, type: 3}
+  spiderAttack: {fileID: 8300000, guid: 07f7abd601f3f4fc59eebffd6e6d6648, type: 3}
 --- !u!114 &2990697086711662998
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5547,9 +5554,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0474f924b33e44ec281004b9907f33c2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  startClip: {fileID: 8300000, guid: b9a288d50d7c240d7b3a998cabd48f43, type: 3}
-  loopClip: {fileID: 8300000, guid: bd611a1423edc4b9f92d605e6a2c57fe, type: 3}
-  endClip: {fileID: 8300000, guid: 41c5e048384304fae9e0c688fdf96078, type: 3}
+  startClip: {fileID: 0}
+  loopClip: {fileID: 8300000, guid: 5e8799a3917789c899fa71c8bd9847e3, type: 3}
+  endClip: {fileID: 0}
   volume: 0.8
   fadeTime: 0.06
 --- !u!1 &8960036571309276193
