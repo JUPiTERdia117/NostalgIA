@@ -5307,6 +5307,11 @@ MonoBehaviour:
   emailShoot: {fileID: 8300000, guid: 8afd20d6df3e895f5846e79c1629bb90, type: 3}
   winrarBite: {fileID: 8300000, guid: 5fdd713c21a14ffda9740a64e6f22ca7, type: 3}
   spiderAttack: {fileID: 8300000, guid: 07f7abd601f3f4fc59eebffd6e6d6648, type: 3}
+  spiderSpawn: {fileID: 8300000, guid: 166c7423a139e80fa8adef174cc38bb0, type: 3}
+  trojanDeath: {fileID: 8300000, guid: db92741d61e628c1c82ab8c813315a3e, type: 3}
+  winrarDeath: {fileID: 8300000, guid: 55de9050dff5ceed19553fc07bf36260, type: 3}
+  emailDeath: {fileID: 8300000, guid: ab5d281ab60080287ae9605b56cffd58, type: 3}
+  spiderDeath: {fileID: 8300000, guid: 7aaaa99f5de847312beac4799f5b761c, type: 3}
 --- !u!114 &2990697086711662998
 MonoBehaviour:
   m_ObjectHideFlags: 0

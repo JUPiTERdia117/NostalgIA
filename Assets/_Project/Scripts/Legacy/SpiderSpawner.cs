@@ -1,5 +1,7 @@
+using NostalgIA.Core.Events;
 using NostalgIA.Gameplay.Enemies;
 using NostalgIA.Gameplay.Player;
+using NostalgIA.Presentation.Audio;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -40,7 +42,13 @@ public class SpiderSpawner : MonoBehaviour
     [SerializeField] private float pulseFrequency = 1.5f;
     [SerializeField] private float pulseAmplitude = 0.08f;
 
+    [Header("Audio")]
+    [Tooltip("Sonido cada vez que sale una araña (Yodguard - small insect monster 6).")]
+    [SerializeField] private AudioClip spawnClip;
+    [SerializeField, Range(0f, 1f)] private float spawnVolume = 0.85f;
+
     private EnemyHealth health;
+    private AudioSource audioSource;
     private readonly List<GameObject> activeSpiders = new List<GameObject>();
     private float nextSpawnTime;
     private Vector3 originalScale;
@@ -54,6 +62,22 @@ public class SpiderSpawner : MonoBehaviour
         health = GetComponent<EnemyHealth>();
         originalScale = transform.localScale;
         anim = GetComponent<EnemyAnimation>();
+        SetupAudioSource();
+    }
+
+    private void SetupAudioSource()
+    {
+        if (!TryGetComponent(out audioSource))
+        {
+            audioSource = gameObject.AddComponent<AudioSource>();
+        }
+        audioSource.playOnAwake = false;
+        audioSource.loop = false;
+        audioSource.spatialBlend = 0.2f;
+        audioSource.minDistance = 4f;
+        audioSource.maxDistance = 35f;
+        audioSource.rolloffMode = AudioRolloffMode.Linear;
+        audioSource.outputAudioMixerGroup = GameAudio.Sfx;
     }
 
     private void Start()
@@ -178,6 +202,14 @@ public class SpiderSpawner : MonoBehaviour
             rb.isKinematic = false;
             rb.AddForce(ejectDir * ejectionSpeed, ForceMode.Impulse);
         }
+
+        bool playedLocally = false;
+        if (spawnClip != null && audioSource != null)
+        {
+            audioSource.PlayOneShot(spawnClip, spawnVolume);
+            playedLocally = true;
+        }
+        EventBus<EnemySpawned>.Raise(new EnemySpawned(EnemyKind.Bug, pos, playedLocally));
 
         Debug.Log($"[SpiderSpawner] ¡Ha nacido una nueva araña! Arañas activas: {activeSpiders.Count}/{maxActiveSpiders}");
     }

@@ -148,6 +148,8 @@ MonoBehaviour:
   spawnGibsOnDeath: 1
   gibCount: 5
   contactDamageToPlayer: 1
+  deathClip: {fileID: 8300000, guid: db92741d61e628c1c82ab8c813315a3e, type: 3}
+  deathVolume: 0.85
   onTakeDamage:
     m_PersistentCalls:
       m_Calls: []
@@ -176,6 +178,8 @@ MonoBehaviour:
   spawnMoment: 0.5
   pulseFrequency: 1.5
   pulseAmplitude: 0.08
+  spawnClip: {fileID: 8300000, guid: 166c7423a139e80fa8adef174cc38bb0, type: 3}
+  spawnVolume: 0.85
 --- !u!114 &8764471461889654256
 MonoBehaviour:
   m_ObjectHideFlags: 0

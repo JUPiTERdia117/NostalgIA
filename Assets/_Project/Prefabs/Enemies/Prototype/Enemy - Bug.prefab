@@ -682,6 +682,8 @@ MonoBehaviour:
   healthBarHeight: 1.1
   spawnGibsOnDeath: 1
   gibCount: 5
+  deathClip: {fileID: 8300000, guid: 55de9050dff5ceed19553fc07bf36260, type: 3}
+  deathVolume: 0.85
   onTakeDamage:
     m_PersistentCalls:
       m_Calls: []

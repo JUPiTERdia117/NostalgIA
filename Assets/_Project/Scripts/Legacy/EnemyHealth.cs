@@ -2,6 +2,7 @@ using NostalgIA.Core.Damage;
 using NostalgIA.Core.Events;
 using NostalgIA.Gameplay.Player;
 using NostalgIA.Gameplay.Tools;
+using NostalgIA.Presentation.Audio;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.Events;
@@ -64,6 +65,11 @@ public class EnemyHealth : MonoBehaviour, IDamageable, IContactHazard
     [Header("Contacto con el jugador")]
     [Tooltip("Corazones que resta al jugador por contacto directo (0 lo desactiva).")]
     [SerializeField, Min(0)] private int contactDamageToPlayer = 1;
+
+    [Header("Audio")]
+    [Tooltip("Sonido al morir este enemigo.")]
+    [SerializeField] private AudioClip deathClip;
+    [SerializeField, Range(0f, 1f)] private float deathVolume = 0.85f;
 
     [Header("Events")]
     public UnityEvent<int> onTakeDamage;
@@ -205,6 +211,7 @@ public class EnemyHealth : MonoBehaviour, IDamageable, IContactHazard
 
         Debug.Log($"[EnemyHealth] {gameObject.name} ha muerto.", this);
         onDeath?.Invoke();
+        EventBus<EnemyKilled>.Raise(new EnemyKilled(ResolveEnemyKind(), transform.position));
 
         // Si el modelo tiene animación de muerte, primero se ve completa y después salen los fragmentos.
         var animation = GetComponent<NostalgIA.Gameplay.Enemies.EnemyAnimation>();
@@ -215,6 +222,14 @@ public class EnemyHealth : MonoBehaviour, IDamageable, IContactHazard
         }
 
         FinishDeath();
+    }
+
+    private EnemyKind ResolveEnemyKind()
+    {
+        if (TryGetComponent<SpiderSpawner>(out _)) return EnemyKind.Trojan;
+        if (TryGetComponent<BugEnemyController>(out _)) return EnemyKind.Antivirus;
+        if (TryGetComponent<FlyingEnemyController>(out _)) return EnemyKind.SpamMail;
+        return EnemyKind.Bug;
     }
 
     /// <summary>Congela al enemigo, reproduce su animación de muerte y luego lo destruye.</summary>

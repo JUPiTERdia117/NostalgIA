@@ -465,12 +465,15 @@ namespace NostalgIA.Core.Events
         public readonly EnemyKind Kind;
         /// <summary>Posición de aparición.</summary>
         public readonly Vector3 Position;
+        /// <summary>Indica si el generador ya reprodujo su clip de audio localmente.</summary>
+        public readonly bool PlayedLocally;
 
         /// <summary>Crea el evento.</summary>
-        public EnemySpawned(EnemyKind kind, Vector3 position)
+        public EnemySpawned(EnemyKind kind, Vector3 position, bool playedLocally = false)
         {
             Kind = kind;
             Position = position;
+            PlayedLocally = playedLocally;
         }
     }
 

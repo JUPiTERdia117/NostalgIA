@@ -64,13 +64,23 @@ namespace NostalgIA.Presentation.Audio
         [Tooltip("Sonido cuando el jugador muere (freesound_community - Videogame Death Sound).")]
         [SerializeField] private AudioResource playerDeath;
 
-        [Header("Enemigos (Respaldo 2D)")]
+        [Header("Enemigos")]
         [Tooltip("Sonido cuando el email dispara (Universfield - Arcade Shot).")]
         [SerializeField] private AudioResource emailShoot;
         [Tooltip("Sonido cuando el WinRar muerde (Anon - Mimi Chomp).")]
         [SerializeField] private AudioResource winrarBite;
         [Tooltip("Sonido cuando ataca una araña (DavidDumaisAudio - Small Monster Attack).")]
         [SerializeField] private AudioResource spiderAttack;
+        [Tooltip("Sonido cada vez que sale una araña (Yodguard - small insect monster 6).")]
+        [SerializeField] private AudioResource spiderSpawn;
+        [Tooltip("Sonido al morir el caballo/troyano (AleXZavesa - Breaking Glass 3).")]
+        [SerializeField] private AudioResource trojanDeath;
+        [Tooltip("Sonido al morir el WinRar (AleXZavesa - Boards Fall 1).")]
+        [SerializeField] private AudioResource winrarDeath;
+        [Tooltip("Sonido al morir el email (OxidVideos - Crumpling paper wrapping).")]
+        [SerializeField] private AudioResource emailDeath;
+        [Tooltip("Sonido al morir una araña (minecraft - Spider death).")]
+        [SerializeField] private AudioResource spiderDeath;
 
         private const float ContinuousWalkStart = 1.90f;
         private const float ContinuousWalkEnd = 9.65f;
@@ -78,7 +88,8 @@ namespace NostalgIA.Presentation.Audio
         private AudioSource footstepSource, landSource, slideSource, fullSource;
         private AudioSource launchSource, toolSwitchSource, grappleSource;
         private AudioSource starSource, bubbleSource, waterSplashSource, checkpointSource, deathSource;
-        private AudioSource emailShootSource, winrarBiteSource, spiderAttackSource;
+        private AudioSource emailShootSource, winrarBiteSource, spiderAttackSource, spiderSpawnSource;
+        private AudioSource trojanDeathSource, winrarDeathSource, emailDeathSource, spiderDeathSource;
 
         private AudioClip continuousWalkClip;
         private bool grounded;
@@ -112,6 +123,11 @@ namespace NostalgIA.Presentation.Audio
             emailShootSource = CreateSource(emailShoot);
             winrarBiteSource = CreateSource(winrarBite);
             spiderAttackSource = CreateSource(spiderAttack);
+            spiderSpawnSource = CreateSource(spiderSpawn);
+            trojanDeathSource = CreateSource(trojanDeath);
+            winrarDeathSource = CreateSource(winrarDeath);
+            emailDeathSource = CreateSource(emailDeath);
+            spiderDeathSource = CreateSource(spiderDeath);
             lastPosition = transform.position;
         }
 
@@ -141,6 +157,8 @@ namespace NostalgIA.Presentation.Audio
             EventBus<CheckpointActivated>.Subscribe(OnCheckpointActivated);
             EventBus<PlayerDied>.Subscribe(OnPlayerDied);
             EventBus<EnemyAttacked>.Subscribe(OnEnemyAttacked);
+            EventBus<EnemySpawned>.Subscribe(OnEnemySpawned);
+            EventBus<EnemyKilled>.Subscribe(OnEnemyKilled);
         }
 
         private void OnDisable()
@@ -158,6 +176,8 @@ namespace NostalgIA.Presentation.Audio
             EventBus<CheckpointActivated>.Unsubscribe(OnCheckpointActivated);
             EventBus<PlayerDied>.Unsubscribe(OnPlayerDied);
             EventBus<EnemyAttacked>.Unsubscribe(OnEnemyAttacked);
+            EventBus<EnemySpawned>.Unsubscribe(OnEnemySpawned);
+            EventBus<EnemyKilled>.Unsubscribe(OnEnemyKilled);
             if (footstepSource != null) footstepSource.Stop();
         }
 
@@ -274,6 +294,31 @@ namespace NostalgIA.Presentation.Audio
                     break;
                 case EnemyKind.Bug:
                     Play(spiderAttackSource);
+                    break;
+            }
+        }
+
+        private void OnEnemySpawned(in EnemySpawned e)
+        {
+            if (e.PlayedLocally) return;
+            if (e.Kind == EnemyKind.Bug) Play(spiderSpawnSource);
+        }
+
+        private void OnEnemyKilled(in EnemyKilled e)
+        {
+            switch (e.Kind)
+            {
+                case EnemyKind.Trojan:
+                    Play(trojanDeathSource);
+                    break;
+                case EnemyKind.Antivirus:
+                    Play(winrarDeathSource);
+                    break;
+                case EnemyKind.SpamMail:
+                    Play(emailDeathSource);
+                    break;
+                case EnemyKind.Bug:
+                    Play(spiderDeathSource);
                     break;
             }
         }
