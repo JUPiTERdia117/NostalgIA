@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using UnityEngine.UI;
 using TMPro;
@@ -36,6 +36,7 @@ namespace SlimUI.ModernMenu{
 		public GameObject texturelowtextLINE;
 		public GameObject texturemedtextLINE;
 		public GameObject texturehightextLINE;
+		public GameObject textureveryhightextLINE;
 		public GameObject cameraeffectstext; 
 
 		[Header("GAME SETTINGS")]
@@ -138,6 +139,7 @@ namespace SlimUI.ModernMenu{
 			}
 
 			// NostalgIA: la fila de texturas es la «Calidad gráfica» y marca el preset guardado.
+			SetupVeryHighQualityButton();
 			ShowGraphicsLine(GameGraphics.Current);
 		}
 
@@ -402,7 +404,7 @@ namespace SlimUI.ModernMenu{
 			}
 		}
 
-		// NostalgIA: los botones bajo/medio/alto de «Calidad gráfica» aplican el preset completo
+		// NostalgIA: los botones bajo/medio/alto/muy alto de «Calidad gráfica» aplican el preset completo
 		// (resolución, texturas, HDR, Bloom y sombras) con GameGraphics.
 		public void TexturesLow (){
 			GameGraphics.Set(GraphicsPreset.Low);
@@ -419,10 +421,90 @@ namespace SlimUI.ModernMenu{
 			ShowGraphicsLine(GraphicsPreset.High);
 		}
 
+		public void TexturesVeryHigh (){
+			GameGraphics.Set(GraphicsPreset.VeryHigh);
+			ShowGraphicsLine(GraphicsPreset.VeryHigh);
+		}
+
+		private void SetupVeryHighQualityButton (){
+			if(texturelowtextLINE == null || texturemedtextLINE == null || texturehightextLINE == null) return;
+			if(textureveryhightextLINE != null) return;
+
+			Transform container = texturehightextLINE.transform.parent;
+			if(container == null) return;
+
+			Transform lowT = container.Find("TextureLow_Btn");
+			Transform medT = container.Find("TextureMed_Btn");
+			Transform highT = container.Find("TextureHigh_Btn");
+			if(lowT == null || medT == null || highT == null) return;
+
+			GameObject veryHighBtnObj = Instantiate(highT.gameObject, container);
+			veryHighBtnObj.name = "TextureVeryHigh_Btn";
+			Button veryHighBtn = veryHighBtnObj.GetComponent<Button>();
+			if(veryHighBtn != null){
+				veryHighBtn.onClick = new Button.ButtonClickedEvent();
+				veryHighBtn.onClick.AddListener(TexturesVeryHigh);
+			}
+			TMP_Text veryHighTmp = veryHighBtnObj.GetComponentInChildren<TMP_Text>(true);
+			if(veryHighTmp != null) veryHighTmp.text = "muy alto";
+
+			textureveryhightextLINE = Instantiate(texturehightextLINE, container);
+			textureveryhightextLINE.name = "VERYHIGHLINE1";
+
+			RectTransform[] buttons = {
+				lowT as RectTransform,
+				medT as RectTransform,
+				highT as RectTransform,
+				veryHighBtnObj.GetComponent<RectTransform>()
+			};
+			RectTransform[] lines = {
+				texturelowtextLINE.GetComponent<RectTransform>(),
+				texturemedtextLINE.GetComponent<RectTransform>(),
+				texturehightextLINE.GetComponent<RectTransform>(),
+				textureveryhightextLINE.GetComponent<RectTransform>()
+			};
+
+			float[] widths = { 68f, 100f, 68f, 132f };
+			float totalWidth = 0f;
+			for(int i = 0; i < 4; i++){
+				TMP_Text tmp = buttons[i].GetComponentInChildren<TMP_Text>(true);
+				if(tmp != null){
+					tmp.fontSize *= 0.8f;
+					tmp.textWrappingMode = TextWrappingModes.NoWrap;
+				}
+				totalWidth += widths[i];
+			}
+
+			const float rowLeft = 190f;
+			const float rowSpan = 400f;
+			float gap = Mathf.Max(14f, (rowSpan - totalWidth) / 3f);
+			float cursorX = rowLeft;
+
+			for(int i = 0; i < 4; i++){
+				RectTransform btnRect = buttons[i];
+				RectTransform lineRect = lines[i];
+				TMP_Text tmp = btnRect.GetComponentInChildren<TMP_Text>(true);
+				float textLeftOffset = -50.45f;
+				if(tmp != null){
+					RectTransform textRect = tmp.rectTransform;
+					textLeftOffset = -btnRect.sizeDelta.x * btnRect.pivot.x
+					                 + textRect.anchoredPosition.x
+					                 - textRect.sizeDelta.x * textRect.pivot.x;
+				}
+
+				float w = widths[i];
+				btnRect.anchoredPosition = new Vector2(cursorX - textLeftOffset, btnRect.anchoredPosition.y);
+				lineRect.anchoredPosition = new Vector2(cursorX + w * 0.5f, lineRect.anchoredPosition.y);
+				lineRect.sizeDelta = new Vector2(w, lineRect.sizeDelta.y);
+				cursorX += w + gap;
+			}
+		}
+
 		private void ShowGraphicsLine (GraphicsPreset preset){
 			if(texturelowtextLINE != null) texturelowtextLINE.SetActive(preset == GraphicsPreset.Low);
 			if(texturemedtextLINE != null) texturemedtextLINE.SetActive(preset == GraphicsPreset.Medium);
 			if(texturehightextLINE != null) texturehightextLINE.SetActive(preset == GraphicsPreset.High);
+			if(textureveryhightextLINE != null) textureveryhightextLINE.SetActive(preset == GraphicsPreset.VeryHigh);
 		}
 	}
 }
