@@ -37,6 +37,8 @@ public class SpiderSpawner : MonoBehaviour
     [SerializeField] private float detectionRange = 18f;
     [Tooltip("Momento del clip Spawn (0 a 1) en el que sale la araña, con la puerta ya abierta.")]
     [SerializeField, Range(0f, 1f)] private float spawnMoment = 0.5f;
+    [Tooltip("Distancia en metros que la araña camina hacia afuera del caballo antes de atacar al jugador.")]
+    [SerializeField, Min(0.5f)] private float exitWalkDistance = 2.6f;
 
     [Header("Visual Pulse")]
     [SerializeField] private float pulseFrequency = 1.5f;
@@ -49,6 +51,9 @@ public class SpiderSpawner : MonoBehaviour
 
     private EnemyHealth health;
     private AudioSource audioSource;
+    private Collider[] spawnerColliders;
+    private Transform headTransform;
+    private Transform lidTransform;
     private readonly List<GameObject> activeSpiders = new List<GameObject>();
     private float nextSpawnTime;
     private Vector3 originalScale;
@@ -62,7 +67,26 @@ public class SpiderSpawner : MonoBehaviour
         health = GetComponent<EnemyHealth>();
         originalScale = transform.localScale;
         anim = GetComponent<EnemyAnimation>();
+        spawnerColliders = GetComponentsInChildren<Collider>(true);
+        CacheModelReferences();
         SetupAudioSource();
+    }
+
+    private void CacheModelReferences()
+    {
+        Transform[] children = GetComponentsInChildren<Transform>(true);
+        for (int i = 0; i < children.Length; i++)
+        {
+            string n = children[i].name;
+            if (headTransform == null && (string.Equals(n, "head", System.StringComparison.OrdinalIgnoreCase) || string.Equals(n, "Bone.003", System.StringComparison.OrdinalIgnoreCase)))
+            {
+                headTransform = children[i];
+            }
+            else if (lidTransform == null && (string.Equals(n, "lid", System.StringComparison.OrdinalIgnoreCase) || string.Equals(n, "Bone.004", System.StringComparison.OrdinalIgnoreCase)))
+            {
+                lidTransform = children[i];
+            }
+        }
     }
 
     private void SetupAudioSource()
@@ -186,21 +210,23 @@ public class SpiderSpawner : MonoBehaviour
             return;
         }
 
-        Vector3 pos = spawnPoint != null ? spawnPoint.position : (transform.position + transform.up * 1f);
-        Quaternion rot = spawnPoint != null ? spawnPoint.rotation : transform.rotation;
+        ResolveSpawnPose(out Vector3 pos, out Vector3 exitDir);
+        Quaternion rot = Quaternion.LookRotation(exitDir, Vector3.up);
 
         GameObject newSpider = Instantiate(spiderPrefab, pos, rot);
         if (transform.parent != null) newSpider.transform.SetParent(transform.parent, true);
         newSpider.name = $"Spider_Spawned_{activeSpiders.Count + 1}";
         activeSpiders.Add(newSpider);
 
-        // Impulso de expulsión hacia afuera
-        Rigidbody rb = newSpider.GetComponent<Rigidbody>();
-        if (rb != null)
+        // Iniciar salida estable: panza hacia el piso, mirando hacia el frente de la puerta y caminando hacia afuera
+        if (newSpider.TryGetComponent(out SpiderEnemyController spiderController))
         {
-            Vector3 ejectDir = (transform.up + Random.insideUnitSphere * 0.5f).normalized;
-            rb.isKinematic = false;
-            rb.AddForce(ejectDir * ejectionSpeed, ForceMode.Impulse);
+            spiderController.BeginSpawnExit(exitDir, exitWalkDistance, spawnerColliders);
+        }
+        else if (newSpider.TryGetComponent(out Rigidbody rb))
+        {
+            rb.isKinematic = true;
+            rb.useGravity = false;
         }
 
         bool playedLocally = false;
@@ -212,5 +238,60 @@ public class SpiderSpawner : MonoBehaviour
         EventBus<EnemySpawned>.Raise(new EnemySpawned(EnemyKind.Bug, pos, playedLocally));
 
         Debug.Log($"[SpiderSpawner] ¡Ha nacido una nueva araña! Arañas activas: {activeSpiders.Count}/{maxActiveSpiders}");
+    }
+
+    /// <summary>
+    /// Calcula la dirección horizontal hacia donde abre la puerta del caballo y la posición a ras de piso.
+    /// </summary>
+    private void ResolveSpawnPose(out Vector3 spawnPos, out Vector3 exitDir)
+    {
+        exitDir = Vector3.zero;
+
+        // En el modelo del Troyano, la puerta trasera está en el extremo opuesto a la cabeza (head).
+        if (headTransform != null)
+        {
+            exitDir = Vector3.ProjectOnPlane(transform.position - headTransform.position, Vector3.up);
+            if (exitDir.sqrMagnitude < 0.001f && lidTransform != null)
+            {
+                exitDir = Vector3.ProjectOnPlane(lidTransform.position - headTransform.position, Vector3.up);
+            }
+        }
+
+        if (exitDir.sqrMagnitude < 0.001f && spawnPoint != null)
+        {
+            exitDir = Vector3.ProjectOnPlane(spawnPoint.forward, Vector3.up);
+        }
+
+        if (exitDir.sqrMagnitude < 0.001f)
+        {
+            exitDir = Vector3.ProjectOnPlane(transform.forward, Vector3.up);
+        }
+
+        if (exitDir.sqrMagnitude < 0.001f)
+        {
+            exitDir = Vector3.forward;
+        }
+        else
+        {
+            exitDir.Normalize();
+        }
+
+        float floorY = transform.position.y;
+        RaycastHit[] hits = Physics.RaycastAll(transform.position + Vector3.up * 1.5f, Vector3.down, 4.0f, ~0, QueryTriggerInteraction.Ignore);
+        float closestDist = float.PositiveInfinity;
+        for (int i = 0; i < hits.Length; i++)
+        {
+            Collider col = hits[i].collider;
+            if (col == null || col.transform.IsChildOf(transform)) continue;
+            if (col.GetComponentInParent<EnemyHealth>() != null || col.GetComponentInParent<PlayerHealth>() != null) continue;
+            if (hits[i].distance < closestDist)
+            {
+                closestDist = hits[i].distance;
+                floorY = hits[i].point.y;
+            }
+        }
+
+        Vector3 horizontalStart = transform.position + exitDir * 0.45f;
+        spawnPos = new Vector3(horizontalStart.x, floorY + 0.38f, horizontalStart.z);
     }
 }
