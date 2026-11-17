@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 8123632025158736646}
   - component: {fileID: 2929321425633138236}
   - component: {fileID: 7522224365719643093}
+  - component: {fileID: -2643063712497664203}
   m_Layer: 0
   m_Name: WinRar
   m_TagString: Enemy
@@ -169,6 +170,28 @@ MonoBehaviour:
   lungeArcHeight: 1.6
   lungeOvershoot: 1.5
   recoveryTime: 0.5
+--- !u!95 &-2643063712497664203
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8695522652960482533}
+  m_Enabled: 1
+  m_Avatar: {fileID: 9000000, guid: 017941ca37aa09008a1c6ad326bea8e5, type: 3}
+  m_Controller: {fileID: 9100000, guid: 2f8d7b8c1d472d508aad998e26dcfb5e, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1001 &3621043387931451950
 PrefabInstance:
   m_ObjectHideFlags: 0

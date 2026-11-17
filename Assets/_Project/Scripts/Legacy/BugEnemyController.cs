@@ -37,6 +37,16 @@ public class BugEnemyController : MonoBehaviour
     [Tooltip("Pausa de recuperación en el suelo tras aterrizar, dando oportunidad al jugador de contraatacar.")]
     [SerializeField] private float recoveryTime = 0.5f;
 
+    [Header("Animator")]
+    [Tooltip("Animator for the enemy model. If empty, an Animator on this object or a child is used.")]
+    [SerializeField] private Animator animator;
+    [Tooltip("Optional Animator bool parameter set while the enemy is moving.")]
+    [SerializeField] private string movingParameter = "IsMoving";
+    [Tooltip("Optional Animator trigger parameter fired when the enemy starts its lunge attack.")]
+    [SerializeField] private string attackTrigger = "Attack";
+    [Tooltip("Optional Animator bool parameter set when the enemy dies.")]
+    [SerializeField] private string deadParameter = "IsDead";
+
     private PlayerHealth player;
     private NavMeshAgent navMeshAgent;
     private EnemyHealth health;
@@ -44,11 +54,25 @@ public class BugEnemyController : MonoBehaviour
     private bool isLunging;
     private float lastAttackTime = -99f;
     private Vector3 originalScale;
+    private int movingParameterHash;
+    private int attackTriggerHash;
+    private int deadParameterHash;
+    private bool hasMovingParameter;
+    private bool hasAttackTrigger;
+    private bool hasDeadParameter;
 
     private void Awake()
     {
         health = GetComponent<EnemyHealth>();
         navMeshAgent = GetComponent<NavMeshAgent>();
+        if (animator == null)
+        {
+            animator = GetComponent<Animator>();
+            if (animator == null)
+                animator = GetComponentInChildren<Animator>();
+        }
+
+        CacheAnimatorParameters();
         originalScale = transform.localScale;
 
         if (navMeshAgent != null)
@@ -75,12 +99,22 @@ public class BugEnemyController : MonoBehaviour
 
     private void Update()
     {
-        if (health != null && health.IsDead) return;
+        if (health != null && health.IsDead)
+        {
+            SetMovingAnimation(false);
+            if (hasDeadParameter)
+                animator.SetBool(deadParameterHash, true);
+            return;
+        }
 
         if (player == null)
         {
             FindPlayer();
-            if (player == null) return;
+            if (player == null)
+            {
+                SetMovingAnimation(false);
+                return;
+            }
         }
 
         if (player.IsDead)
@@ -89,6 +123,7 @@ public class BugEnemyController : MonoBehaviour
             {
                 navMeshAgent.isStopped = true;
             }
+            SetMovingAnimation(false);
             return;
         }
 
@@ -100,17 +135,46 @@ public class BugEnemyController : MonoBehaviour
             {
                 navMeshAgent.isStopped = true;
             }
+            SetMovingAnimation(false);
             return;
         }
 
         if (!isAttacking && distanceToPlayer <= attackRange && Time.time - lastAttackTime >= attackCooldown)
         {
+            SetMovingAnimation(false);
             StartCoroutine(AttackRoutine());
         }
         else if (!isAttacking)
         {
             FollowPlayer(distanceToPlayer);
+            SetMovingAnimation(distanceToPlayer > stoppingDistance);
         }
+    }
+
+    private void CacheAnimatorParameters()
+    {
+        if (animator == null || animator.runtimeAnimatorController == null)
+            return;
+
+        movingParameterHash = Animator.StringToHash(movingParameter);
+        attackTriggerHash = Animator.StringToHash(attackTrigger);
+        deadParameterHash = Animator.StringToHash(deadParameter);
+
+        foreach (AnimatorControllerParameter parameter in animator.parameters)
+        {
+            if (parameter.name == movingParameter && parameter.type == AnimatorControllerParameterType.Bool)
+                hasMovingParameter = true;
+            else if (parameter.name == attackTrigger && parameter.type == AnimatorControllerParameterType.Trigger)
+                hasAttackTrigger = true;
+            else if (parameter.name == deadParameter && parameter.type == AnimatorControllerParameterType.Bool)
+                hasDeadParameter = true;
+        }
+    }
+
+    private void SetMovingAnimation(bool isMoving)
+    {
+        if (hasMovingParameter)
+            animator.SetBool(movingParameterHash, isMoving);
     }
 
     private void FindPlayer()
@@ -156,6 +220,8 @@ public class BugEnemyController : MonoBehaviour
     private IEnumerator AttackRoutine()
     {
         isAttacking = true;
+        if (hasAttackTrigger)
+            animator.SetTrigger(attackTriggerHash);
 
         if (navMeshAgent != null && navMeshAgent.isActiveAndEnabled && navMeshAgent.isOnNavMesh)
         {
