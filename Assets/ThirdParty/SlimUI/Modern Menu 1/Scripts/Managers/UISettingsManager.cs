@@ -5,6 +5,8 @@ using TMPro;
 using NostalgIA.Presentation.Audio;
 using NostalgIA.Presentation.VFX;
 using NostalgIA.Input;
+using NostalgIA.Core.Game;
+using NostalgIA.Core.Services;
 
 namespace SlimUI.ModernMenu{
 	public class UISettingsManager : MonoBehaviour {
@@ -89,13 +91,8 @@ namespace SlimUI.ModernMenu{
 				fullscreentext.GetComponent<TMP_Text>().text = "apagado";
 			}
 
-			// check hud value
-			if(PlayerPrefs.GetInt("ShowHUD")==0){
-				showhudtext.GetComponent<TMP_Text>().text = "apagado";
-			}
-			else{
-				showhudtext.GetComponent<TMP_Text>().text = "encendido";
-			}
+			// check hud value (NostalgIA: HudSettings; por defecto el HUD se muestra)
+			showhudtext.GetComponent<TMP_Text>().text = HudSettings.Show ? "encendido" : "apagado";
 
 			// check tool tip value (NostalgIA: la escena del menú quitó esta opción, por eso reviso que exista)
 			if(tooltipstext == null){}
@@ -120,6 +117,9 @@ namespace SlimUI.ModernMenu{
 
 			// check mouse inverse
 			invertmousetext.GetComponent<TMP_Text>().text = LookSettings.Invert ? "encendido" : "apagado";
+
+			// NostalgIA: filas para cambiar las teclas de agacharse y de cambiar herramienta (solo PC).
+			if(!Application.isMobilePlatform) AddKeyRows();
 
 			// check motion blur
 			if(PlayerPrefs.GetInt("MotionBlur")==0){
@@ -193,15 +193,60 @@ namespace SlimUI.ModernMenu{
 		}
 
 		// the playerprefs variable that is checked to enable hud while in game
+		// NostalgIA: el HUD y los controles táctiles escuchan HudSettings y se ocultan al momento.
 		public void ShowHUD (){
-			if(PlayerPrefs.GetInt("ShowHUD")==0){
-				PlayerPrefs.SetInt("ShowHUD",1);
-				showhudtext.GetComponent<TMP_Text>().text = "encendido";
+			HudSettings.Show = !HudSettings.Show;
+			showhudtext.GetComponent<TMP_Text>().text = HudSettings.Show ? "encendido" : "apagado";
+		}
+
+		// ---------------------------------------------------------------- teclas configurables
+		// NostalgIA: se copian la etiqueta y el botón de «invertir mouse» dos veces, debajo de él,
+		// para no rehacer a mano el estilo del menú. Cada copia muestra su tecla y, al pulsarla,
+		// espera la tecla nueva (InputReader.StartRebind).
+		private TMP_Text crouchKeyText;
+		private TMP_Text switchKeyText;
+
+		private void AddKeyRows (){
+			RectTransform invertButton = invertmousetext.transform.parent as RectTransform;
+			RectTransform invertLabel = FindLabel(invertButton.parent, "invertir mouse");
+			RectTransform sensYButton = sensitivityYSlider.GetComponent<RectTransform>();
+			if(invertButton == null || invertLabel == null) return;
+			// Separación entre filas: la misma que hay entre «sensibilidad Y» e «invertir mouse».
+			float step = invertButton.anchoredPosition.y - sensYButton.anchoredPosition.y;
+			crouchKeyText = AddKeyRow(invertLabel, invertButton, step, "agacharse", InputActionNames.Crouch);
+			switchKeyText = AddKeyRow(invertLabel, invertButton, step * 2f, "cambiar herramienta", InputActionNames.SwitchTool);
+			RefreshKeyRows();
+		}
+
+		private TMP_Text AddKeyRow (RectTransform label, RectTransform button, float offsetY, string title, string action){
+			RectTransform newLabel = Instantiate(label, label.parent);
+			newLabel.anchoredPosition += new Vector2(0f, offsetY);
+			newLabel.GetComponent<TMP_Text>().text = title;
+
+			RectTransform newButton = Instantiate(button, button.parent);
+			newButton.anchoredPosition += new Vector2(0f, offsetY);
+			Button clickable = newButton.GetComponent<Button>();
+			clickable.onClick = new Button.ButtonClickedEvent(); // quita la llamada a InvertMouse de la copia
+			TMP_Text keyText = newButton.GetComponentInChildren<TMP_Text>();
+			clickable.onClick.AddListener(() => {
+				if(!ServiceLocator.TryGet(out InputReader reader)) return;
+				keyText.text = "pulsa una tecla";
+				reader.StartRebind(action, RefreshKeyRows);
+			});
+			return keyText;
+		}
+
+		private void RefreshKeyRows (){
+			if(crouchKeyText == null || !ServiceLocator.TryGet(out InputReader reader)) return;
+			crouchKeyText.text = reader.GetKeyLabel(InputActionNames.Crouch);
+			switchKeyText.text = reader.GetKeyLabel(InputActionNames.SwitchTool);
+		}
+
+		private static RectTransform FindLabel (Transform parent, string text){
+			foreach(TMP_Text label in parent.GetComponentsInChildren<TMP_Text>(true)){
+				if(label.text == text) return label.rectTransform;
 			}
-			else if(PlayerPrefs.GetInt("ShowHUD")==1){
-				PlayerPrefs.SetInt("ShowHUD",0);
-				showhudtext.GetComponent<TMP_Text>().text = "apagado";
-			}
+			return null;
 		}
 
 		// the playerprefs variable that is checked to enable mobile sfx while in game

@@ -157,6 +157,8 @@ MonoBehaviour:
   slideFovBoost: 5
   grappleFovSpeed: 24
   fovChangeSpeed: 5
+  grappleAttachFovPunch: 6
+  fovPunchDecay: 4
   useHeadBob: 1
   bobAmount: 0.03
   bobSpeed: 12
@@ -213,7 +215,7 @@ MeshRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5164704485471470031}
-  m_Enabled: 1
+  m_Enabled: 0
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
@@ -5123,6 +5125,7 @@ GameObject:
   - component: {fileID: 4763264352384977089}
   - component: {fileID: 3871245519006427731}
   - component: {fileID: 6203948571029384756}
+  - component: {fileID: 2990697086711662998}
   m_Layer: 6
   m_Name: Player
   m_TagString: Player
@@ -5249,6 +5252,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: NostalgIA.Gameplay::NostalgIA.Gameplay.Aim.AimService
   aimCamera: {fileID: 3415554554926441822}
   probeDistance: 120
+  grappleAssistAngle: 5
+  grappleAssistMaxRadius: 1.6
 --- !u!114 &4763264352384977089
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5262,6 +5267,52 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: NostalgIA.Gameplay::NostalgIA.Gameplay.Player.RespawnService
   tools: {fileID: 3019190042854401692}
+--- !u!114 &3871245519006427731
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7243138653710705996}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 91e59c6da0544b73b447d98d3b2c8fc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: NostalgIA.Gameplay::NostalgIA.Gameplay.Player.DuplicatePlayerGuard
+--- !u!114 &6203948571029384756
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7243138653710705996}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c2ce76a9059bf410f96b5c4b7b962b4d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  footstep: {fileID: 202406593149995430, guid: ff1250fdfab64814bcdf7ccde7aa98b5, type: 2}
+  stepDistance: 2
+  land: {fileID: 790041869801421236, guid: 7e92c27091ef4b0494096a5ef75e46fa, type: 2}
+  slide: {fileID: 389180604098807366, guid: 00210a1bfc114e9fb321235bffa404a3, type: 2}
+  vacuumFull: {fileID: 861664330938876554, guid: 891bc132daa04ccc9987e8501ba54b78, type: 2}
+--- !u!114 &2990697086711662998
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7243138653710705996}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a857751c9ed9943f087b645249d6a4cc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: NostalgIA.Presentation::NostalgIA.Presentation.VFX.RobotBreakApart
+  cameraPivot: {fileID: 0}
+  burstImpulse: 0.15
+  pieceMass: 0.4
+  cameraOffset: {x: 1.8, y: 1.3}
+  cameraMoveTime: 1.2
 --- !u!1 &8537935048495171037
 GameObject:
   m_ObjectHideFlags: 0
@@ -5457,10 +5508,50 @@ MonoBehaviour:
   grapple: {fileID: 0}
   robotRoot: {fileID: 0}
   modeTransitionSpeed: 3.5
-  clawLaunchTime: 0.055
-  clawRetractSpeed: 28
-  compartmentInflateSpeed: 9
-  maxCompartmentInflation: 2.45
+  transitionTwistDegrees: 28
+  grappleOpenExtraDegrees: 6
+  vacuumCloseFraction: 0.55
+  vacuumMidCurlDegrees: 12
+  vacuumTipCurlDegrees: 5
+  suctionClawOpen: 0.85
+  suctionClawSpeed: 7
+  ejectOpenTime: 0.25
+  ejectClawSpeed: 24
+  hookFlightSpeed: 75
+  gripCloseTime: 0.09
+  unhookFraction: 0.2
+  dockFraction: 0.1
+  unhookPushDistance: 0.25
+  missReachDistance: 7
+  missDuration: 0.32
+  chamberRadialGrowth: 0.35
+  chamberTopAnchor: 0.6
+  chamberLengthGrowth: 0.12
+  tankRadialGrowth: 0.22
+  ringRadialGrowth: 0.1
+  inflateFrequency: 3.2
+  inflateDamping: 0.55
+  gulpAmplitude: 0.14
+  gulpDuration: 0.45
+  deflateAmplitude: 0.08
+  pressureWobbleAmplitude: 0.015
+--- !u!114 &5501928374650192837
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8645152226666509418}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0474f924b33e44ec281004b9907f33c2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  startClip: {fileID: 8300000, guid: b9a288d50d7c240d7b3a998cabd48f43, type: 3}
+  loopClip: {fileID: 8300000, guid: bd611a1423edc4b9f92d605e6a2c57fe, type: 3}
+  endClip: {fileID: 8300000, guid: 41c5e048384304fae9e0c688fdf96078, type: 3}
+  volume: 0.8
+  fadeTime: 0.06
 --- !u!1 &8960036571309276193
 GameObject:
   m_ObjectHideFlags: 0
@@ -6087,49 +6178,3 @@ Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 75b05a9674e5316ef94692c037609d2e, type: 3}
   m_PrefabInstance: {fileID: 8384318185046393080}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &3871245519006427731
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7243138653710705996}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 91e59c6da0544b73b447d98d3b2c8fc5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: NostalgIA.Gameplay::NostalgIA.Gameplay.Player.DuplicatePlayerGuard
---- !u!114 &5501928374650192837
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8645152226666509418}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0474f924b33e44ec281004b9907f33c2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  startClip: {fileID: 8300000, guid: b9a288d50d7c240d7b3a998cabd48f43, type: 3}
-  loopClip: {fileID: 8300000, guid: bd611a1423edc4b9f92d605e6a2c57fe, type: 3}
-  endClip: {fileID: 8300000, guid: 41c5e048384304fae9e0c688fdf96078, type: 3}
-  volume: 0.8
-  fadeTime: 0.06
---- !u!114 &6203948571029384756
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7243138653710705996}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c2ce76a9059bf410f96b5c4b7b962b4d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  footstep: {fileID: 202406593149995430, guid: ff1250fdfab64814bcdf7ccde7aa98b5, type: 2}
-  stepDistance: 2
-  land: {fileID: 790041869801421236, guid: 7e92c27091ef4b0494096a5ef75e46fa, type: 2}
-  slide: {fileID: 389180604098807366, guid: 00210a1bfc114e9fb321235bffa404a3, type: 2}
-  vacuumFull: {fileID: 861664330938876554, guid: 891bc132daa04ccc9987e8501ba54b78, type: 2}

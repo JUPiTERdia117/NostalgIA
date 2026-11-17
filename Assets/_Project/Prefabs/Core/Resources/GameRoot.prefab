@@ -5120,6 +5120,8 @@ GameObject:
   m_Component:
   - component: {fileID: 4121636279460277051}
   - component: {fileID: 7543331220587817907}
+  - component: {fileID: 7222903183043261802}
+  - component: {fileID: 6945126492372140705}
   m_Layer: 0
   m_Name: GameRoot
   m_TagString: Untagged
@@ -5160,6 +5162,32 @@ MonoBehaviour:
   inputReader: {fileID: 11400000, guid: c0d5bf69cc9ca436fb4891099b55a662, type: 2}
   prewarmPools:
   - {fileID: 11400000, guid: 8849a4502f8de44338cfd779703ba81d, type: 2}
+--- !u!114 &7222903183043261802
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3620904407201665145}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b311ca3acfa9c4f95b445189d2b91dd9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: NostalgIA.Gameplay::NostalgIA.Gameplay.Level.LevelProgressService
+--- !u!114 &6945126492372140705
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3620904407201665145}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 92b1c6e01dc6d41909519ba376a22c90, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: NostalgIA.Presentation::NostalgIA.Presentation.UI.FlowScreensPresenter
+  font: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  deathPanelDelay: 1.6
 --- !u!1 &5294984328451081404
 GameObject:
   m_ObjectHideFlags: 0
@@ -10859,6 +10887,21 @@ MonoBehaviour:
   nextLevelButton: {fileID: 2964345899144703140}
   nextLevelLabel: {fileID: 7275225902957462586}
   settings: {fileID: 5839201746620193847}
+--- !u!114 &5839201746620193847
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6884837586164755266}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a47e2c5d9f1b4c6e8d3a0b7f25c19e84, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  window: {fileID: 7676327915651817463}
+  font: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  position: {x: 300, y: -30}
 --- !u!1 &7115380580384049988
 GameObject:
   m_ObjectHideFlags: 0
@@ -15839,18 +15882,3 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!114 &5839201746620193847
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6884837586164755266}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a47e2c5d9f1b4c6e8d3a0b7f25c19e84, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  window: {fileID: 7676327915651817463}
-  font: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  position: {x: 300, y: -30}

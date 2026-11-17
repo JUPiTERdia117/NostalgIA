@@ -304,6 +304,7 @@ namespace NostalgIA.Input
                 case GameState.MainMenu:
                 case GameState.StationSelect:
                 case GameState.Results:
+                case GameState.Respawning: // pantalla de muerte con botón
                     EnableUI();
                     break;
                 default:
@@ -390,6 +391,82 @@ namespace NostalgIA.Input
             if (activeAsset == null) return;
             activeAsset.RemoveAllBindingOverrides();
             PlayerPrefs.DeleteKey(BindingOverridesKey);
+            BindingsChanged?.Invoke();
+        }
+
+        // ------------------------------------------------------------- cambiar teclas
+        /// <summary>Se dispara cuando cambia una tecla, para que la interfaz actualice sus etiquetas.</summary>
+        public event Action BindingsChanged;
+
+        private InputActionRebindingExtensions.RebindingOperation rebinding;
+
+        /// <summary>Indica si se está esperando la tecla nueva.</summary>
+        public bool IsRebinding => rebinding != null;
+
+        /// <summary>Acciones cuya tecla puede cambiar el jugador (el GDD marca C y F como configurables).</summary>
+        public static bool IsRebindable(string actionName) =>
+            actionName == InputActionNames.Crouch || actionName == InputActionNames.SwitchTool;
+
+        /// <summary>Nombre de la tecla asignada a una acción (por ejemplo, «C»).</summary>
+        public string GetKeyLabel(string actionName)
+        {
+            InputAction action = activeAsset != null ? activeAsset.FindAction(actionName) : null;
+            int index = KeyboardBindingIndex(action);
+            return index >= 0 ? action.GetBindingDisplayString(index) : string.Empty;
+        }
+
+        /// <summary>
+        /// Espera la siguiente tecla del teclado y la asigna a la acción. Escape cancela.
+        /// Se guarda en <c>PlayerPrefs</c> al terminar.
+        /// </summary>
+        /// <param name="actionName">Acción a cambiar (Crouch o SwitchTool).</param>
+        /// <param name="onFinished">Se llama al terminar o cancelar.</param>
+        public void StartRebind(string actionName, Action onFinished)
+        {
+            CancelRebind();
+            InputAction action = activeAsset != null ? activeAsset.FindAction(actionName) : null;
+            int index = KeyboardBindingIndex(action);
+            if (index < 0) { onFinished?.Invoke(); return; }
+
+            // La acción debe estar desactivada para reasignarla; el mapa de juego ya lo está en
+            // la pausa y en el menú, pero me aseguro.
+            bool wasEnabled = action.enabled;
+            action.Disable();
+            rebinding = action.PerformInteractiveRebinding(index)
+                .WithControlsHavingToMatchPath("<Keyboard>")
+                .WithControlsExcluding("<Keyboard>/anyKey")
+                .WithCancelingThrough("<Keyboard>/escape")
+                .OnComplete(op => FinishRebind(action, wasEnabled, true, onFinished))
+                .OnCancel(op => FinishRebind(action, wasEnabled, false, onFinished))
+                .Start();
+        }
+
+        /// <summary>Cancela la espera de tecla (por ejemplo, al cerrar la pausa).</summary>
+        public void CancelRebind() => rebinding?.Cancel();
+
+        private void FinishRebind(InputAction action, bool wasEnabled, bool changed, Action onFinished)
+        {
+            rebinding?.Dispose();
+            rebinding = null;
+            if (wasEnabled) action.Enable();
+            if (changed)
+            {
+                SaveBindingOverrides();
+                BindingsChanged?.Invoke();
+            }
+            onFinished?.Invoke();
+        }
+
+        /// <summary>Primer binding de teclado de la acción (−1 si no tiene).</summary>
+        private static int KeyboardBindingIndex(InputAction action)
+        {
+            if (action == null) return -1;
+            for (int i = 0; i < action.bindings.Count; i++)
+            {
+                InputBinding binding = action.bindings[i];
+                if (!binding.isComposite && !binding.isPartOfComposite && binding.path.StartsWith("<Keyboard>")) return i;
+            }
+            return -1;
         }
 
         // ------------------------------------------------------------- cálculo de la mirada

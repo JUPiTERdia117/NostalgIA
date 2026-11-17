@@ -76,7 +76,11 @@ namespace NostalgIA.Presentation.UI
             EventBus<GameStateChanged>.Subscribe(OnGameStateChanged);
             EventBus<InputSchemeChanged>.Subscribe(OnSchemeChanged);
             EventBus<NextLevelStatusReported>.Subscribe(OnNextLevelStatusReported);
-            if (ServiceLocator.TryGet(out InputReader reader)) scheme = reader.CurrentScheme;
+            if (ServiceLocator.TryGet(out InputReader reader))
+            {
+                scheme = reader.CurrentScheme;
+                reader.BindingsChanged += OnBindingsChanged;
+            }
             bool paused = ServiceLocator.TryGet(out GameStateMachine machine) && machine.State == GameState.Paused;
             SetVisible(paused);
         }
@@ -87,6 +91,14 @@ namespace NostalgIA.Presentation.UI
             EventBus<GameStateChanged>.Unsubscribe(OnGameStateChanged);
             EventBus<InputSchemeChanged>.Unsubscribe(OnSchemeChanged);
             EventBus<NextLevelStatusReported>.Unsubscribe(OnNextLevelStatusReported);
+            if (ServiceLocator.TryGet(out InputReader reader)) reader.BindingsChanged -= OnBindingsChanged;
+        }
+
+        /// <summary>El jugador cambió una tecla en los ajustes: se rehace la lista de controles.</summary>
+        private void OnBindingsChanged()
+        {
+            BuildTexts();
+            if (canvas.enabled) RefreshTexts();
         }
 
         private void OnGameStateChanged(in GameStateChanged evt) => SetVisible(evt.Current == GameState.Paused);

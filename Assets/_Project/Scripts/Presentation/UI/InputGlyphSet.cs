@@ -7,6 +7,8 @@
 
 using System;
 using NostalgIA.Core.Events;
+using NostalgIA.Core.Services;
+using NostalgIA.Input;
 using UnityEngine;
 
 namespace NostalgIA.Presentation.UI
@@ -82,7 +84,14 @@ namespace NostalgIA.Presentation.UI
             {
                 case InputScheme.Gamepad: return entry.gamepad ?? string.Empty;
                 case InputScheme.Touch: return entry.touch ?? string.Empty;
-                default: return entry.keyboardMouse ?? string.Empty;
+                default:
+                    // Agacharse y cambiar herramienta se pueden reasignar: se muestra la tecla real.
+                    if (InputReader.IsRebindable(action) && ServiceLocator.TryGet(out InputReader reader))
+                    {
+                        string key = reader.GetKeyLabel(action);
+                        if (!string.IsNullOrEmpty(key)) return key;
+                    }
+                    return entry.keyboardMouse ?? string.Empty;
             }
         }
 

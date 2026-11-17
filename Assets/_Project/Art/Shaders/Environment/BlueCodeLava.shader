@@ -50,13 +50,9 @@ Shader "Tutorial/BlueCodeLava"
                 0x1F1111F, 0x0F8383E, 0x1F21084, 0x0000840   // D S T .
             };
 
-            // Número "aleatorio" en [0, 1) que siempre es el mismo para la misma celda.
-            float Hash(float2 p)
-            {
-                float3 p3 = frac(p.xyx * 0.1031);
-                p3 += dot(p3, p3.yzx + 33.33);
-                return frac((p3.x + p3.y) * p3.z);
-            }
+            // Número de 0 a 1, siempre el mismo para la misma celda: decide qué carácter va y cuánto
+            // mide cada línea. Es una fórmula aritmética (Interleaved Gradient Noise), no un hash.
+            float CellValue(float2 cell) { return frac(52.9829189 * frac(dot(cell, float2(0.06711056, 0.00583715)))); }
 
             // 1 si el punto `local` (0 a 1 dentro de la celda) cae en un píxel encendido del carácter.
             // La celda se parte en 7×7 y el carácter ocupa el 5×5 del centro (el borde separa letras).
@@ -78,31 +74,31 @@ Shader "Tutorial/BlueCodeLava"
             half4 Frag(Varyings input) : SV_Target
             {
                 float scroll = _Time.y * _ScrollSpeed;
-                float2 grid = input.uv * _WorldScale * float2(28.0, 56.0);   // Rejilla de caracteres.
+                float2 grid = input.uv * _WorldScale * float2(28.0, 56.0);   // Una celda = un carácter.
 
-                // Capa de enfrente: se lee como bloques de código.
+                // Capa de enfrente: renglones de código que bajan.
                 float2 p = grid + float2(0.0, scroll * 8.0);
                 float2 cell = floor(p);
-                float row = Hash(float2(cell.y, 1.0));
-                float col = fmod(abs(cell.x), 36.0);                                          // El diseño se repite cada 36 columnas.
-                float indent = floor(Hash(float2(floor(cell.y * 0.2), 2.0)) * 3.0) * 4.0 + 9.0; // Sangría compartida por 5 filas.
-                float lineEnd = indent + floor(Hash(float2(cell.y, 3.0)) * 18.0);
-                bool lineNumber = col >= 1.0 && col <= 5.0 && row > 0.25;
-                bool lineBody = col >= indent && col <= lineEnd && row > 0.12;
-                float r = Hash(cell);
-                float front = ((lineNumber || lineBody) && r > 0.16) ? Glyph(uint(r * 64.0), frac(p)) : 0.0;
+                float col = fmod(abs(cell.x), 36.0);                                              // Cada renglón mide 36 columnas.
+                float row = CellValue(float2(cell.y, 1.0));                                       // Algunas filas quedan vacías.
+                float indent = 9.0 + 4.0 * floor(3.0 * CellValue(float2(floor(cell.y / 5.0), 2.0))); // Sangría compartida por 5 filas.
+                float lineEnd = indent + floor(18.0 * CellValue(float2(cell.y, 3.0)));            // Largo de la línea.
+                bool isText = (col >= 1.0 && col <= 5.0 && row > 0.25)                             // Número de línea.
+                           || (col >= indent && col <= lineEnd && row > 0.12);                    // Código.
+                float r = CellValue(cell);
+                float front = (isText && r > 0.16) ? Glyph(uint(r * 64.0), frac(p)) : 0.0;
 
-                // Capa de atrás: dispersa, tenue y más lenta (paralaje).
+                // Capa de atrás: pocos caracteres, tenues y más lentos (da profundidad).
                 float2 q = grid + float2(3.5, scroll * 4.5);
-                float rb = Hash(floor(q) + 19.3);
-                float back = (rb > 0.72 && Hash(float2(floor(q.y), 4.0)) > 0.4) ? Glyph(uint(rb * 32.0), frac(q)) * 0.22 : 0.0;
+                float rb = CellValue(floor(q) + 19.0);
+                float back = (rb > 0.72 && CellValue(float2(floor(q.y), 4.0)) > 0.4) ? 0.22 * Glyph(uint(rb * 32.0), frac(q)) : 0.0;
 
-                // Fondo azul con líneas de barrido y un pulso lento.
+                // Fondo: líneas de barrido de monitor y un pulso lento.
                 float2 w = input.uv * _WorldScale * 10.0;
-                float wave = (0.93 + 0.07 * sin((w.y * 80.0 + scroll * 20.0) * PI))
-                           * (0.88 + 0.12 * sin(_Time.y * 2.5 + w.x * 0.8));
+                float scanLines = 0.93 + 0.07 * sin((w.y * 80.0 + scroll * 20.0) * PI);
+                float pulse = 0.88 + 0.12 * sin(_Time.y * 2.5 + w.x * 0.8);
 
-                float3 color = lerp(_DeepColor.rgb, _BaseColor.rgb, wave);
+                float3 color = lerp(_DeepColor.rgb, _BaseColor.rgb, scanLines * pulse);
                 color = lerp(color, _CodeColor.rgb * 0.65, back);
                 color = lerp(color, _CodeColor.rgb * _GlowIntensity, front);
                 return half4(color, 1.0);

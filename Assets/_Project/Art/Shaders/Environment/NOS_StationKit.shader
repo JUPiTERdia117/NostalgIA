@@ -2,6 +2,7 @@
 // Material de los muros, pisos y techos de las Estaciones: color base con luz,
 // rejilla de neón de 1 m y, solo en muros, código y una banda de escaneo que sube.
 // No usa texturas: el patrón sale de la posición en el mundo.
+// Refleja el entorno con las Reflection Probes de la escena (pisos pulidos y muros metálicos).
 
 Shader "NOS/StationKit"
 {
@@ -15,6 +16,10 @@ Shader "NOS/StationKit"
         _CodeEmission ("Emisión del código", Range(0, 4)) = 0.5
         _ScanSpeed ("Velocidad de escaneo (m/s)", Float) = 1.5
         _ScanEmission ("Emisión de la banda de escaneo", Range(0, 2)) = 0.25
+        _FloorReflection ("Reflejo del piso (Reflection Probe)", Range(0, 1)) = 0.6
+        _FloorSmoothness ("Suavidad del piso", Range(0, 1)) = 0.85
+        _WallReflection ("Reflejo de muros y techo (metal)", Range(0, 1)) = 0.25
+        _WallSmoothness ("Suavidad de muros y techo", Range(0, 1)) = 0.6
     }
 
     SubShader
@@ -36,6 +41,10 @@ Shader "NOS/StationKit"
             half _CodeEmission;
             float _ScanSpeed;
             half _ScanEmission;
+            half _FloorReflection;
+            half _FloorSmoothness;
+            half _WallReflection;
+            half _WallSmoothness;
         CBUFFER_END
         ENDHLSL
 
@@ -57,6 +66,10 @@ Shader "NOS/StationKit"
             #pragma multi_compile_fragment _ _ADDITIONAL_LIGHT_SHADOWS
             #pragma multi_compile_fragment _ _SHADOWS_SOFT
             #pragma multi_compile_fragment _ _SCREEN_SPACE_OCCLUSION
+            // Reflection Probes: mezcla entre sondas, proyección de caja y atlas (Forward+).
+            #pragma multi_compile_fragment _ _REFLECTION_PROBE_BLENDING
+            #pragma multi_compile_fragment _ _REFLECTION_PROBE_BOX_PROJECTION
+            #pragma multi_compile_fragment _ _REFLECTION_PROBE_ATLAS
             #pragma multi_compile_instancing
 
             // Luz horneada: sin esto las luces Baked (como las LavaGlow) nunca se ven en
@@ -148,7 +161,21 @@ Shader "NOS/StationKit"
                 surface.occlusion = 1;
                 surface.alpha = 1;
 
-                return half4(UniversalFragmentBlinnPhong(light, surface).rgb, 1);
+                half3 color = UniversalFragmentBlinnPhong(light, surface).rgb;
+
+                // Reflejo de la Reflection Probe más cercana (o del cielo si no hay ninguna).
+                // El piso pulido refleja más y más nítido; muros y techo, un brillo metálico suave.
+                bool isFloor = !isWall && normalWS.y > 0.0;
+                half reflection = isFloor ? _FloorReflection : _WallReflection;
+                half smoothness = isFloor ? _FloorSmoothness : _WallSmoothness;
+                half3 reflectVector = reflect(-light.viewDirectionWS, normalWS);
+                half3 environment = GlossyEnvironmentReflection(reflectVector, pos, 1.0h - smoothness, 1.0h, light.normalizedScreenSpaceUV);
+
+                // Fresnel: se refleja más cuando se mira la superficie de lado, como en un piso real.
+                half fresnel = pow(1.0h - saturate(dot(normalWS, light.viewDirectionWS)), 4.0h);
+                color += environment * reflection * (0.4h + 0.6h * fresnel);
+
+                return half4(color, 1);
             }
             ENDHLSL
         }

@@ -1,15 +1,18 @@
 // -----------------------------------------------------------------------------
 // NostalgIA — Jugabilidad (NostalgIA.Gameplay)
 // Archivo: RespawnService.cs
-// Propósito: reaparición en el último checkpoint sin recargar la escena.
+// Propósito: reaparición en el último checkpoint (o reinicio del Tutorial) cuando
+// el jugador pulsa el botón de la pantalla de muerte.
 // -----------------------------------------------------------------------------
 
+using NostalgIA.Core;
 using NostalgIA.Core.Events;
 using NostalgIA.Core.Game;
 using NostalgIA.Core.Lifecycle;
 using NostalgIA.Core.Services;
 using NostalgIA.Gameplay.Tools;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace NostalgIA.Gameplay.Player
 {
@@ -20,18 +23,13 @@ namespace NostalgIA.Gameplay.Player
     /// <para>Secuencia:</para>
     /// <list type="number">
     /// <item>Recibe <see cref="PlayerDied"/> y cambia el estado global a <see cref="GameState.Respawning"/>
-    /// (sin entrada) durante <c>respawnDelay</c> segundos (≈ 0,8 s, tiempo de la transición visual).</item>
-    /// <item>Reubica al jugador en el último checkpoint activo, anula velocidades, restablece corazones
-    /// y herramientas (gancho suelto, succión detenida).</item>
-    /// <item>Notifica a los <see cref="IResettable"/> registrados para que vuelvan a su estado inicial.</item>
+    /// (sin entrada de juego). La pantalla de muerte muestra el robot desarmado y un botón.</item>
+    /// <item>Al pulsar el botón llega <see cref="RespawnRequested"/>. En el Tutorial se vuelve a
+    /// cargar la escena completa (el tutorial empieza de nuevo).</item>
+    /// <item>En los demás niveles reubica al jugador en el último checkpoint activo, anula
+    /// velocidades, restablece corazones y herramientas y notifica a los <see cref="IResettable"/>.</item>
     /// <item>Publica <see cref="PlayerRespawned"/> y regresa a <see cref="GameState.Playing"/>.</item>
     /// </list>
-    /// <para>
-    /// Sustituye la recarga completa de escena del prototipo, que tardaba varios segundos en
-    /// escenas grandes, generaba basura y obligaba a guardar el progreso en campos estáticos.
-    /// La espera se cuenta en <c>Update</c> con un temporizador en lugar de una corrutina, para
-    /// no asignar el enumerador en cada muerte.
-    /// </para>
     /// </remarks>
     [DisallowMultipleComponent]
     [RequireComponent(typeof(PlayerMotor), typeof(PlayerHealth))]
@@ -48,7 +46,6 @@ namespace NostalgIA.Gameplay.Player
         private int spawnCheckpointIndex = -1;
 
         private bool respawnPending;
-        private float respawnTimer;
 
         /// <summary>Posición de reaparición actual.</summary>
         public Vector3 SpawnPosition => spawnPosition;
@@ -56,7 +53,7 @@ namespace NostalgIA.Gameplay.Player
         /// <summary>Índice del checkpoint actual (−1 = inicio de la escena).</summary>
         public int SpawnCheckpointIndex => spawnCheckpointIndex;
 
-        /// <summary>Indica si hay una reaparición en curso.</summary>
+        /// <summary>Indica si el jugador está muerto esperando el botón.</summary>
         public bool IsRespawning => respawnPending;
 
         /// <summary>Toma la posición inicial de la escena como primer punto de reaparición.</summary>
@@ -74,6 +71,7 @@ namespace NostalgIA.Gameplay.Player
         {
             ServiceLocator.Register(this);
             EventBus<PlayerDied>.Subscribe(OnPlayerDied);
+            EventBus<RespawnRequested>.Subscribe(OnRespawnRequested);
             EventBus<CheckpointActivated>.Subscribe(OnCheckpointActivated);
             EventBus<LevelGateCrossed>.Subscribe(OnLevelGateCrossed);
         }
@@ -82,6 +80,7 @@ namespace NostalgIA.Gameplay.Player
         private void OnDisable()
         {
             EventBus<PlayerDied>.Unsubscribe(OnPlayerDied);
+            EventBus<RespawnRequested>.Unsubscribe(OnRespawnRequested);
             EventBus<CheckpointActivated>.Unsubscribe(OnCheckpointActivated);
             EventBus<LevelGateCrossed>.Unsubscribe(OnLevelGateCrossed);
             ServiceLocator.Unregister(this);
@@ -107,22 +106,32 @@ namespace NostalgIA.Gameplay.Player
             spawnCheckpointIndex = evt.Index;
         }
 
-        /// <summary>Inicia la secuencia de reaparición.</summary>
+        /// <summary>El jugador murió: se espera al botón de la pantalla de muerte.</summary>
         private void OnPlayerDied(in PlayerDied evt)
         {
             if (respawnPending) return;
             respawnPending = true;
-            respawnTimer = motor.Settings.respawnDelay;
             if (ServiceLocator.TryGet(out GameStateMachine machine)) machine.ChangeState(GameState.Respawning);
             tools?.ResetTools();
         }
 
-        /// <summary>Cuenta la espera de la transición visual.</summary>
-        private void Update()
+        /// <summary>
+        /// Se pulsó el botón. En el Tutorial se reinicia la escena completa; en los demás niveles
+        /// se reaparece en el último checkpoint.
+        /// </summary>
+        private void OnRespawnRequested(in RespawnRequested evt)
         {
             if (!respawnPending) return;
-            respawnTimer -= Time.unscaledDeltaTime;
-            if (respawnTimer <= 0f) CompleteRespawn();
+            if (gameObject.scene.name == SceneNames.Tutorial)
+            {
+                respawnPending = false;
+                // Aviso de reaparición antes de recargar: los efectos persistentes (posprocesado de
+                // GameRoot, pantalla de muerte) vuelven a la normalidad.
+                EventBus<PlayerRespawned>.Raise(new PlayerRespawned(-1, spawnPosition, health.MaxHearts));
+                SceneManager.LoadScene(SceneNames.Tutorial);
+                return;
+            }
+            CompleteRespawn();
         }
 
         /// <summary>Reubica y restablece al jugador y a la estación.</summary>
