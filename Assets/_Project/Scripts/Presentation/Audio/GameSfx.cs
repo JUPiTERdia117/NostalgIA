@@ -93,6 +93,7 @@ namespace NostalgIA.Presentation.Audio
 
         private AudioClip continuousWalkClip;
         private bool grounded;
+        private bool inWater;
         private bool initialToolReceived;
         private float lastWaterSplashTime = float.NegativeInfinity;
         private float walkStopTimer;
@@ -144,16 +145,19 @@ namespace NostalgIA.Presentation.Audio
         private void OnEnable()
         {
             initialToolReceived = false;
+            inWater = false;
             EventBus<LocomotionStateChanged>.Subscribe(OnLocomotion);
             EventBus<PlayerLanded>.Subscribe(OnLanded);
             EventBus<SlideStarted>.Subscribe(OnSlide);
             EventBus<VacuumFull>.Subscribe(OnVacuumFull);
+            EventBus<VacuumEmptyTrigger>.Subscribe(OnVacuumEmptyTrigger);
             EventBus<ObjectLaunched>.Subscribe(OnObjectLaunched);
             EventBus<ToolSwitched>.Subscribe(OnToolSwitched);
             EventBus<GrappleFired>.Subscribe(OnGrappleFired);
             EventBus<StarCollected>.Subscribe(OnStarCollected);
             EventBus<BubbleBounced>.Subscribe(OnBubbleBounced);
             EventBus<ShallowWaterEntered>.Subscribe(OnWaterEntered);
+            EventBus<ShallowWaterPresenceChanged>.Subscribe(OnWaterPresenceChanged);
             EventBus<CheckpointActivated>.Subscribe(OnCheckpointActivated);
             EventBus<PlayerDied>.Subscribe(OnPlayerDied);
             EventBus<EnemyAttacked>.Subscribe(OnEnemyAttacked);
@@ -167,12 +171,14 @@ namespace NostalgIA.Presentation.Audio
             EventBus<PlayerLanded>.Unsubscribe(OnLanded);
             EventBus<SlideStarted>.Unsubscribe(OnSlide);
             EventBus<VacuumFull>.Unsubscribe(OnVacuumFull);
+            EventBus<VacuumEmptyTrigger>.Unsubscribe(OnVacuumEmptyTrigger);
             EventBus<ObjectLaunched>.Unsubscribe(OnObjectLaunched);
             EventBus<ToolSwitched>.Unsubscribe(OnToolSwitched);
             EventBus<GrappleFired>.Unsubscribe(OnGrappleFired);
             EventBus<StarCollected>.Unsubscribe(OnStarCollected);
             EventBus<BubbleBounced>.Unsubscribe(OnBubbleBounced);
             EventBus<ShallowWaterEntered>.Unsubscribe(OnWaterEntered);
+            EventBus<ShallowWaterPresenceChanged>.Unsubscribe(OnWaterPresenceChanged);
             EventBus<CheckpointActivated>.Unsubscribe(OnCheckpointActivated);
             EventBus<PlayerDied>.Unsubscribe(OnPlayerDied);
             EventBus<EnemyAttacked>.Unsubscribe(OnEnemyAttacked);
@@ -210,13 +216,23 @@ namespace NostalgIA.Presentation.Audio
                     {
                         footstepSource.time = ContinuousWalkStart;
                     }
+
+                    // Al caminar sobre agua se reproduce al mismo tiempo el efecto de chapoteo de agua.
+                    if (inWater && waterSplashSource != null && !waterSplashSource.isPlaying)
+                    {
+                        Play(waterSplashSource);
+                    }
                 }
                 else
                 {
                     walkStopTimer -= Time.unscaledDeltaTime;
-                    if (walkStopTimer <= 0f && footstepSource.isPlaying)
+                    if (walkStopTimer <= 0f)
                     {
-                        footstepSource.Pause();
+                        if (footstepSource.isPlaying) footstepSource.Pause();
+                        if (inWater && waterSplashSource != null && waterSplashSource.isPlaying && Time.time - lastWaterSplashTime > 0.9f)
+                        {
+                            waterSplashSource.Stop();
+                        }
                     }
                 }
                 return;
@@ -229,6 +245,7 @@ namespace NostalgIA.Presentation.Audio
             if (walked < stepDistance) return;
             walked = 0f;
             Play(footstepSource);
+            if (inWater) Play(waterSplashSource);
         }
 
         private void OnLocomotion(in LocomotionStateChanged e)
@@ -255,6 +272,7 @@ namespace NostalgIA.Presentation.Audio
 
         private void OnSlide(in SlideStarted e) => Play(slideSource);
         private void OnVacuumFull(in VacuumFull e) => Play(fullSource);
+        private void OnVacuumEmptyTrigger(in VacuumEmptyTrigger e) => Play(fullSource);
         private void OnObjectLaunched(in ObjectLaunched e) => Play(launchSource);
 
         private void OnToolSwitched(in ToolSwitched e)
@@ -275,7 +293,13 @@ namespace NostalgIA.Presentation.Audio
         private void OnWaterEntered(in ShallowWaterEntered e)
         {
             lastWaterSplashTime = Time.time;
+            inWater = true;
             Play(waterSplashSource);
+        }
+
+        private void OnWaterPresenceChanged(in ShallowWaterPresenceChanged e)
+        {
+            inWater = e.InWater;
         }
 
         private void OnCheckpointActivated(in CheckpointActivated e) => Play(checkpointSource);

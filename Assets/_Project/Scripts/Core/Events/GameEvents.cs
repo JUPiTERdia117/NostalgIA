@@ -703,6 +703,18 @@ namespace NostalgIA.Core.Events
         }
     }
 
+    /// <summary>
+    /// Cambio de presencia del jugador dentro del volumen de agua poco profunda. Publica <c>WaterFallCushion</c>.
+    /// </summary>
+    public readonly struct ShallowWaterPresenceChanged : IGameEvent
+    {
+        /// <summary><c>true</c> mientras los pies del jugador están en el agua poco profunda.</summary>
+        public readonly bool InWater;
+
+        /// <summary>Crea el evento.</summary>
+        public ShallowWaterPresenceChanged(bool inWater) => InWater = inWater;
+    }
+
     // ===================================================================== Puertas entre niveles
 
     /// <summary>

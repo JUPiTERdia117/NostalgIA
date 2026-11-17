@@ -77,6 +77,7 @@ namespace NostalgIA.Gameplay.Tools
         private int pendingCapacity;
         private bool equipped;
         private bool suctioning;
+        private bool wasAbsorbHeld;
         private Vector3 eyePosition;
         private Vector3 eyeDirection = Vector3.forward;
         private bool hasAim;
@@ -142,11 +143,16 @@ namespace NostalgIA.Gameplay.Tools
         public void Unequip()
         {
             equipped = false;
+            wasAbsorbHeld = false;
             StopSuction();
         }
 
         /// <inheritdoc />
-        public void ResetTool() => StopSuction();
+        public void ResetTool()
+        {
+            wasAbsorbHeld = false;
+            StopSuction();
+        }
 
         /// <inheritdoc />
         public void Tick(in ToolInput input, in AimSample aim, float deltaTime)
@@ -158,12 +164,26 @@ namespace NostalgIA.Gameplay.Tools
                 eyeDirection = aim.Ray.direction;
             }
 
-            if (!equipped) return;
+            if (!equipped)
+            {
+                wasAbsorbHeld = false;
+                return;
+            }
+
+            bool absorbJustPressed = input.AbsorbHeld && !wasAbsorbHeld;
+            wasAbsorbHeld = input.AbsorbHeld;
 
             // La succión se mantiene mientras el depósito no esté lleno; las absorciones en curso
             // ya cuentan contra la capacidad en ScanCone, de modo que no se inician de más.
             if (input.AbsorbHeld && hasAim && !storage.IsFull) StartSuction();
-            else if (!input.AbsorbHeld || storage.IsFull) StopSuction();
+            else
+            {
+                if (!input.AbsorbHeld || storage.IsFull) StopSuction();
+                if (absorbJustPressed && storage.IsFull)
+                {
+                    EventBus<VacuumFull>.Raise(new VacuumFull(storage.Capacity));
+                }
+            }
 
             if (input.FirePressed) TryLaunch(in aim);
         }
@@ -298,8 +318,12 @@ namespace NostalgIA.Gameplay.Tools
             float edgeDistance = toEdge.magnitude;
             if (edgeDistance > 0.0001f &&
                 Physics.Raycast(aim.Ray.origin, toEdge / edgeDistance, edgeDistance, LaunchObstacleMask, QueryTriggerInteraction.Ignore))
+            {
+                if (storage.IsFull) EventBus<VacuumFull>.Raise(new VacuumFull(storage.Capacity));
                 return;
+            }
 
+            bool wasFullBeforeLaunch = storage.IsFull;
             storage.Dequeue();
 
             // Giro inicial inversamente proporcional al tamaño, con un máximo, y eje ligeramente
@@ -310,6 +334,10 @@ namespace NostalgIA.Gameplay.Tools
 
             front.LaunchFromStorage(spawnCenter, direction, stats.launchImpulse, spinAxis * spin);
             float mass = front.Body != null ? front.Body.mass : 1f;
+            if (wasFullBeforeLaunch)
+            {
+                EventBus<VacuumFull>.Raise(new VacuumFull(storage.Capacity));
+            }
             EventBus<ObjectLaunched>.Raise(new ObjectLaunched(spawnCenter, direction, storage.Count, storage.Capacity, mass));
         }
 

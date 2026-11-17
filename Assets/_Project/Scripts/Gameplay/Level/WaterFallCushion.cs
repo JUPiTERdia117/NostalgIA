@@ -31,11 +31,17 @@ namespace NostalgIA.Gameplay.Level
 
         private float lastSplashTime = float.NegativeInfinity;
         private bool wasAboveWaterSurface = true;
+        private bool playerInWater;
 
         private void Awake()
         {
             GetComponent<BoxCollider>().isTrigger = true;
             gameObject.layer = Layers.Trigger;
+        }
+
+        private void OnDisable()
+        {
+            SetPlayerInWater(false);
         }
 
         private void OnTriggerEnter(Collider other) => CushionPlayer(other, true);
@@ -47,7 +53,15 @@ namespace NostalgIA.Gameplay.Level
             if (other.TryGetComponent<PlayerMotor>(out _))
             {
                 wasAboveWaterSurface = true;
+                SetPlayerInWater(false);
             }
+        }
+
+        private void SetPlayerInWater(bool value)
+        {
+            if (playerInWater == value) return;
+            playerInWater = value;
+            EventBus<ShallowWaterPresenceChanged>.Raise(new ShallowWaterPresenceChanged(value));
         }
 
         private void CushionPlayer(Collider other, bool entered)
@@ -55,6 +69,9 @@ namespace NostalgIA.Gameplay.Level
             if (!other.TryGetComponent(out PlayerMotor motor)) return;
 
             float waterSurfaceY = transform.position.y + 0.05f;
+            bool isBelowOrAtSurface = other.transform.position.y <= waterSurfaceY + 0.1f;
+            SetPlayerInWater(isBelowOrAtSurface);
+
             if (other.transform.position.y > waterSurfaceY)
             {
                 wasAboveWaterSurface = true;
