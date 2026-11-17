@@ -31952,7 +31952,7 @@ Transform:
   m_GameObject: {fileID: 1887996637}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 18.068756, y: 0, z: -10.716389}
+  m_LocalPosition: {x: -13.98, y: 2.65, z: -13.42}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -31973,8 +31973,8 @@ ReflectionProbe:
   m_TimeSlicingMode: 0
   m_Resolution: 128
   m_UpdateFrequency: 0
-  m_BoxSize: {x: 82.74414, y: 3.5, z: 81.9316}
-  m_BoxOffset: {x: 0, y: -0.75, z: 0}
+  m_BoxSize: {x: 82.74414, y: 3.5, z: 85.6848}
+  m_BoxOffset: {x: 0, y: -0.75, z: -1.8765945}
   m_NearClip: 0.3
   m_FarClip: 1000
   m_ShadowDistance: 100
@@ -31983,11 +31983,11 @@ ReflectionProbe:
   m_CullingMask:
     serializedVersion: 2
     m_Bits: 4294967295
-  m_IntensityMultiplier: 1
+  m_IntensityMultiplier: 2
   m_BlendDistance: 2
   m_HDR: 1
   m_BoxProjection: 1
-  m_RenderDynamicObjects: 0
+  m_RenderDynamicObjects: 1
   m_UseOcclusionCulling: 1
   m_Importance: 1
   m_CustomBakedTexture: {fileID: 8900000, guid: 75c87f94ec782408182333f16ce43d2a, type: 3}
