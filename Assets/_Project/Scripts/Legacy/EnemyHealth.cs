@@ -206,6 +206,36 @@ public class EnemyHealth : MonoBehaviour, IDamageable, IContactHazard
         Debug.Log($"[EnemyHealth] {gameObject.name} ha muerto.", this);
         onDeath?.Invoke();
 
+        // Si el modelo tiene animación de muerte, primero se ve completa y después salen los fragmentos.
+        var animation = GetComponent<NostalgIA.Gameplay.Enemies.EnemyAnimation>();
+        if (animation != null && animation.HasDeath)
+        {
+            StartCoroutine(DeathSequence(animation));
+            return;
+        }
+
+        FinishDeath();
+    }
+
+    /// <summary>Congela al enemigo, reproduce su animación de muerte y luego lo destruye.</summary>
+    private IEnumerator DeathSequence(NostalgIA.Gameplay.Enemies.EnemyAnimation animation)
+    {
+        // Quieto mientras se anima: sin física, sin navegación y sin barra de vida.
+        if (TryGetComponent(out Rigidbody body))
+        {
+            if (!body.isKinematic) { body.linearVelocity = Vector3.zero; body.angularVelocity = Vector3.zero; }
+            body.isKinematic = true;
+        }
+        if (TryGetComponent(out UnityEngine.AI.NavMeshAgent agent)) agent.enabled = false;
+        if (healthBar != null) healthBar.gameObject.SetActive(false);
+
+        yield return animation.PlayDeath();
+        FinishDeath();
+    }
+
+    /// <summary>Efecto de destrucción (fragmentos) y eliminación del enemigo.</summary>
+    private void FinishDeath()
+    {
         if (spawnGibsOnDeath)
         {
             SpawnDebris();
@@ -217,6 +247,9 @@ public class EnemyHealth : MonoBehaviour, IDamageable, IContactHazard
     private void OnCollisionEnter(Collision collision)
     {
         if (IsDead) return;
+
+        // Los fragmentos visuales (robot desarmado, escombros) no hacen daño.
+        if (collision.gameObject.layer == NostalgIA.Core.Layers.Debris) return;
 
         // Ignorar colisiones con el propio jugador o con otros enemigos
         if (collision.gameObject.CompareTag("Player") ||

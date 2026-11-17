@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 2626355443166118894}
   - component: {fileID: 1279181369607287537}
   - component: {fileID: 1440244418540534984}
+  - component: {fileID: 8810107346018562394}
   m_Layer: 0
   m_Name: FlyingEmail
   m_TagString: Enemy
@@ -103,8 +104,10 @@ MonoBehaviour:
   fullHealthColor: {r: 0, g: 0, b: 0, a: 0}
   woundedColor: {r: 1, g: 0.55, b: 0.12, a: 1}
   criticalColor: {r: 0.85, g: 0.08, b: 0.08, a: 1}
+  forcePerDamageUnit: 45
+  minUnthrownForceThreshold: 25
   minImpactVelocity: 3.5
-  defaultImpactDamage: 1
+  minPlayerThrownDamage: 1
   damageFlashColor: {r: 1, g: 1, b: 1, a: 1}
   flashDuration: 0.12
   showFloatingDamage: 1
@@ -112,6 +115,7 @@ MonoBehaviour:
   healthBarHeight: 1
   spawnGibsOnDeath: 1
   gibCount: 5
+  contactDamageToPlayer: 1
   onTakeDamage:
     m_PersistentCalls:
       m_Calls: []
@@ -135,6 +139,7 @@ MonoBehaviour:
   bobAmount: 0.4
   flySpeed: 3
   rotationSpeed: 5
+  detectionRange: 24
   preferredDistance: 8
   minDistance: 4
   projectilePrefab: {fileID: 3242908112007423225, guid: 17e646db4fa0247eeb6d1c986af70032, type: 3}
@@ -143,6 +148,22 @@ MonoBehaviour:
   chargeTime: 0.5
   projectileDamage: 1
   projectileSpeed: 12
+--- !u!114 &8810107346018562394
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6520994322236937956}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7b59c892d6f6643ba8a83a52fd5684f2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: NostalgIA.Gameplay::NostalgIA.Gameplay.Enemies.EnemyAnimation
+  animator: {fileID: 7585862560252940135}
+  crossFade: 0.12
+  deathState: Death
+  deathHold: 0.1
 --- !u!1001 &2556239204547467882
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -198,10 +219,40 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 0323c1acbc322758fa52c69861ab4ede, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7585862560252940135}
   m_SourcePrefab: {fileID: 100100000, guid: 0323c1acbc322758fa52c69861ab4ede, type: 3}
 --- !u!4 &2662524023678172545 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 0323c1acbc322758fa52c69861ab4ede, type: 3}
   m_PrefabInstance: {fileID: 2556239204547467882}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &3438779595992049467 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 0323c1acbc322758fa52c69861ab4ede, type: 3}
+  m_PrefabInstance: {fileID: 2556239204547467882}
+  m_PrefabAsset: {fileID: 0}
+--- !u!95 &7585862560252940135
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3438779595992049467}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 04a39726f15aa4925a1a51787cccf005, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
