@@ -1,5 +1,6 @@
-using NostalgIA.Gameplay.Enemies;
+using NostalgIA.Core.Events;
 using NostalgIA.Gameplay.Player;
+using NostalgIA.Presentation.Audio;
 using System.Collections;
 using UnityEngine;
 
@@ -7,12 +8,6 @@ using UnityEngine;
 /// Enemigo volador inspirado en las calaveras flotantes de Doom.
 /// Flota en el aire, mantiene distancia con el jugador y le dispara proyectiles.
 /// </summary>
-/// <remarks>
-/// Animaciones del Spam Mail (si el modelo tiene <see cref="EnemyAnimation"/>):
-/// <b>Flying</b> en bucle siempre (capa base, mueve las alas) y <b>Shoot</b> al disparar en la capa
-/// «Disparo», que solo afecta la lengüeta del sobre; por eso las alas no dejan de moverse.
-/// Con animaciones, la vibración por escala al cargar el disparo se desactiva.
-/// </remarks>
 [RequireComponent(typeof(EnemyHealth))]
 public class FlyingEnemyController : MonoBehaviour
 {
@@ -39,30 +34,46 @@ public class FlyingEnemyController : MonoBehaviour
     [SerializeField] private int projectileDamage = 1;
     [SerializeField] private float projectileSpeed = 12f;
 
+    [Header("Audio")]
+    [Tooltip("Sonido cuando el email dispara (Universfield - Arcade Shot).")]
+    [SerializeField] private AudioClip shootClip;
+    [SerializeField, Range(0f, 1f)] private float shootVolume = 0.85f;
+
     private PlayerHealth player;
     private EnemyHealth health;
+    private AudioSource audioSource;
     private float nextFireTime;
     private bool isCharging;
     private Vector3 originalScale;
     private Vector3 spawnPosition;
-    private EnemyAnimation anim;
-
-    /// <summary>Capa del Animator donde está el disparo (encima del vuelo).</summary>
-    private const int ShootLayer = 1;
 
     private void Awake()
     {
         health = GetComponent<EnemyHealth>();
         originalScale = transform.localScale;
         spawnPosition = transform.position;
-        anim = GetComponent<EnemyAnimation>();
+        SetupAudioSource();
         FindPlayer();
+    }
+
+    private void SetupAudioSource()
+    {
+        if (!TryGetComponent(out audioSource))
+        {
+            audioSource = gameObject.AddComponent<AudioSource>();
+        }
+        audioSource.playOnAwake = false;
+        audioSource.loop = false;
+        audioSource.spatialBlend = 0.25f;
+        audioSource.minDistance = 4f;
+        audioSource.maxDistance = 35f;
+        audioSource.rolloffMode = AudioRolloffMode.Linear;
+        audioSource.outputAudioMixerGroup = GameAudio.Sfx;
     }
 
     private void Start()
     {
         if (player == null) FindPlayer();
-        if (anim != null) anim.Play("Flying");   // Vuela en todo momento.
         nextFireTime = Time.time + Random.Range(1.5f, fireRate);
     }
 
@@ -159,19 +170,14 @@ public class FlyingEnemyController : MonoBehaviour
     private IEnumerator ChargeAndShootRoutine()
     {
         isCharging = true;
-        bool animated = anim != null && anim.IsAnimated;
 
-        // La lengüeta se abre mientras carga y el proyectil sale al terminar la carga.
-        if (animated) anim.Play("Shoot", ShootLayer, true);
-
-        // Animación de carga: vibración y aumento de tamaño (solo sin animaciones)
+        // Animación de carga: vibración y aumento de tamaño
         float elapsed = 0f;
         while (elapsed < chargeTime)
         {
-            if (health != null && health.IsDead) yield break;
             elapsed += Time.deltaTime;
             float t = elapsed / chargeTime;
-            if (!animated) transform.localScale = Vector3.Lerp(originalScale, originalScale * 1.25f, t) + Random.insideUnitSphere * 0.03f;
+            transform.localScale = Vector3.Lerp(originalScale, originalScale * 1.25f, t) + Random.insideUnitSphere * 0.03f;
             yield return null;
         }
 
@@ -223,6 +229,14 @@ public class FlyingEnemyController : MonoBehaviour
             EnemyProjectile proj = sphere.AddComponent<EnemyProjectile>();
             proj.Initialize(direction, projectileDamage, projectileSpeed);
         }
+
+        bool playedLocally = false;
+        if (shootClip != null && audioSource != null)
+        {
+            audioSource.PlayOneShot(shootClip, shootVolume);
+            playedLocally = true;
+        }
+        EventBus<EnemyAttacked>.Raise(new EnemyAttacked(EnemyKind.SpamMail, origin, playedLocally));
 
         Debug.Log($"[FlyingEnemyController] ¡Calavera flotante disparó un proyectil hacia el jugador!");
     }

@@ -1,4 +1,6 @@
+using NostalgIA.Core.Events;
 using NostalgIA.Gameplay.Player;
+using NostalgIA.Presentation.Audio;
 using System.Collections;
 using UnityEngine;
 
@@ -55,6 +57,11 @@ public class SpiderEnemyController : MonoBehaviour
     [SerializeField] private int contactDamage = 1;
     [SerializeField] private float meleeCooldown = 1.0f;
 
+    [Header("Audio")]
+    [Tooltip("Sonido cuando ataca la araña (DavidDumaisAudio - Small Monster Attack).")]
+    [SerializeField] private AudioClip attackClip;
+    [SerializeField, Range(0f, 1f)] private float attackVolume = 0.85f;
+
     public SpiderState CurrentState => state;
 
     private SpiderState state = SpiderState.Crawling;
@@ -62,11 +69,13 @@ public class SpiderEnemyController : MonoBehaviour
     private Transform playerCameraTransform;
     private EnemyHealth health;
     private Rigidbody rb;
+    private AudioSource audioSource;
 
     private Vector3 currentSurfaceNormal = Vector3.up;
     private Vector3 originalScale;
     private float lastJumpTime = -99f;
     private float lastMeleeTime = -99f;
+    private float lastAttackSoundTime = -99f;
     private float latchTimer;
     private float nextLatchDamageTime;
 
@@ -79,6 +88,7 @@ public class SpiderEnemyController : MonoBehaviour
         health = GetComponent<EnemyHealth>();
         rb = GetComponent<Rigidbody>();
         originalScale = transform.localScale;
+        SetupAudioSource();
 
         rb.isKinematic = true;
         rb.useGravity = false;
@@ -125,6 +135,35 @@ public class SpiderEnemyController : MonoBehaviour
 
         legTransforms = legList.ToArray();
         originalLegRotations = rotList.ToArray();
+    }
+
+    private void SetupAudioSource()
+    {
+        if (!TryGetComponent(out audioSource))
+        {
+            audioSource = gameObject.AddComponent<AudioSource>();
+        }
+        audioSource.playOnAwake = false;
+        audioSource.loop = false;
+        audioSource.spatialBlend = 0.2f;
+        audioSource.minDistance = 4f;
+        audioSource.maxDistance = 35f;
+        audioSource.rolloffMode = AudioRolloffMode.Linear;
+        audioSource.outputAudioMixerGroup = GameAudio.Sfx;
+    }
+
+    private void PlayAttackSound()
+    {
+        if (Time.time - lastAttackSoundTime < 0.25f) return;
+        lastAttackSoundTime = Time.time;
+
+        bool playedLocally = false;
+        if (attackClip != null && audioSource != null)
+        {
+            audioSource.PlayOneShot(attackClip, attackVolume);
+            playedLocally = true;
+        }
+        EventBus<EnemyAttacked>.Raise(new EnemyAttacked(EnemyKind.Bug, transform.position, playedLocally));
     }
 
     private void Update()
@@ -290,6 +329,7 @@ public class SpiderEnemyController : MonoBehaviour
 
         transform.localScale = originalScale;
         state = SpiderState.Leaping;
+        PlayAttackSound();
 
         // Objetivo: La cara/cámara del jugador
         Vector3 targetFace = playerCameraTransform != null 
@@ -363,6 +403,7 @@ public class SpiderEnemyController : MonoBehaviour
         transform.localRotation = Quaternion.Euler(20f, 180f, 0f);
 
         // Daño instantáneo al atrapar la cara (usa leapHitDamage si está configurado)
+        PlayAttackSound();
         int initialDamage = leapHitDamage > 0 ? leapHitDamage : latchDamage;
         player.TakeDamage(initialDamage);
         Debug.Log($"[SpiderEnemyController] ¡ABRAZACARAS ENGANCHADO AL ROSTRO DEL JUGADOR! Daño inicial: {initialDamage}");
@@ -498,6 +539,7 @@ public class SpiderEnemyController : MonoBehaviour
             PlayerHealth target = collision.gameObject.GetComponentInParent<PlayerHealth>();
             if (target != null && !target.IsDead)
             {
+                PlayAttackSound();
                 target.TakeDamage(contactDamage);
                 lastMeleeTime = Time.time;
             }
