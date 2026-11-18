@@ -103,8 +103,10 @@ MonoBehaviour:
   fullHealthColor: {r: 0, g: 0, b: 0, a: 0}
   woundedColor: {r: 1, g: 0.55, b: 0.12, a: 1}
   criticalColor: {r: 0.85, g: 0.08, b: 0.08, a: 1}
+  forcePerDamageUnit: 45
+  minUnthrownForceThreshold: 25
   minImpactVelocity: 3.5
-  defaultImpactDamage: 1
+  minPlayerThrownDamage: 1
   damageFlashColor: {r: 1, g: 1, b: 1, a: 1}
   flashDuration: 0.12
   showFloatingDamage: 1
@@ -114,6 +116,7 @@ MonoBehaviour:
   gibCount: 5
   deathClip: {fileID: 8300000, guid: ab5d281ab60080287ae9605b56cffd58, type: 3}
   deathVolume: 0.85
+  contactDamageToPlayer: 1
   onTakeDamage:
     m_PersistentCalls:
       m_Calls: []
@@ -137,9 +140,10 @@ MonoBehaviour:
   bobAmount: 0.4
   flySpeed: 3
   rotationSpeed: 5
+  detectionRange: 24
   preferredDistance: 8
   minDistance: 4
-  projectilePrefab: {fileID: 3242908112007423225, guid: 17e646db4fa0247eeb6d1c986af70032, type: 3}
+  projectilePrefab: {fileID: 8247120292416644820, guid: 98437ff330673e0a2a1c2f61e9f51dcf, type: 3}
   shootPoint: {fileID: 0}
   fireRate: 3
   chargeTime: 0.5
