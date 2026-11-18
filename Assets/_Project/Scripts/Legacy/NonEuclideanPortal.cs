@@ -1,4 +1,5 @@
 using NostalgIA.Gameplay.Player;
+using NostalgIA.Presentation.VFX;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -28,8 +29,12 @@ public class NonEuclideanPortal : MonoBehaviour
     [Header("Rendimiento y Activación")]
     [Tooltip("Distancia máxima a la que este portal renderiza la vista de la otra dimensión.")]
     public float maxRenderDistance = 120f;
+    [Tooltip("Fracción de la resolución de render del preset gráfico (no de la pantalla real) en PC.")]
     [Range(0.25f, 1f)]
     public float renderTextureResolutionScale = 0.85f;
+    [Tooltip("Fracción de la resolución de render del preset gráfico en teléfono.")]
+    [Range(0.25f, 1f)]
+    public float mobileRenderTextureResolutionScale = 0.5f;
 
     // Cámara para renderizar la vista del portal vinculado
     private Camera portalCamera;
@@ -101,6 +106,9 @@ public class NonEuclideanPortal : MonoBehaviour
             if (addData == null) addData = camObj.AddComponent<UniversalAdditionalCameraData>();
             addData.renderShadows = false;
             addData.renderPostProcessing = false;
+            addData.antialiasing = AntialiasingMode.None;
+            addData.requiresDepthOption = CameraOverrideOption.Off;
+            addData.requiresColorOption = CameraOverrideOption.Off;
         }
     }
 
@@ -331,13 +339,18 @@ public class NonEuclideanPortal : MonoBehaviour
 
     private void EnsureRenderTexture()
     {
-        int w = Mathf.Max(256, Mathf.RoundToInt(Screen.width * renderTextureResolutionScale));
-        int h = Mathf.Max(256, Mathf.RoundToInt(Screen.height * renderTextureResolutionScale));
+        // Sigue al preset gráfico: tamaño relativo a la resolución de render y HDR solo si el
+        // pipeline lo usa (sin HDR, una textura de 32 bits cuesta la mitad de ancho de banda).
+        float scale = Application.isMobilePlatform ? mobileRenderTextureResolutionScale : renderTextureResolutionScale;
+        Vector2Int size = GameGraphics.SecondaryViewSize(scale);
+        int w = Mathf.Max(256, size.x);
+        int h = Mathf.Max(256, size.y);
+        RenderTextureFormat format = LdrEmissionFallback.PipelineIsLdr() ? RenderTextureFormat.Default : RenderTextureFormat.DefaultHDR;
 
-        if (viewTexture == null || viewTexture.width != w || viewTexture.height != h)
+        if (viewTexture == null || viewTexture.width != w || viewTexture.height != h || viewTexture.format != format)
         {
             ReleaseRenderTexture();
-            viewTexture = new RenderTexture(w, h, 24, RenderTextureFormat.DefaultHDR);
+            viewTexture = new RenderTexture(w, h, 24, format);
             viewTexture.name = $"PortalRT_{name}_{w}x{h}";
             viewTexture.Create();
             if (portalMaterial != null)
