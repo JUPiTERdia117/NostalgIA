@@ -118,7 +118,7 @@ namespace NostalgIA.Presentation.Levels
         [Header("Vista del portal")]
         [Tooltip("Distancia máxima a la que se dibuja la vista del otro nivel, en m.")]
         [SerializeField, Min(5f)] private float renderDistance = 90f;
-        [Tooltip("Escala de resolución de la vista en PC (fracción de la pantalla).")]
+        [Tooltip("Escala de resolución de la vista en PC (fracción de la resolución de render del preset).")]
         [SerializeField, Range(0.25f, 1f)] private float resolutionScale = 0.8f;
         [Tooltip("Escala de resolución de la vista en móvil.")]
         [SerializeField, Range(0.25f, 1f)] private float mobileResolutionScale = 0.5f;
@@ -661,9 +661,11 @@ namespace NostalgIA.Presentation.Levels
         /// </summary>
         private void EnsureViewTexture()
         {
+            // Fracción de la resolución de render del preset (no de la pantalla real).
             float scale = Application.isMobilePlatform ? mobileResolutionScale : resolutionScale;
-            int width = Mathf.Max(64, Mathf.RoundToInt(Screen.width * scale));
-            int height = Mathf.Max(64, Mathf.RoundToInt(Screen.height * scale));
+            Vector2Int size = GameGraphics.SecondaryViewSize(scale);
+            int width = size.x;
+            int height = size.y;
             if (viewTexture != null && viewTexture.width == width && viewTexture.height == height)
             {
                 // La textura pudo crearse al terminar el precalentado sin quedar asignada a la cámara.

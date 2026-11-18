@@ -76,6 +76,31 @@ namespace NostalgIA.Presentation.VFX
         /// <summary>Altura de render que pide el preset en esta plataforma.</summary>
         public static int TargetHeight(GraphicsPreset preset) => (IsMobile ? MobileHeights : DesktopHeights)[(int)preset];
 
+        /// <summary>
+        /// Tamaño en píxeles para una vista secundaria (portales): una fracción de la resolución a la
+        /// que se renderiza el mundo con el preset actual, no de la pantalla real. Así la vista del
+        /// portal baja junto con el preset en vez de costar lo mismo en bajo que en alto.
+        /// </summary>
+        public static Vector2Int SecondaryViewSize(float fraction)
+        {
+            float scale = (activeAsset != null ? activeAsset.renderScale : 1f) * fraction;
+            return new Vector2Int(
+                Mathf.Max(64, Mathf.RoundToInt(Screen.width * scale)),
+                Mathf.Max(64, Mathf.RoundToInt(Screen.height * scale)));
+        }
+
+        /// <summary>
+        /// Límite de FPS. Sin él, Android se queda en 30 FPS y en PC la GPU trabaja al 100 % sin
+        /// descanso (se calienta y baja de rendimiento). Teléfono: hasta 60 FPS. PC: la frecuencia
+        /// del monitor (si el vSync del menú está encendido, manda el vSync).
+        /// </summary>
+        private static void ApplyFrameRate()
+        {
+            double refresh = Screen.currentResolution.refreshRateRatio.value;
+            int displayRate = refresh > 1.0 ? Mathf.RoundToInt((float)refresh) : 60;
+            Application.targetFrameRate = IsMobile ? Mathf.Min(60, displayRate) : displayRate;
+        }
+
         /// <summary>Guarda el preset y lo aplica de inmediato.</summary>
         public static void Set(GraphicsPreset preset)
         {
@@ -175,6 +200,7 @@ namespace NostalgIA.Presentation.VFX
             activeAsset = null;
             bloomOverride = null;
             appliedShortSide = 0;
+            ApplyFrameRate();
             Apply();
         }
     }

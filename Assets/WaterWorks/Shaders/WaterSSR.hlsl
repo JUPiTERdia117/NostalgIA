@@ -4,6 +4,14 @@
 #define _GBUFFER_NORMALS_OCT
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DeclareNormalsTexture.hlsl"
 
+// NostalgIA: interruptor global del trazado SSR. Ningún preset gráfico genera la textura de
+// profundidad ni la copia de color, así que el trazado no tenía datos válidos y aun así costaba
+// 15 iteraciones (dos lecturas de textura cada una) por píxel de agua. Apagado (valor por
+// defecto 0) se usa el reflejo del reflection probe / cielo: una sola lectura.
+// Para volver al SSR: activar Depth y Opaque Texture en el asset de URP y
+// Shader.SetGlobalFloat("_NOS_WaterSSR", 1).
+float _NOS_WaterSSR;
+
 float SceneDepth(float2 UV)
 {
 	return LinearEyeDepth(SHADERGRAPH_SAMPLE_SCENE_DEPTH(UV), _ZBufferParams);
@@ -68,6 +76,18 @@ float ReconstructDepthFromPos(float3 pos, float2 screenPos)
 
 void SSR_float(float3 viewDir, float stepSize, float4 screenPos, float samples, float thickness, float smoothness, float3 _normal, float3 _position, bool reconstructDepth, out float3 col)
 {
+	if (_NOS_WaterSSR < 0.5)
+	{
+		// Agua horizontal: la normal de detalle (espacio tangente, z arriba) pasa a mundo (y arriba).
+		float3 worldNormal = normalize(float3(_normal.x, max(_normal.z, 0.0001), _normal.y));
+		float3 reflectDir = reflect(-normalize(viewDir), worldNormal);
+		float4 encoded = SAMPLE_TEXTURECUBE_LOD(unity_SpecCube0, samplerunity_SpecCube0, reflectDir, 0);
+		// Decodificación HDR del probe (igual que DecodeHDREnvironment, sin depender de su include).
+		float alpha = max(unity_SpecCube0_HDR.w * (encoded.a - 1.0) + 1.0, 0.0);
+		col = min(encoded.rgb * (unity_SpecCube0_HDR.x * pow(alpha, unity_SpecCube0_HDR.y)), 5);
+		return;
+	}
+
 	viewDir.x = -viewDir.x;
 
 	float3 reflectionPos = ReconstructPosFromDepth(SceneDepth(screenPos.xy), screenPos);
