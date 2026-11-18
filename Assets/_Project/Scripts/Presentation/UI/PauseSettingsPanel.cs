@@ -40,7 +40,7 @@ namespace NostalgIA.Presentation.UI
 
         private const float Width = 540f;
         private const float RowHeight = 44f;
-        private static readonly string[] QualityNames = { "bajo", "medio", "alto" };
+        private static readonly string[] QualityNames = { "bajo", "medio", "alto", "muy alto" };
 
         private RectTransform column;
         private int rowCount;
@@ -119,8 +119,8 @@ namespace NostalgIA.Presentation.UI
 
         private void NextQuality()
         {
-            // Bajo → medio → alto → bajo.
-            var next = (GraphicsPreset)(((int)GameGraphics.Current + 1) % 3);
+            // Bajo → medio → alto → muy alto → bajo.
+            var next = (GraphicsPreset)(((int)GameGraphics.Current + 1) % QualityNames.Length);
             GameGraphics.Set(next);
             qualityText.SetText(QualityNames[(int)next]);
         }

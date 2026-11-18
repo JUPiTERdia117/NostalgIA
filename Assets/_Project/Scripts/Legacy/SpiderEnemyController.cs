@@ -15,6 +15,7 @@ public class SpiderEnemyController : MonoBehaviour
 {
     public enum SpiderState
     {
+        Emerging,
         Crawling,
         Windup,
         Leaping,
@@ -73,11 +74,14 @@ public class SpiderEnemyController : MonoBehaviour
 
     private Vector3 currentSurfaceNormal = Vector3.up;
     private Vector3 originalScale;
+    private Vector3 emergeDirection = Vector3.forward;
+    private float emergeRemainingDistance;
     private float lastJumpTime = -99f;
     private float lastMeleeTime = -99f;
     private float lastAttackSoundTime = -99f;
     private float latchTimer;
     private float nextLatchDamageTime;
+    private readonly RaycastHit[] surfaceHits = new RaycastHit[8];
 
     // Cache de patas para animación de forcejeo
     private Transform[] legTransforms;
@@ -115,7 +119,92 @@ public class SpiderEnemyController : MonoBehaviour
     private void Start()
     {
         if (player == null) FindPlayer();
-        lastJumpTime = Time.time + Random.Range(1f, 2.5f);
+        if (state != SpiderState.Emerging)
+        {
+            lastJumpTime = Time.time + Random.Range(1f, 2.5f);
+        }
+    }
+
+    /// <summary>
+    /// Inicia la salida ordenada desde el caballo/generador: panza hacia el piso, mirando hacia el
+    /// frente de salida y caminando hacia afuera antes de perseguir o atacar al jugador.
+    /// </summary>
+    public void BeginSpawnExit(Vector3 exitDirection, float walkOutDistance = 2.6f, Collider[] spawnerColliders = null)
+    {
+        Vector3 flatDir = Vector3.ProjectOnPlane(exitDirection, Vector3.up);
+        if (flatDir.sqrMagnitude < 0.001f) flatDir = Vector3.ProjectOnPlane(transform.forward, Vector3.up);
+        if (flatDir.sqrMagnitude < 0.001f) flatDir = Vector3.forward;
+        emergeDirection = flatDir.normalized;
+
+        emergeRemainingDistance = Mathf.Max(0.5f, walkOutDistance);
+        currentSurfaceNormal = Vector3.up;
+        state = SpiderState.Emerging;
+
+        if (rb == null) rb = GetComponent<Rigidbody>();
+        if (rb != null)
+        {
+            if (!rb.isKinematic)
+            {
+                rb.linearVelocity = Vector3.zero;
+                rb.angularVelocity = Vector3.zero;
+            }
+            rb.isKinematic = true;
+            rb.useGravity = false;
+        }
+
+        transform.rotation = Quaternion.LookRotation(emergeDirection, Vector3.up);
+
+        // Ajustar altura inicial exactamente sobre el piso para que no aparezca flotando ni hundida
+        if (RaycastSurface(transform.position + Vector3.up * 1.2f, Vector3.down, 3.5f, out RaycastHit floorHit))
+        {
+            transform.position = new Vector3(transform.position.x, floorHit.point.y + groundOffset, transform.position.z);
+        }
+
+        if (spawnerColliders != null)
+        {
+            Collider[] myColliders = GetComponentsInChildren<Collider>(true);
+            for (int i = 0; i < myColliders.Length; i++)
+            {
+                if (myColliders[i] == null) continue;
+                for (int j = 0; j < spawnerColliders.Length; j++)
+                {
+                    if (spawnerColliders[j] != null)
+                    {
+                        Physics.IgnoreCollision(myColliders[i], spawnerColliders[j], true);
+                    }
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// Raycast de superficie que ignora colliders de otros enemigos (como el caballo) y del jugador,
+    /// evitando que la araña intente trepar por el collider esférico del caballo y se voltee.
+    /// </summary>
+    private bool RaycastSurface(Vector3 origin, Vector3 direction, float maxDistance, out RaycastHit bestHit)
+    {
+        int count = Physics.RaycastNonAlloc(origin, direction, surfaceHits, maxDistance, surfaceMask, QueryTriggerInteraction.Ignore);
+        float closestDist = float.PositiveInfinity;
+        bestHit = default;
+        bool found = false;
+
+        for (int i = 0; i < count; i++)
+        {
+            Collider col = surfaceHits[i].collider;
+            if (col == null) continue;
+            if (col.transform.IsChildOf(transform)) continue;
+            if (col.GetComponentInParent<EnemyHealth>() != null) continue;
+            if (col.GetComponentInParent<PlayerHealth>() != null) continue;
+
+            if (surfaceHits[i].distance < closestDist)
+            {
+                closestDist = surfaceHits[i].distance;
+                bestHit = surfaceHits[i];
+                found = true;
+            }
+        }
+
+        return found;
     }
 
     private void CacheLegs()
@@ -170,6 +259,12 @@ public class SpiderEnemyController : MonoBehaviour
     {
         if (health != null && health.IsDead) return;
 
+        if (state == SpiderState.Emerging)
+        {
+            HandleEmergingState();
+            return;
+        }
+
         if (player == null || playerCameraTransform == null)
         {
             FindPlayer();
@@ -191,6 +286,32 @@ public class SpiderEnemyController : MonoBehaviour
             case SpiderState.FacehuggerLatched:
                 HandleLatchedState();
                 break;
+        }
+    }
+
+    private void HandleEmergingState()
+    {
+        currentSurfaceNormal = Vector3.up;
+        transform.rotation = Quaternion.LookRotation(emergeDirection, Vector3.up);
+
+        float step = crawlSpeed * Time.deltaTime;
+        transform.position += emergeDirection * step;
+        emergeRemainingDistance -= step;
+
+        if (RaycastSurface(transform.position + Vector3.up * 1.2f, Vector3.down, 3.5f, out RaycastHit floorHit))
+        {
+            Vector3 pos = transform.position;
+            pos.y = Mathf.Lerp(pos.y, floorHit.point.y + groundOffset, adhereSpeed * Time.deltaTime);
+            transform.position = pos;
+        }
+
+        AnimateLegsWalking();
+
+        if (emergeRemainingDistance <= 0f)
+        {
+            state = SpiderState.Crawling;
+            // Breve margen al terminar de salir antes de poder saltar hacia el jugador
+            lastJumpTime = Time.time - jumpCooldown + 0.6f;
         }
     }
 
@@ -243,25 +364,25 @@ public class SpiderEnemyController : MonoBehaviour
 
         // A) Raycast frontal: detecta muros que se avecinan para trepar antes de chocar
         Vector3 forwardOrigin = transform.position + transform.up * 0.2f;
-        if (Physics.Raycast(forwardOrigin, transform.forward, out RaycastHit hitFwd, forwardWallCheckDistance, surfaceMask, QueryTriggerInteraction.Ignore))
+        if (RaycastSurface(forwardOrigin, transform.forward, forwardWallCheckDistance, out RaycastHit hitFwd))
         {
             bestHit = hitFwd;
             hasHit = true;
         }
         // B) Raycast hacia abajo de la araña (vientre)
-        else if (Physics.Raycast(transform.position + transform.up * 0.1f, -transform.up, out RaycastHit hitDown, surfaceCheckDistance, surfaceMask, QueryTriggerInteraction.Ignore))
+        else if (RaycastSurface(transform.position + transform.up * 0.1f, -transform.up, surfaceCheckDistance, out RaycastHit hitDown))
         {
             bestHit = hitDown;
             hasHit = true;
         }
         // C) Raycast frontal-inferior (anticipa esquinas y cornisas superiores)
-        else if (Physics.Raycast(transform.position + transform.forward * 0.5f, -transform.up, out RaycastHit hitFwdDown, surfaceCheckDistance * 1.5f, surfaceMask, QueryTriggerInteraction.Ignore))
+        else if (RaycastSurface(transform.position + transform.forward * 0.5f, -transform.up, surfaceCheckDistance * 1.5f, out RaycastHit hitFwdDown))
         {
             bestHit = hitFwdDown;
             hasHit = true;
         }
         // D) Raycast trasero-inferior
-        else if (Physics.Raycast(transform.position - transform.forward * 0.4f, -transform.up, out RaycastHit hitBackDown, surfaceCheckDistance * 1.5f, surfaceMask, QueryTriggerInteraction.Ignore))
+        else if (RaycastSurface(transform.position - transform.forward * 0.4f, -transform.up, surfaceCheckDistance * 1.5f, out RaycastHit hitBackDown))
         {
             bestHit = hitBackDown;
             hasHit = true;
@@ -367,7 +488,7 @@ public class SpiderEnemyController : MonoBehaviour
             }
 
             // Aterrizaje en el suelo si no alcanzó al jugador
-            if (flightTimer > 0.35f && Physics.Raycast(transform.position, Vector3.down, out RaycastHit hit, 0.7f, surfaceMask, QueryTriggerInteraction.Ignore))
+            if (flightTimer > 0.35f && RaycastSurface(transform.position, Vector3.down, 0.7f, out RaycastHit hit))
             {
                 LandOnSurface(hit.normal, hit.point);
                 yield break;
@@ -489,7 +610,7 @@ public class SpiderEnemyController : MonoBehaviour
         while (timer < 2.0f)
         {
             timer += Time.deltaTime;
-            if (Physics.Raycast(transform.position, Vector3.down, out RaycastHit hit, 0.7f, surfaceMask, QueryTriggerInteraction.Ignore))
+            if (RaycastSurface(transform.position, Vector3.down, 0.7f, out RaycastHit hit))
             {
                 LandOnSurface(hit.normal, hit.point);
                 yield break;

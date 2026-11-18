@@ -478,6 +478,8 @@ MonoBehaviour:
   healthBarHeight: 1.9
   spawnGibsOnDeath: 1
   gibCount: 5
+  deathClip: {fileID: 8300000, guid: db92741d61e628c1c82ab8c813315a3e, type: 3}
+  deathVolume: 0.85
   onTakeDamage:
     m_PersistentCalls:
       m_Calls: []
@@ -504,6 +506,8 @@ MonoBehaviour:
   ejectionSpeed: 3.5
   pulseFrequency: 1.5
   pulseAmplitude: 0.08
+  spawnClip: {fileID: 8300000, guid: 166c7423a139e80fa8adef174cc38bb0, type: 3}
+  spawnVolume: 0.85
 --- !u!1 &6513931077601677303
 GameObject:
   m_ObjectHideFlags: 0

@@ -16592,6 +16592,7 @@ MonoBehaviour:
   hoverSound: {fileID: 416334276975340224}
   sliderSound: {fileID: 415493337217123926}
   swooshSound: {fileID: 415849237809912358}
+  buttonClickClip: {fileID: 8300000, guid: 6a691484ce62dfc4398c05dd76a34f79, type: 3}
 --- !u!114 &393905815672338038
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -25647,10 +25648,10 @@ AudioSource:
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: -7128067719386893152, guid: d0356619051640ada6fd96b7c866c34a, type: 2}
   m_audioClip: {fileID: 0}
-  m_Resource: {fileID: 8300000, guid: c12d40421acc84a4b90823d6080bbad1, type: 3}
+  m_Resource: {fileID: 8300000, guid: 6a691484ce62dfc4398c05dd76a34f79, type: 3}
   m_PlayOnAwake: 0
-  m_Volume: 0.237
-  m_Pitch: 0.9
+  m_Volume: 0.85
+  m_Pitch: 1
   Loop: 0
   Mute: 0
   Spatialize: 0

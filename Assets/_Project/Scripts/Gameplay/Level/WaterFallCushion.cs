@@ -30,6 +30,8 @@ namespace NostalgIA.Gameplay.Level
         [SerializeField, Min(0.5f)] private float minSplashSpeed = 3.5f;
 
         private float lastSplashTime = float.NegativeInfinity;
+        private bool wasAboveWaterSurface = true;
+        private bool playerInWater;
 
         private void Awake()
         {
@@ -37,20 +39,53 @@ namespace NostalgIA.Gameplay.Level
             gameObject.layer = Layers.Trigger;
         }
 
+        private void OnDisable()
+        {
+            SetPlayerInWater(false);
+        }
+
         private void OnTriggerEnter(Collider other) => CushionPlayer(other, true);
 
         private void OnTriggerStay(Collider other) => CushionPlayer(other, false);
+
+        private void OnTriggerExit(Collider other)
+        {
+            if (other.TryGetComponent<PlayerMotor>(out _))
+            {
+                wasAboveWaterSurface = true;
+                SetPlayerInWater(false);
+            }
+        }
+
+        private void SetPlayerInWater(bool value)
+        {
+            if (playerInWater == value) return;
+            playerInWater = value;
+            EventBus<ShallowWaterPresenceChanged>.Raise(new ShallowWaterPresenceChanged(value));
+        }
 
         private void CushionPlayer(Collider other, bool entered)
         {
             if (!other.TryGetComponent(out PlayerMotor motor)) return;
 
+            float waterSurfaceY = transform.position.y + 0.05f;
+            bool isBelowOrAtSurface = other.transform.position.y <= waterSurfaceY + 0.1f;
+            SetPlayerInWater(isBelowOrAtSurface);
+
+            if (other.transform.position.y > waterSurfaceY)
+            {
+                wasAboveWaterSurface = true;
+            }
+
             Vector3 raw = motor.RawVelocity;
             float downwardSpeed = -raw.y;
             if (downwardSpeed <= 0f) return;
 
-            if (entered && downwardSpeed >= minSplashSpeed && Time.time - lastSplashTime > 0.35f)
+            bool crossedSurface = entered || (wasAboveWaterSurface && other.transform.position.y <= waterSurfaceY);
+            float effectiveMinSpeed = Mathf.Min(minSplashSpeed, 2.0f);
+            if (crossedSurface && downwardSpeed >= effectiveMinSpeed && Time.time - lastSplashTime > 0.35f)
             {
+                wasAboveWaterSurface = false;
                 lastSplashTime = Time.time;
                 EventBus<ShallowWaterEntered>.Raise(new ShallowWaterEntered(other.transform.position, downwardSpeed));
             }

@@ -465,12 +465,15 @@ namespace NostalgIA.Core.Events
         public readonly EnemyKind Kind;
         /// <summary>Posición de aparición.</summary>
         public readonly Vector3 Position;
+        /// <summary>Indica si el generador ya reprodujo su clip de audio localmente.</summary>
+        public readonly bool PlayedLocally;
 
         /// <summary>Crea el evento.</summary>
-        public EnemySpawned(EnemyKind kind, Vector3 position)
+        public EnemySpawned(EnemyKind kind, Vector3 position, bool playedLocally = false)
         {
             Kind = kind;
             Position = position;
+            PlayedLocally = playedLocally;
         }
     }
 
@@ -700,6 +703,18 @@ namespace NostalgIA.Core.Events
         }
     }
 
+    /// <summary>
+    /// Cambio de presencia del jugador dentro del volumen de agua poco profunda. Publica <c>WaterFallCushion</c>.
+    /// </summary>
+    public readonly struct ShallowWaterPresenceChanged : IGameEvent
+    {
+        /// <summary><c>true</c> mientras los pies del jugador están en el agua poco profunda.</summary>
+        public readonly bool InWater;
+
+        /// <summary>Crea el evento.</summary>
+        public ShallowWaterPresenceChanged(bool inWater) => InWater = inWater;
+    }
+
     // ===================================================================== Puertas entre niveles
 
     /// <summary>
@@ -797,6 +812,67 @@ namespace NostalgIA.Core.Events
 
         /// <summary>Crea el evento.</summary>
         public LevelGateClosed(Transform gate) => Gate = gate;
+    }
+
+    // ===================================================================== Pantalla de carga entre niveles
+
+    /// <summary>
+    /// Empieza el cambio de nivel con pantalla de carga. Publica <c>LevelTransitionRunner</c>; la
+    /// pantalla de carga se oscurece en <see cref="FadeOutDuration"/> segundos (tiempo real).
+    /// </summary>
+    public readonly struct LevelTransitionStarted : IGameEvent
+    {
+        /// <summary>Nombre de la escena que se va a cargar.</summary>
+        public readonly string DestinationName;
+        /// <summary>Segundos que tarda la pantalla en cubrir la imagen.</summary>
+        public readonly float FadeOutDuration;
+
+        /// <summary>Crea el evento.</summary>
+        public LevelTransitionStarted(string destinationName, float fadeOutDuration)
+        {
+            DestinationName = destinationName;
+            FadeOutDuration = fadeOutDuration;
+        }
+    }
+
+    /// <summary>Avance de la carga entre 0 y 1. Publica <c>LevelTransitionRunner</c> cada frame.</summary>
+    public readonly struct LevelTransitionProgress : IGameEvent
+    {
+        /// <summary>Avance entre 0 y 1.</summary>
+        public readonly float Progress;
+
+        /// <summary>Crea el evento.</summary>
+        public LevelTransitionProgress(float progress) => Progress = progress;
+    }
+
+    /// <summary>
+    /// El nivel nuevo ya está cargado y es la escena activa, el jugador está en su entrada y el
+    /// nivel anterior se descargó, todo detrás de la pantalla de carga. La presentación aprovecha
+    /// para precalentar los shaders del nivel y responde con <see cref="LevelTransitionWarmupDone"/>.
+    /// </summary>
+    public readonly struct LevelTransitionArrived : IGameEvent
+    {
+        /// <summary>Escena del nivel nuevo.</summary>
+        public readonly Scene Destination;
+
+        /// <summary>Crea el evento.</summary>
+        public LevelTransitionArrived(Scene destination) => Destination = destination;
+    }
+
+    /// <summary>La presentación terminó de precalentar los shaders del nivel nuevo.</summary>
+    public readonly struct LevelTransitionWarmupDone : IGameEvent { }
+
+    /// <summary>
+    /// Termina el cambio de nivel: la pantalla de carga se aclara en <see cref="FadeInDuration"/>
+    /// segundos y el jugador recupera el control. Publica <c>LevelTransitionRunner</c>.
+    /// </summary>
+    public readonly struct LevelTransitionFinished : IGameEvent
+    {
+        /// <summary>Segundos que tarda la pantalla en desaparecer.</summary>
+        public readonly float FadeInDuration;
+
+        /// <summary>Crea el evento.</summary>
+        public LevelTransitionFinished(float fadeInDuration) => FadeInDuration = fadeInDuration;
     }
 
     /// <summary>

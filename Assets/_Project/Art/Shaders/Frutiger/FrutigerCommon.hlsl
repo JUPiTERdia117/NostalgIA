@@ -172,7 +172,7 @@ half NOS_Caustics(float2 p, float time)
 {
     float n1 = NOS_ValueNoise2D(p + float2(time * 0.31, time * 0.17));
     float n2 = NOS_ValueNoise2D(p * 1.27 + float2(-time * 0.23, time * 0.29) + 7.3);
-    half web = (half)(1.0 - abs(n1 - n2));
+    half web = saturate((half)(1.0 - abs(n1 - n2)));
     // pow 10: con diferencia 0,05 → 0,95^10 ≈ 0,60; con 0,2 → 0,8^10 ≈ 0,11. Solo quedan hilos.
     web = pow(web, 10.0h);
     return web;

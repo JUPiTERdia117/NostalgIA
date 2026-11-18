@@ -27,10 +27,14 @@ Material:
     m_Floats:
     - _CodeDensity: 0.267
     - _CodeEmission: 1.39
+    - _FloorReflection: 0.6
+    - _FloorSmoothness: 1
     - _LineEmission: 1.63
     - _LineWidth: 0.0223
     - _ScanEmission: 0.25
     - _ScanSpeed: 1.5
+    - _WallReflection: 0.25
+    - _WallSmoothness: 0.918
     m_Colors:
     - _LineColor: {r: 0.6274533, g: 0.6420177, b: 2.6082377, a: 1}
     - _WallColorTop: {r: 0.29369885, g: 0.3852947, b: 0.8301887, a: 1}

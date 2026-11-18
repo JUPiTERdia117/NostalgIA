@@ -17,7 +17,8 @@ namespace NostalgIA.Presentation.VFX
     {
         Low = 0,
         Medium = 1,
-        High = 2
+        High = 2,
+        VeryHigh = 3
     }
 
     /// <summary>
@@ -26,13 +27,12 @@ namespace NostalgIA.Presentation.VFX
     /// <remarks>
     /// <para>
     /// Cada preset es un asset de URP en <c>Resources/GraphicsPresets</c> (uno por plataforma y nivel)
-    /// con su HDR, sus sombras y su renderer (solo PC alto lleva SSAO). Ninguno pide la copia de
-    /// color ni la textura de profundidad: solo las usaban los shaders de Verano, que ya no se usan.
+    /// con su HDR, sus sombras y su renderer (PC alto y móvil/PC muy alto llevan Forward+, SSR y SSAO).
     /// </para>
     /// <para>
     /// La resolución es la altura a la que se renderiza el mundo 3D (el lado corto de la pantalla).
     /// Se logra con la escala de render de URP, así el menú y el HUD siguen nítidos, y nunca supera
-    /// la pantalla real: en un monitor 1080p los tres niveles de PC renderizan a 1080.
+    /// la pantalla real: en un monitor 1080p los niveles de PC renderizan a 1080.
     /// </para>
     /// <para>
     /// Se usa una copia en memoria del asset para poder cambiarle la escala sin modificar el
@@ -45,14 +45,14 @@ namespace NostalgIA.Presentation.VFX
         private const string PresetFolder = "GraphicsPresets/";
         private const float MinRenderScale = 0.25f;
 
-        // Altura de render objetivo por nivel (bajo, medio, alto).
-        private static readonly int[] DesktopHeights = { 1080, 1440, 2160 };   // Full HD, 2K, 4K
-        private static readonly int[] MobileHeights = { 720, 1080, 1440 };     // HD, Full HD, QHD+ («2K»)
+        // Altura de render objetivo por nivel (bajo, medio, alto, muy alto).
+        private static readonly int[] DesktopHeights = { 1080, 1440, 2160, 2160 };   // Full HD, 2K, 4K, 4K
+        private static readonly int[] MobileHeights = { 720, 1080, 1440, 1440 };     // HD, Full HD, QHD+ («2K»), QHD+
 
         // Mipmaps que se saltan las texturas: 1 = mitad de resolución en bajo.
-        private static readonly int[] TextureMipmapLimits = { 1, 0, 0 };
+        private static readonly int[] TextureMipmapLimits = { 1, 0, 0, 0 };
 
-        private static readonly UniversalRenderPipelineAsset[] runtimeAssets = new UniversalRenderPipelineAsset[3];
+        private static readonly UniversalRenderPipelineAsset[] runtimeAssets = new UniversalRenderPipelineAsset[4];
         private static UniversalRenderPipelineAsset activeAsset;
         private static Bloom bloomOverride;
         private static int appliedShortSide;
@@ -69,12 +69,37 @@ namespace NostalgIA.Presentation.VFX
             get
             {
                 int fallback = (int)(IsMobile ? GraphicsPreset.Medium : GraphicsPreset.High);
-                return (GraphicsPreset)Mathf.Clamp(PlayerPrefs.GetInt(PresetKey, fallback), 0, 2);
+                return (GraphicsPreset)Mathf.Clamp(PlayerPrefs.GetInt(PresetKey, fallback), 0, 3);
             }
         }
 
         /// <summary>Altura de render que pide el preset en esta plataforma.</summary>
         public static int TargetHeight(GraphicsPreset preset) => (IsMobile ? MobileHeights : DesktopHeights)[(int)preset];
+
+        /// <summary>
+        /// Tamaño en píxeles para una vista secundaria (portales): una fracción de la resolución a la
+        /// que se renderiza el mundo con el preset actual, no de la pantalla real. Así la vista del
+        /// portal baja junto con el preset en vez de costar lo mismo en bajo que en alto.
+        /// </summary>
+        public static Vector2Int SecondaryViewSize(float fraction)
+        {
+            float scale = (activeAsset != null ? activeAsset.renderScale : 1f) * fraction;
+            return new Vector2Int(
+                Mathf.Max(64, Mathf.RoundToInt(Screen.width * scale)),
+                Mathf.Max(64, Mathf.RoundToInt(Screen.height * scale)));
+        }
+
+        /// <summary>
+        /// Límite de FPS. Sin él, Android se queda en 30 FPS y en PC la GPU trabaja al 100 % sin
+        /// descanso (se calienta y baja de rendimiento). Teléfono: hasta 60 FPS. PC: la frecuencia
+        /// del monitor (si el vSync del menú está encendido, manda el vSync).
+        /// </summary>
+        private static void ApplyFrameRate()
+        {
+            double refresh = Screen.currentResolution.refreshRateRatio.value;
+            int displayRate = refresh > 1.0 ? Mathf.RoundToInt((float)refresh) : 60;
+            Application.targetFrameRate = IsMobile ? Mathf.Min(60, displayRate) : displayRate;
+        }
 
         /// <summary>Guarda el preset y lo aplica de inmediato.</summary>
         public static void Set(GraphicsPreset preset)
@@ -145,7 +170,7 @@ namespace NostalgIA.Presentation.VFX
             bloomOverride.intensity.overrideState = preset == GraphicsPreset.Low;     // Bajo: sin Bloom.
             bloomOverride.intensity.value = 0f;
             bloomOverride.highQualityFiltering.overrideState = true;
-            bloomOverride.highQualityFiltering.value = preset == GraphicsPreset.High;
+            bloomOverride.highQualityFiltering.value = preset >= GraphicsPreset.High;
         }
 
         private static void CreateOverrideVolume()
@@ -175,6 +200,7 @@ namespace NostalgIA.Presentation.VFX
             activeAsset = null;
             bloomOverride = null;
             appliedShortSide = 0;
+            ApplyFrameRate();
             Apply();
         }
     }
