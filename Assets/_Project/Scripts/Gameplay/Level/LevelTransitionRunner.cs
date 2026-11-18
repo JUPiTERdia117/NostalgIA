@@ -62,6 +62,8 @@ namespace NostalgIA.Gameplay.Level
         private const float WarmupTimeout = 8f;
         /// <summary>Frames que se dibuja el nivel nuevo detrás de la pantalla antes de mostrarlo.</summary>
         private const int HiddenFrames = 3;
+        /// <summary>Segundos que se ve «Listo» al 100 % antes de mostrar el nivel.</summary>
+        private const float ReadySeconds = 0.6f;
 
         private static LevelTransitionRunner current;
 
@@ -198,6 +200,8 @@ namespace NostalgIA.Gameplay.Level
                 Report(0.78f);
                 yield return null;
             }
+            // La basura de la carga se recoge aquí, tapada, y no en medio del juego.
+            System.GC.Collect();
             // Las sondas de luz del nivel nuevo se combinan sin las del anterior.
             LightProbes.Tetrahedralize();
             Application.backgroundLoadingPriority = previousPriority;
@@ -216,6 +220,8 @@ namespace NostalgIA.Gameplay.Level
             // Unos frames dibujando el nivel real desde la entrada: compila lo que se ve al aparecer.
             for (int i = 0; i < HiddenFrames; i++) yield return null;
             Report(1f);
+            // La pantalla muestra «Listo» un momento antes de devolver el control.
+            yield return new WaitForSecondsRealtime(ReadySeconds);
 
             Finish(machine);
         }

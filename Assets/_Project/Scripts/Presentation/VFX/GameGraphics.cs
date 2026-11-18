@@ -28,7 +28,7 @@ namespace NostalgIA.Presentation.VFX
     /// <para>
     /// Cada preset es un asset de URP en <c>Resources/GraphicsPresets</c> (uno por plataforma y nivel)
     /// con su HDR, sus sombras y su renderer. En PC, muy alto usa <c>PC_Renderer</c> (SSAO completo y SSR)
-    /// y alto usa <c>PC_Renderer_High</c> (SSAO a media resolución y sin SSR), que cuesta bastante menos.
+    /// y alto usa <c>PC_Renderer_High</c> (SSR y SSAO a media resolución), que cuesta bastante menos.
     /// </para>
     /// <para>
     /// La resolución es la altura a la que se renderiza el mundo 3D (el lado corto de la pantalla).

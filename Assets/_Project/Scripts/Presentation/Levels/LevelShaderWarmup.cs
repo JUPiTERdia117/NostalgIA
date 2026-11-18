@@ -1,8 +1,8 @@
 // -----------------------------------------------------------------------------
 // NostalgIA — Presentación (NostalgIA.Presentation)
 // Archivo: LevelShaderWarmup.cs
-// Propósito: precalentar los shaders del nivel siguiente mientras está dormido,
-// para que no se compilen todos de golpe cuando la puerta empieza a mostrarlo.
+// Propósito: precalentar los shaders (y subir mallas y texturas) de uno o varios
+// niveles detrás de la pantalla de carga, para que no se compilen durante el juego.
 // -----------------------------------------------------------------------------
 
 using System.Collections.Generic;
@@ -67,16 +67,33 @@ namespace NostalgIA.Presentation.Levels
         /// <summary><c>true</c> cuando ya se dibujaron todos.</summary>
         public bool Done => next >= items.Count;
 
-        /// <summary>
-        /// Recorre todos los renderers de la escena (también los que están apagados porque el nivel
-        /// duerme) y guarda una entrada por cada combinación distinta de material y formato de malla.
-        /// </summary>
-        /// <param name="scene">Escena del nivel siguiente.</param>
-        public void Collect(Scene scene)
+        /// <summary>Parte del trabajo ya hecho, de 0 a 1 (1 si no hay nada que dibujar).</summary>
+        public float Progress => items.Count > 0 ? (float)next / items.Count : 1f;
+
+        /// <summary>Vacía la lista.</summary>
+        public void Clear()
         {
             items.Clear();
             seen.Clear();
             next = 0;
+        }
+
+        /// <summary>
+        /// Vacía la lista y agrega todos los renderers de la escena (también los que están apagados).
+        /// </summary>
+        /// <param name="scene">Escena del nivel siguiente.</param>
+        public void Collect(Scene scene)
+        {
+            Clear();
+            AddScene(scene);
+        }
+
+        /// <summary>
+        /// Agrega a la lista todos los renderers de una escena cargada (también los apagados), una
+        /// entrada por cada combinación distinta de material y formato de malla.
+        /// </summary>
+        public void AddScene(Scene scene)
+        {
             if (!scene.IsValid() || !scene.isLoaded) return;
 
             var roots = new List<GameObject>(64);
@@ -88,6 +105,38 @@ namespace NostalgIA.Presentation.Levels
                 roots[r].GetComponentsInChildren(true, renderers);
                 for (int i = 0; i < renderers.Count; i++) AddRenderer(renderers[i], materials);
             }
+        }
+
+        /// <summary>Agrega los dibujos guardados de otro nivel (ver <see cref="WarmupManifest"/>).</summary>
+        public void AddManifest(WarmupManifest manifest)
+        {
+            if (manifest == null) return;
+            IReadOnlyList<WarmupManifest.Entry> entries = manifest.Entries;
+            for (int i = 0; i < entries.Count; i++)
+            {
+                WarmupManifest.Entry entry = entries[i];
+                if (entry.Material == null) continue;
+                Mesh mesh = entry.Mesh != null ? entry.Mesh : Quad;
+                Add(mesh, Mathf.Clamp(entry.Submesh, 0, Mathf.Max(0, mesh.subMeshCount - 1)), entry.Material, entry.Layer);
+            }
+        }
+
+        /// <summary>
+        /// Describe los dibujos de una escena como entradas de lista (lo usa el generador del editor).
+        /// </summary>
+        public static List<WarmupManifest.Entry> Describe(Scene scene)
+        {
+            var warmup = new LevelShaderWarmup();
+            warmup.AddScene(scene);
+            var result = new List<WarmupManifest.Entry>(warmup.items.Count);
+            for (int i = 0; i < warmup.items.Count; i++)
+            {
+                Item item = warmup.items[i];
+                // El quad interno no es un asset: se guarda vacío y se reemplaza al cargar.
+                Mesh mesh = item.Mesh == quad && quad != null && quad.name == "WarmupQuad" ? null : item.Mesh;
+                result.Add(new WarmupManifest.Entry { Mesh = mesh, Submesh = item.Submesh, Material = item.Material, Layer = item.Layer });
+            }
+            return result;
         }
 
         /// <summary>

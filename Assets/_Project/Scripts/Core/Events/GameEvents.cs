@@ -972,35 +972,33 @@ namespace NostalgIA.Core.Events
     // ===================================================================== Progreso
 
     /// <summary>
-    /// Se completó un nivel: la pantalla de resultados lo muestra. Publica <c>LevelProgressService</c>.
+    /// Se terminó el juego (meta final): la pantalla de resultados lo muestra. Publica
+    /// <c>LevelProgressService</c>. Cruzar la puerta del Tutorial no lo publica.
     /// </summary>
     public readonly struct LevelCompleted : IGameEvent
     {
         /// <summary>Nombre del nivel que ve el jugador.</summary>
         public readonly string Title;
-        /// <summary>Estrellas recogidas en esta partida.</summary>
-        public readonly int Stars;
-        /// <summary>Estrellas que tiene el nivel.</summary>
-        public readonly int TotalStars;
-        /// <summary>Duración de la partida del nivel, en segundos.</summary>
-        public readonly float TimeSeconds;
-        /// <summary><c>true</c> si hay un nivel siguiente (se puede continuar).</summary>
-        public readonly bool HasNextLevel;
-        /// <summary>Texto de la mejora obtenida para el nivel siguiente (vacío si no hay).</summary>
-        public readonly string UpgradeText;
+        /// <summary>Tiempo que tomó terminar este nivel, en segundos.</summary>
+        public readonly float LevelSeconds;
+        /// <summary>Tiempo de la partida completa desde el primer nivel; negativo si no aplica.</summary>
+        public readonly float RunSeconds;
+        /// <summary>Estrellas recogidas en todo el juego.</summary>
+        public readonly int GameStars;
+        /// <summary>Estrellas que hay en todo el juego.</summary>
+        public readonly int GameTotalStars;
 
-        public LevelCompleted(string title, int stars, int totalStars, float timeSeconds, bool hasNextLevel, string upgradeText)
+        public LevelCompleted(string title, float levelSeconds, float runSeconds, int gameStars, int gameTotalStars)
         {
             Title = title;
-            Stars = stars;
-            TotalStars = totalStars;
-            TimeSeconds = timeSeconds;
-            HasNextLevel = hasNextLevel;
-            UpgradeText = upgradeText ?? string.Empty;
+            LevelSeconds = levelSeconds;
+            RunSeconds = runSeconds;
+            GameStars = gameStars;
+            GameTotalStars = gameTotalStars;
         }
 
-        /// <summary>Indica si se recogieron todas las estrellas.</summary>
-        public bool IsPlatinum => TotalStars > 0 && Stars >= TotalStars;
+        /// <summary><c>true</c> si se jugó la partida completa desde el primer nivel.</summary>
+        public bool HasRunTime => RunSeconds >= 0f;
     }
 
     /// <summary>

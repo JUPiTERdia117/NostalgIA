@@ -315,6 +315,10 @@ namespace SlimUI.ModernMenu{
 
 		// Load Bar synching animation
 		IEnumerator LoadAsynchronously(string sceneName){ // scene name is just the name of the current scene being loaded
+			// NostalgIA: los niveles se cargan con la pantalla de carga del juego, que además precarga
+			// shaders, texturas y audio y muestra «Listo» al terminar.
+			// El menú se queda visible debajo mientras la pantalla de carga aparece encima.
+			if(NostalgIA.Presentation.UI.LevelLoadingScreen.LoadLevel(sceneName)) yield break;
 			AsyncOperation operation = SceneManager.LoadSceneAsync(sceneName);
 			operation.allowSceneActivation = false;
 			mainCanvas.SetActive(false);

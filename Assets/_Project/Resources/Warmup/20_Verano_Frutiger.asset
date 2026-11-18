@@ -1,0 +1,244 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8a38d0c16813b477293346c9e5c96c17, type: 3}
+  m_Name: 20_Verano_Frutiger
+  m_EditorClassIdentifier: NostalgIA.Presentation::NostalgIA.Presentation.Levels.WarmupManifest
+  sceneName: 20_Verano_Frutiger
+  entries:
+  - Mesh: {fileID: 4300000, guid: 4d166bb498b2a4399862cade7458a81a, type: 2}
+    Submesh: 0
+    Material: {fileID: 2100000, guid: 2e7fa2e78657b1e429472827526c75ea, type: 2}
+    Layer: 0
+  - Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+    Submesh: 0
+    Material: {fileID: 2100000, guid: f974bc487257c42c09c63426bf76d8d2, type: 2}
+    Layer: 0
+  - Mesh: {fileID: 3836962167230424001, guid: 8c71f03fcb0c13644a30696cafc5cda8, type: 3}
+    Submesh: 0
+    Material: {fileID: 2100000, guid: 09473d06882d1414b84b1fdb7a095516, type: 2}
+    Layer: 0
+  - Mesh: {fileID: 1424200115404124385, guid: f222748f1796b2e49a56a2fbf7563247, type: 3}
+    Submesh: 0
+    Material: {fileID: 2100000, guid: 3922c043c1c52cb47a7b1bfed562a4b6, type: 2}
+    Layer: 0
+  - Mesh: {fileID: 1424200115404124385, guid: f222748f1796b2e49a56a2fbf7563247, type: 3}
+    Submesh: 1
+    Material: {fileID: 2100000, guid: 0a1f44318dd467a45bfef81ad0e8855a, type: 2}
+    Layer: 0
+  - Mesh: {fileID: 10206, guid: 0000000000000000e000000000000000, type: 0}
+    Submesh: 0
+    Material: {fileID: 2100000, guid: a32c1d5367aec485793d6f715c49dcb4, type: 2}
+    Layer: 0
+  - Mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
+    Submesh: 0
+    Material: {fileID: 2100000, guid: 9a5cdb1e19c874aa0a1db5df258ed4b1, type: 2}
+    Layer: 7
+  - Mesh: {fileID: 3140967619493104911, guid: e3b7c611e6c2b7fab9cb9d249a1ea1d8, type: 3}
+    Submesh: 0
+    Material: {fileID: 2100000, guid: 49154c6f3164b771eb7c2d9967d84581, type: 2}
+    Layer: 8
+  - Mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
+    Submesh: 0
+    Material: {fileID: 2100000, guid: 85de6eb5a7783b66aa17e342b7b3e773, type: 2}
+    Layer: 8
+  - Mesh: {fileID: 289301614986012343, guid: 48d010c04c8d908a4aeedef514fa5d49, type: 3}
+    Submesh: 0
+    Material: {fileID: 2100000, guid: aa6ed02a6ed213aba91718d01f3fafee, type: 2}
+    Layer: 8
+  - Mesh: {fileID: -8545447256379345787, guid: 0323c1acbc322758fa52c69861ab4ede, type: 3}
+    Submesh: 0
+    Material: {fileID: 2100000, guid: 9cc8717db934efaf089ce512719e5012, type: 2}
+    Layer: 0
+  - Mesh: {fileID: -8545447256379345787, guid: 0323c1acbc322758fa52c69861ab4ede, type: 3}
+    Submesh: 1
+    Material: {fileID: 2100000, guid: 7ae7b301ba281a7d9a84cd9c898f6a90, type: 2}
+    Layer: 0
+  - Mesh: {fileID: -8545447256379345787, guid: 0323c1acbc322758fa52c69861ab4ede, type: 3}
+    Submesh: 2
+    Material: {fileID: 2100000, guid: f090a10bf1fc764038d93d952832dd0e, type: 2}
+    Layer: 0
+  - Mesh: {fileID: -6306165518510694157, guid: 0323c1acbc322758fa52c69861ab4ede, type: 3}
+    Submesh: 1
+    Material: {fileID: 2100000, guid: d585c2fdc872a81f39b1f4608ea59b8a, type: 2}
+    Layer: 0
+  - Mesh: {fileID: 2832822873855585004, guid: 0323c1acbc322758fa52c69861ab4ede, type: 3}
+    Submesh: 0
+    Material: {fileID: 2100000, guid: d585c2fdc872a81f39b1f4608ea59b8a, type: 2}
+    Layer: 0
+  - Mesh: {fileID: 2832822873855585004, guid: 0323c1acbc322758fa52c69861ab4ede, type: 3}
+    Submesh: 1
+    Material: {fileID: 2100000, guid: f090a10bf1fc764038d93d952832dd0e, type: 2}
+    Layer: 0
+  - Mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
+    Submesh: 0
+    Material: {fileID: 2100000, guid: ccc835224603442ddb75bcf3e065b236, type: 2}
+    Layer: 0
+  - Mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
+    Submesh: 0
+    Material: {fileID: 2100000, guid: 5b774a3acd7c64f1cb8c3d4f0e697455, type: 2}
+    Layer: 0
+  - Mesh: {fileID: 10206, guid: 0000000000000000e000000000000000, type: 0}
+    Submesh: 0
+    Material: {fileID: 2100000, guid: 61acae787dc8943f9afc4058b8543b13, type: 2}
+    Layer: 0
+  - Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+    Submesh: 0
+    Material: {fileID: 2100000, guid: a2e29ad57640744879aae89a245afcb8, type: 2}
+    Layer: 10
+  - Mesh: {fileID: -1906400850140278043, guid: 52f5d91cf7cb14c1bae161f41a24d330, type: 3}
+    Submesh: 0
+    Material: {fileID: 2100000, guid: 60dd05beba35e4b05bc2e46aeefcc68f, type: 2}
+    Layer: 0
+  - Mesh: {fileID: -1906400850140278043, guid: 52f5d91cf7cb14c1bae161f41a24d330, type: 3}
+    Submesh: 1
+    Material: {fileID: 2100000, guid: a97b64e0db49b486482927e993b4a979, type: 2}
+    Layer: 0
+  - Mesh: {fileID: 7315564398615028574, guid: 52f5d91cf7cb14c1bae161f41a24d330, type: 3}
+    Submesh: 0
+    Material: {fileID: 2100000, guid: 09b2f9222fb6f4e5a92bac915d64a475, type: 2}
+    Layer: 0
+  - Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+    Submesh: 0
+    Material: {fileID: 2100000, guid: c9197023c385c4d7d868e9036aae1d49, type: 2}
+    Layer: 0
+  - Mesh: {fileID: 8195499056177016675, guid: 1590c7a088f56ca5b9b1b5ed5a6bb896, type: 3}
+    Submesh: 0
+    Material: {fileID: 2100000, guid: 4b5cfb0f5fb010bc9b08ef40fdc4b7eb, type: 2}
+    Layer: 0
+  - Mesh: {fileID: 8195499056177016675, guid: 1590c7a088f56ca5b9b1b5ed5a6bb896, type: 3}
+    Submesh: 1
+    Material: {fileID: 2100000, guid: fa6d44c32d34f0d2799192ad8991782b, type: 2}
+    Layer: 0
+  - Mesh: {fileID: -7070831255929112694, guid: d91946a734254e014a9627cc28379c8b, type: 3}
+    Submesh: 0
+    Material: {fileID: 2100000, guid: 63003641a2f4c53138e18234c9912b6e, type: 2}
+    Layer: 0
+  - Mesh: {fileID: -7070831255929112694, guid: d91946a734254e014a9627cc28379c8b, type: 3}
+    Submesh: 1
+    Material: {fileID: 2100000, guid: 9eca2e49a09466c73b52340cc0289bd5, type: 2}
+    Layer: 0
+  - Mesh: {fileID: -7699666271181864620, guid: d91946a734254e014a9627cc28379c8b, type: 3}
+    Submesh: 0
+    Material: {fileID: 2100000, guid: 02e7d3086782d8d5297171b576cfc76e, type: 2}
+    Layer: 0
+  - Mesh: {fileID: -7699666271181864620, guid: d91946a734254e014a9627cc28379c8b, type: 3}
+    Submesh: 1
+    Material: {fileID: 2100000, guid: 7d3ab30e42f053fb9a32ed821d1aaafd, type: 2}
+    Layer: 0
+  - Mesh: {fileID: 3209554841506446676, guid: d91946a734254e014a9627cc28379c8b, type: 3}
+    Submesh: 0
+    Material: {fileID: 2100000, guid: 63003641a2f4c53138e18234c9912b6e, type: 2}
+    Layer: 0
+  - Mesh: {fileID: 3209554841506446676, guid: d91946a734254e014a9627cc28379c8b, type: 3}
+    Submesh: 1
+    Material: {fileID: 2100000, guid: 9eca2e49a09466c73b52340cc0289bd5, type: 2}
+    Layer: 0
+  - Mesh: {fileID: -1764814519981889553, guid: d91946a734254e014a9627cc28379c8b, type: 3}
+    Submesh: 0
+    Material: {fileID: 2100000, guid: 7d3ab30e42f053fb9a32ed821d1aaafd, type: 2}
+    Layer: 0
+  - Mesh: {fileID: -1764814519981889553, guid: d91946a734254e014a9627cc28379c8b, type: 3}
+    Submesh: 1
+    Material: {fileID: 2100000, guid: 02e7d3086782d8d5297171b576cfc76e, type: 2}
+    Layer: 0
+  - Mesh: {fileID: 10206, guid: 0000000000000000e000000000000000, type: 0}
+    Submesh: 0
+    Material: {fileID: 2100000, guid: 047a190aa7cb748bab36d13e76288334, type: 2}
+    Layer: 0
+  - Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+    Submesh: 0
+    Material: {fileID: 2100000, guid: 890bbb79e11ac44879779a46fff88fcf, type: 2}
+    Layer: 3
+  - Mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
+    Submesh: 0
+    Material: {fileID: 2100000, guid: e2241c13020754ab2a025040d524d6a1, type: 2}
+    Layer: 8
+  - Mesh: {fileID: 4493585093827132993, guid: 017941ca37aa09008a1c6ad326bea8e5, type: 3}
+    Submesh: 0
+    Material: {fileID: 2100000, guid: c8291e1354b8d3ba8953ed59a7b2dbf5, type: 2}
+    Layer: 0
+  - Mesh: {fileID: 759096203756417900, guid: 017941ca37aa09008a1c6ad326bea8e5, type: 3}
+    Submesh: 0
+    Material: {fileID: 2100000, guid: 41e56f82ed680220585e37a93da6c7fd, type: 2}
+    Layer: 0
+  - Mesh: {fileID: -8761976922659346040, guid: 017941ca37aa09008a1c6ad326bea8e5, type: 3}
+    Submesh: 0
+    Material: {fileID: 2100000, guid: c8291e1354b8d3ba8953ed59a7b2dbf5, type: 2}
+    Layer: 0
+  - Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+    Submesh: 0
+    Material: {fileID: 2100000, guid: ea13f633503cd4eddb6ee6d06d6e9b49, type: 2}
+    Layer: 0
+  - Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+    Submesh: 0
+    Material: {fileID: 2100000, guid: 0dbd84e6e5db24dc481f1586b84d2a4d, type: 2}
+    Layer: 0
+  - Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+    Submesh: 0
+    Material: {fileID: 2100000, guid: 20cfe9ec78df442178f602925a8fe715, type: 2}
+    Layer: 0
+  - Mesh: {fileID: 4300000, guid: e502660417c7947ed8c6ba133b3f72b0, type: 2}
+    Submesh: 0
+    Material: {fileID: 2100000, guid: 7d85010d309f04fdf87f4ef8c1abb73a, type: 2}
+    Layer: 0
+  - Mesh: {fileID: 10210, guid: 0000000000000000e000000000000000, type: 0}
+    Submesh: 0
+    Material: {fileID: 2100000, guid: dfe90a53ed7a943549660f7aa4df8dde, type: 2}
+    Layer: 0
+  - Mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
+    Submesh: 0
+    Material: {fileID: 2100000, guid: 77c845df0c6db8a4abb91d700b45c03d, type: 2}
+    Layer: 14
+  - Mesh: {fileID: -7689953114278343279, guid: e67b29967d506a0408e193df7656c30c, type: 3}
+    Submesh: 0
+    Material: {fileID: 2100000, guid: 0aeff8716f662ac40bef880920d285c2, type: 2}
+    Layer: 0
+  - Mesh: {fileID: 10206, guid: 0000000000000000e000000000000000, type: 0}
+    Submesh: 0
+    Material: {fileID: 2100000, guid: 0543f8e9167f341b68b9ad94f3d9e99c, type: 2}
+    Layer: 0
+  - Mesh: {fileID: 10208, guid: 0000000000000000e000000000000000, type: 0}
+    Submesh: 0
+    Material: {fileID: 2100000, guid: 0e6d64548eaf8470199e90809979943e, type: 2}
+    Layer: 6
+  - Mesh: {fileID: -7387706064836869012, guid: 75b05a9674e5316ef94692c037609d2e, type: 3}
+    Submesh: 0
+    Material: {fileID: 2100000, guid: 1b505e9029cd54bba9f819acb571b98a, type: 2}
+    Layer: 6
+  - Mesh: {fileID: -8302102485596996044, guid: 75b05a9674e5316ef94692c037609d2e, type: 3}
+    Submesh: 0
+    Material: {fileID: 2100000, guid: 36e468cf27a1d4bb2a80759dc31ae6eb, type: 2}
+    Layer: 6
+  - Mesh: {fileID: 2212009239438826721, guid: 75b05a9674e5316ef94692c037609d2e, type: 3}
+    Submesh: 0
+    Material: {fileID: 2100000, guid: 2a88b81bbeb444e96ba752f181207320, type: 2}
+    Layer: 6
+  - Mesh: {fileID: -2228417370725966487, guid: 75b05a9674e5316ef94692c037609d2e, type: 3}
+    Submesh: 0
+    Material: {fileID: 2100000, guid: 0bef31cf2cc9a4c449668357bb64618c, type: 2}
+    Layer: 6
+  - Mesh: {fileID: -2672194731218637548, guid: 75b05a9674e5316ef94692c037609d2e, type: 3}
+    Submesh: 0
+    Material: {fileID: 2100000, guid: 6b83cc50f95b4415cbf2bc92278f4956, type: 2}
+    Layer: 6
+  - Mesh: {fileID: 8691780276856062721, guid: 75b05a9674e5316ef94692c037609d2e, type: 3}
+    Submesh: 0
+    Material: {fileID: 2100000, guid: 8602b7ab2c90f4745a54794441ffbb4d, type: 2}
+    Layer: 6
+  - Mesh: {fileID: 10210, guid: 0000000000000000e000000000000000, type: 0}
+    Submesh: 0
+    Material: {fileID: 2100000, guid: aaf6f49b1a8434b54b9700d2d794187d, type: 2}
+    Layer: 6
+  - Mesh: {fileID: 10208, guid: 0000000000000000e000000000000000, type: 0}
+    Submesh: 0
+    Material: {fileID: 2100000, guid: 613fbde175d577b40a41eb0aa3d0ae07, type: 2}
+    Layer: 6

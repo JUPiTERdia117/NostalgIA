@@ -1,14 +1,12 @@
 // -----------------------------------------------------------------------------
 // NostalgIA — Presentación (NostalgIA.Presentation)
 // Archivo: FlowScreensPresenter.cs
-// Propósito: pantalla de resultados al completar un nivel y pantalla de muerte
+// Propósito: pantalla de resultados al terminar el juego y pantalla de muerte
 // con el botón para reaparecer.
 // -----------------------------------------------------------------------------
 
 using NostalgIA.Core;
 using NostalgIA.Core.Events;
-using NostalgIA.Core.Game;
-using NostalgIA.Core.Services;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -23,9 +21,9 @@ namespace NostalgIA.Presentation.UI
     /// </summary>
     /// <remarks>
     /// <list type="bullet">
-    /// <item><b>Resultados</b> (<see cref="LevelCompleted"/>): estrellas, platino, tiempo y mejora
-    /// obtenida. Con nivel siguiente ofrece «Continuar» y «Menú principal»; en la meta final, solo
-    /// «Volver al menú».</item>
+    /// <item><b>Resultados</b> (<see cref="LevelCompleted"/>): solo al terminar el juego. Muestra el
+    /// tiempo de la partida completa (si empezó en el Tutorial), el del nivel final y las estrellas
+    /// de todo el juego, con el botón «Volver al menú».</item>
     /// <item><b>Muerte</b> (<see cref="PlayerDied"/>): aparece tras una pausa breve, para que se vea
     /// el robot desarmado en el suelo, con el botón «Reaparecer» (o «Reiniciar tutorial» en el
     /// Tutorial), que publica <see cref="RespawnRequested"/>.</item>
@@ -44,7 +42,7 @@ namespace NostalgIA.Presentation.UI
 
         private GameObject resultsPanel;
         private TextMeshProUGUI resultsTitle, resultsBody;
-        private Button continueButton, menuButton;
+        private Button menuButton;
 
         private GameObject deathPanel;
         private TextMeshProUGUI respawnLabel;
@@ -92,23 +90,28 @@ namespace NostalgIA.Presentation.UI
         private void OnLevelCompleted(in LevelCompleted evt)
         {
             HideDeath();
-            resultsTitle.SetText($"¡{evt.Title} completado!");
+            resultsTitle.SetText("¡Juego completado!");
 
-            string stars = evt.TotalStars > 0 ? $"♦  Estrellas: {evt.Stars} / {evt.TotalStars}" : "♦  Este nivel no tiene estrellas";
-            string platinum = evt.IsPlatinum
-                ? "<color=#FFD166>√  NIVEL PLATINADO</color>"
-                : "<color=#8D99AE>Consigue todas las estrellas para platinarlo</color>";
-            int minutes = Mathf.FloorToInt(evt.TimeSeconds / 60f);
-            int seconds = Mathf.FloorToInt(evt.TimeSeconds % 60f);
-            string body = $"{stars}\n{platinum}\nTiempo: {minutes}:{seconds:00}";
-            if (evt.UpgradeText.Length > 0) body += $"\n\n<color=#9DB8FF>Mejoras obtenidas</color>\n{evt.UpgradeText}";
+            // Solo tiempos y estrellas: partida completa (si empezó en el primer nivel), nivel final
+            // y estrellas de todo el juego.
+            string body = string.Empty;
+            if (evt.HasRunTime) body += $"Partida completa: {FormatTime(evt.RunSeconds)}\n";
+            body += $"Nivel {evt.Title}: {FormatTime(evt.LevelSeconds)}\n";
+            body += evt.GameTotalStars > 0
+                ? $"♦  Estrellas: {evt.GameStars} / {evt.GameTotalStars}"
+                : "♦  Estrellas: 0";
             resultsBody.SetText(body);
 
-            // Con nivel siguiente: «Continuar» y «Menú principal»; en la meta final, solo el menú.
-            continueButton.gameObject.SetActive(evt.HasNextLevel);
-            menuButton.GetComponentInChildren<TextMeshProUGUI>().SetText(evt.HasNextLevel ? "Menú principal" : "Volver al menú");
             resultsPanel.SetActive(true);
-            Select(evt.HasNextLevel ? continueButton : menuButton);
+            Select(menuButton);
+        }
+
+        /// <summary>Minutos y segundos (y horas si las hay), por ejemplo «12:05» o «1:02:30».</summary>
+        private static string FormatTime(float seconds)
+        {
+            int total = Mathf.Max(0, Mathf.FloorToInt(seconds));
+            int h = total / 3600, m = total / 60 % 60, sec = total % 60;
+            return h > 0 ? $"{h}:{m:00}:{sec:00}" : $"{m}:{sec:00}";
         }
 
         private void OnPlayerDied(in PlayerDied evt) => deathTimer = deathPanelDelay;
@@ -124,12 +127,6 @@ namespace NostalgIA.Presentation.UI
         }
 
         // ------------------------------------------------------------------ botones
-        private void Continue()
-        {
-            resultsPanel.SetActive(false);
-            if (ServiceLocator.TryGet(out GameStateMachine machine)) machine.ChangeState(GameState.Playing);
-        }
-
         private void GoToMenu()
         {
             resultsPanel.SetActive(false);
@@ -169,8 +166,8 @@ namespace NostalgIA.Presentation.UI
             resultsPanel = window.parent.gameObject;
             resultsTitle = UiKit.NewText(window, font, string.Empty, new Vector2(0f, 200f), new Vector2(660f, 70f), 40f, TextAlignmentOptions.Center);
             resultsBody = UiKit.NewText(window, font, string.Empty, new Vector2(0f, 20f), new Vector2(640f, 280f), 26f, TextAlignmentOptions.Center);
-            continueButton = UiKit.NewButton(window, font, "Continuar", new Vector2(-170f, -200f), new Vector2(300f, 60f), 26f, Continue);
-            menuButton = UiKit.NewButton(window, font, "Menú principal", new Vector2(170f, -200f), new Vector2(300f, 60f), 26f, GoToMenu);
+            // Es la meta final: solo se puede volver al menú.
+            menuButton = UiKit.NewButton(window, font, "Volver al menú", new Vector2(0f, -200f), new Vector2(300f, 60f), 26f, GoToMenu);
         }
 
         private void BuildDeath(Transform canvas)
