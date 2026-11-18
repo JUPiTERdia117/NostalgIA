@@ -27,7 +27,8 @@ namespace NostalgIA.Presentation.VFX
     /// <remarks>
     /// <para>
     /// Cada preset es un asset de URP en <c>Resources/GraphicsPresets</c> (uno por plataforma y nivel)
-    /// con su HDR, sus sombras y su renderer (PC alto y móvil/PC muy alto llevan Forward+, SSR y SSAO).
+    /// con su HDR, sus sombras y su renderer. En PC, muy alto usa <c>PC_Renderer</c> (SSAO completo y SSR)
+    /// y alto usa <c>PC_Renderer_High</c> (SSAO a media resolución y sin SSR), que cuesta bastante menos.
     /// </para>
     /// <para>
     /// La resolución es la altura a la que se renderiza el mundo 3D (el lado corto de la pantalla).
@@ -46,7 +47,8 @@ namespace NostalgIA.Presentation.VFX
         private const float MinRenderScale = 0.25f;
 
         // Altura de render objetivo por nivel (bajo, medio, alto, muy alto).
-        private static readonly int[] DesktopHeights = { 1080, 1440, 2160, 2160 };   // Full HD, 2K, 4K, 4K
+        // Muy alto en PC no tiene tope: la escala se limita a 1, así que renderiza a la resolución nativa.
+        private static readonly int[] DesktopHeights = { 1080, 1440, 1440, int.MaxValue };   // Full HD, 2K, 2K, nativa
         private static readonly int[] MobileHeights = { 720, 1080, 1440, 1440 };     // HD, Full HD, QHD+ («2K»), QHD+
 
         // Mipmaps que se saltan las texturas: 1 = mitad de resolución en bajo.
