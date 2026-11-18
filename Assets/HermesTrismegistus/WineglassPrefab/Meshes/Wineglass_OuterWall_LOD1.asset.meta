@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: feb748615dec9e94fa965b8470b44134
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 4300000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 390330
+  packageName: Wineglass Prefab
+  packageVersion: 1.1.2
+  assetPath: Assets/HermesTrismegistus/WineglassPrefab/Meshes/Wineglass_OuterWall_LOD1.asset
+  uploadId: 956450

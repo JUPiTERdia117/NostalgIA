@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: c19f892264efde742b59221c4c12ba6b
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 4300000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 390330
+  packageName: Wineglass Prefab
+  packageVersion: 1.1.2
+  assetPath: Assets/HermesTrismegistus/WineglassPrefab/Meshes/Wineglass_TopRim_LOD2.asset
+  uploadId: 956450
