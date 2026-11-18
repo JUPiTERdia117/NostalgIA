@@ -3,7 +3,27 @@ guid: 52f5d91cf7cb14c1bae161f41a24d330
 ModelImporter:
   serializedVersion: 24300
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: fa_building_color_general
+    second: {fileID: 2100000, guid: a97b64e0db49b486482927e993b4a979, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: fa_building_color_glass
+    second: {fileID: 2100000, guid: 60dd05beba35e4b05bc2e46aeefcc68f, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: fa_building_color_metal
+    second: {fileID: 2100000, guid: 09b2f9222fb6f4e5a92bac915d64a475, type: 2}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: fa_building_colorgrid
+    second: {fileID: 2800000, guid: f5e97fea64e0548edb864597283a5c7c, type: 3}
   materials:
     materialImportMode: 2
     materialName: 0
