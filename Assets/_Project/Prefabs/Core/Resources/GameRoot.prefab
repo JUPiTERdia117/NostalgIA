@@ -10397,7 +10397,7 @@ GameObject:
   - component: {fileID: 7980604364439075305}
   - component: {fileID: 2964345899144703140}
   m_Layer: 5
-  m_Name: NextLevelTestButton
+  m_Name: MenuButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -10570,7 +10570,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Siguiente nivel (Test)
+  m_text: "Volver al men\xFA"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: ae5d91afdc34f4d40a8cb071877d2cbc, type: 2}
   m_sharedMaterial: {fileID: 720710784763394152, guid: ae5d91afdc34f4d40a8cb071877d2cbc, type: 2}
@@ -10884,8 +10884,8 @@ MonoBehaviour:
   controlsText: {fileID: 821796057909902044}
   resumeHintText: {fileID: 3767961349970614828}
   resumeButton: {fileID: 4903200150362630526}
-  nextLevelButton: {fileID: 2964345899144703140}
-  nextLevelLabel: {fileID: 7275225902957462586}
+  menuButton: {fileID: 2964345899144703140}
+  menuLabel: {fileID: 7275225902957462586}
   settings: {fileID: 5839201746620193847}
 --- !u!114 &5839201746620193847
 MonoBehaviour:

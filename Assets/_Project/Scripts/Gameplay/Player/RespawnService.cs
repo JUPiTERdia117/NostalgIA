@@ -1,18 +1,16 @@
 // -----------------------------------------------------------------------------
 // NostalgIA — Jugabilidad (NostalgIA.Gameplay)
 // Archivo: RespawnService.cs
-// Propósito: reaparición en el último checkpoint (o reinicio del Tutorial) cuando
-// el jugador pulsa el botón de la pantalla de muerte.
+// Propósito: reaparición en el último checkpoint cuando el jugador pulsa el botón
+// de la pantalla de muerte.
 // -----------------------------------------------------------------------------
 
-using NostalgIA.Core;
 using NostalgIA.Core.Events;
 using NostalgIA.Core.Game;
 using NostalgIA.Core.Lifecycle;
 using NostalgIA.Core.Services;
 using NostalgIA.Gameplay.Tools;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 namespace NostalgIA.Gameplay.Player
 {
@@ -24,10 +22,10 @@ namespace NostalgIA.Gameplay.Player
     /// <list type="number">
     /// <item>Recibe <see cref="PlayerDied"/> y cambia el estado global a <see cref="GameState.Respawning"/>
     /// (sin entrada de juego). La pantalla de muerte muestra el robot desarmado y un botón.</item>
-    /// <item>Al pulsar el botón llega <see cref="RespawnRequested"/>. En el Tutorial se vuelve a
-    /// cargar la escena completa (el tutorial empieza de nuevo).</item>
-    /// <item>En los demás niveles reubica al jugador en el último checkpoint activo, anula
-    /// velocidades, restablece corazones y herramientas y notifica a los <see cref="IResettable"/>.</item>
+    /// <item>Al pulsar el botón llega <see cref="RespawnRequested"/>: reubica al jugador en el último
+    /// checkpoint activo (o en la entrada del nivel si aún no tocó ninguno), anula velocidades,
+    /// restablece corazones y herramientas y notifica a los <see cref="IResettable"/>. Vale igual
+    /// para el Tutorial que para los demás niveles.</item>
     /// <item>Publica <see cref="PlayerRespawned"/> y regresa a <see cref="GameState.Playing"/>.</item>
     /// </list>
     /// </remarks>
@@ -115,22 +113,10 @@ namespace NostalgIA.Gameplay.Player
             tools?.ResetTools();
         }
 
-        /// <summary>
-        /// Se pulsó el botón. En el Tutorial se reinicia la escena completa; en los demás niveles
-        /// se reaparece en el último checkpoint.
-        /// </summary>
+        /// <summary>Se pulsó el botón de la pantalla de muerte: se reaparece en el último checkpoint.</summary>
         private void OnRespawnRequested(in RespawnRequested evt)
         {
             if (!respawnPending) return;
-            if (gameObject.scene.name == SceneNames.Tutorial)
-            {
-                respawnPending = false;
-                // Aviso de reaparición antes de recargar: los efectos persistentes (posprocesado de
-                // GameRoot, pantalla de muerte) vuelven a la normalidad.
-                EventBus<PlayerRespawned>.Raise(new PlayerRespawned(-1, spawnPosition, health.MaxHearts));
-                SceneManager.LoadScene(SceneNames.Tutorial);
-                return;
-            }
             CompleteRespawn();
         }
 

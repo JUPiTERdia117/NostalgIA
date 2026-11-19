@@ -38,6 +38,9 @@ namespace NostalgIA.Gameplay.Enemies
         [SerializeField] private string deathState = "Death";
         [Tooltip("Pausa en la última pose de muerte antes de los fragmentos, en segundos.")]
         [SerializeField, Min(0f)] private float deathHold = 0.1f;
+        [Tooltip("Cuántos cuadros de la animación de muerte se reproducen (0 = el clip completo). " +
+                 "El Spam Mail usa 3: se ve el inicio de la muerte y enseguida salen los fragmentos.")]
+        [SerializeField, Min(0)] private int deathFrames = 0;
 
         // Estado que se está reproduciendo en cada capa, para no reiniciar un ciclo que ya corre.
         private readonly int[] current = new int[4];
@@ -73,11 +76,17 @@ namespace NostalgIA.Gameplay.Enemies
         /// <remarks>Los clips vienen del FBX con el nombre «Armature|bite»; se buscan por el final.</remarks>
         public float Length(string state)
         {
-            if (!IsAnimated) return 0f;
+            AnimationClip clip = FindClip(state);
+            return clip != null ? clip.length : 0f;
+        }
+
+        private AnimationClip FindClip(string state)
+        {
+            if (!IsAnimated) return null;
             foreach (AnimationClip clip in animator.runtimeAnimatorController.animationClips)
                 if (clip != null && clip.name.EndsWith(state, StringComparison.OrdinalIgnoreCase))
-                    return clip.length;
-            return 0f;
+                    return clip;
+            return null;
         }
 
         /// <summary>Reproduce la muerte y espera a que termine (lo usa <see cref="EnemyHealth"/>).</summary>
@@ -85,8 +94,23 @@ namespace NostalgIA.Gameplay.Enemies
         {
             // La muerte gana sobre cualquier capa superior (por ejemplo, el disparo del Spam Mail).
             for (int i = 1; i < animator.layerCount; i++) animator.SetLayerWeight(i, 0f);
-            Play(deathState, 0, true);
-            yield return new WaitForSeconds(Length(deathState) + deathHold);
+            if (deathFrames > 0)
+            {
+                // Solo unos cuadros: sin mezcla, para que empiece en su primer cuadro en este momento.
+                animator.Play(Animator.StringToHash(deathState), 0, 0f);
+                current[0] = Animator.StringToHash(deathState);
+            }
+            else Play(deathState, 0, true);
+
+            AnimationClip clip = FindClip(deathState);
+            float duration = clip != null ? clip.length : 0f;
+            if (deathFrames > 0 && clip != null && clip.frameRate > 0f)
+                duration = Mathf.Min(duration, deathFrames / clip.frameRate);
+            yield return new WaitForSeconds(duration);
+
+            // Se congela la pose alcanzada (en el Spam Mail, el tercer cuadro) hasta los fragmentos.
+            if (deathFrames > 0) animator.speed = 0f;
+            yield return new WaitForSeconds(deathHold);
         }
     }
 }

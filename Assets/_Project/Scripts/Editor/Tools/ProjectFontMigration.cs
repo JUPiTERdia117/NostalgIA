@@ -41,7 +41,7 @@ namespace NostalgIA.EditorTools
         // ASCII, español y los símbolos que usa el juego.
         private const string Characters =
             " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~" +
-            "áéíóúÁÉÍÓÚñÑüÜ¿¡«»…—–•♦●›ª√·‘’“”";
+            "áéíóúÁÉÍÓÚñÑüÜ¿¡«»…—–•♦♥●›ª√·‘’“”";
 
         [MenuItem("NostalgIA/Aplicar fuente JikiTourai a todo el proyecto")]
         public static void Run()
@@ -75,8 +75,13 @@ namespace NostalgIA.EditorTools
             }
 
             var existing = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(AssetPath);
-            // Si ya existe se reutiliza: así no cambia su GUID y no se rompen las referencias.
-            if (existing != null) return existing;
+            // Si ya existe se reutiliza (así no cambia su GUID y no se rompen las referencias) y solo se
+            // le agregan los caracteres que le falten, por ejemplo si la fuente ganó glifos nuevos.
+            if (existing != null)
+            {
+                AddCharacters(existing);
+                return existing;
+            }
 
             // SDF de 1024 × 1024 con 64 pt por glyph: nítido de 12 a 200 pt.
             TMP_FontAsset font = TMP_FontAsset.CreateFontAsset(source, 64, 8, GlyphRenderMode.SDFAA, 1024, 1024,
@@ -88,13 +93,21 @@ namespace NostalgIA.EditorTools
             font.material.name = font.name + " Material";
             AssetDatabase.AddObjectToAsset(font.material, font);
 
+            AddCharacters(font);
+            return font;
+        }
+
+        /// <summary>Pone en el atlas los caracteres de <see cref="Characters"/> y deja la fuente estática.</summary>
+        private static void AddCharacters(TMP_FontAsset font)
+        {
+            // Para agregar glifos la fuente debe ser dinámica un momento.
+            font.atlasPopulationMode = AtlasPopulationMode.Dynamic;
             font.TryAddCharacters(Characters, out string missing);
             if (!string.IsNullOrEmpty(missing)) Debug.LogWarning($"[Fuente] Caracteres que no tiene: {missing}");
             // Estática: el atlas ya trae todo y no se modifica mientras se juega.
             font.atlasPopulationMode = AtlasPopulationMode.Static;
             EditorUtility.SetDirty(font);
             AssetDatabase.SaveAssets();
-            return font;
         }
 
         private static void SetAsDefault(TMP_FontAsset font)
