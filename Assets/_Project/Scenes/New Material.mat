@@ -115,7 +115,7 @@ Material:
     - _GlossMapScale: 0
     - _Glossiness: 0
     - _GlossyReflections: 0
-    - _GlowIntensity: 5
+    - _GlowIntensity: 4.15
     - _Metallic: 0
     - _OcclusionStrength: 1
     - _Parallax: 0.005
@@ -136,7 +136,7 @@ Material:
     m_Colors:
     - _BaseColor: {r: 0, g: 0, b: 0, a: 1}
     - _BorderColor: {r: 0.01, g: 0.03, b: 0.07999996, a: 1}
-    - _CodeColor: {r: 0.481718, g: 0.990566, b: 0.2756764, a: 1}
+    - _CodeColor: {r: 0.3082009, g: 0.6893048, b: 0.15282789, a: 1}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _DeepColor: {r: 0.13293312, g: 0.2830189, b: 0, a: 1}
     - _DotColor: {r: 0.19999996, g: 0.9, b: 1, a: 1}
