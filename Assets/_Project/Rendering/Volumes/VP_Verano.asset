@@ -21,10 +21,10 @@ MonoBehaviour:
     m_Value: {x: 0.5, y: 0.5}
   intensity:
     m_OverrideState: 1
-    m_Value: 0.433
+    m_Value: 0.478
   smoothness:
     m_OverrideState: 1
-    m_Value: 0.398
+    m_Value: 0.635
   rounded:
     m_OverrideState: 1
     m_Value: 1
@@ -72,11 +72,11 @@ MonoBehaviour:
     m_OverrideState: 1
     m_Value: 6
   dirtTexture:
-    m_OverrideState: 1
+    m_OverrideState: 0
     m_Value: {fileID: 0}
     dimension: 1
   dirtIntensity:
-    m_OverrideState: 1
+    m_OverrideState: 0
     m_Value: 0
 --- !u!114 &11400000
 MonoBehaviour:
@@ -113,10 +113,10 @@ MonoBehaviour:
   active: 1
   lift:
     m_OverrideState: 1
-    m_Value: {x: 0.8847996, y: 0.7621517, z: 1, w: -0.13452914}
+    m_Value: {x: 0.8847996, y: 0.7621517, z: 1, w: -0.37112224}
   gamma:
     m_OverrideState: 1
-    m_Value: {x: 0.6737331, y: 0.62209463, z: 1, w: -0.49327356}
+    m_Value: {x: 0.6737331, y: 0.62209463, z: 1, w: -0.15772872}
   gain:
     m_OverrideState: 0
     m_Value: {x: 1, y: 1, z: 1, w: 0}
@@ -135,10 +135,10 @@ MonoBehaviour:
   active: 1
   temperature:
     m_OverrideState: 1
-    m_Value: -7
+    m_Value: 37
   tint:
     m_OverrideState: 1
-    m_Value: 44
+    m_Value: 17.2
 --- !u!114 &5783758829606785538
 MonoBehaviour:
   m_ObjectHideFlags: 3
@@ -153,17 +153,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.ColorAdjustments
   active: 1
   postExposure:
-    m_OverrideState: 1
+    m_OverrideState: 0
     m_Value: -0.23
   contrast:
     m_OverrideState: 1
-    m_Value: -3
+    m_Value: 5.6
   colorFilter:
     m_OverrideState: 1
     m_Value: {r: 1.0228424, g: 1.1103106, b: 1.1353015, a: 1}
   hueShift:
     m_OverrideState: 1
-    m_Value: 55.5
+    m_Value: 80
   saturation:
     m_OverrideState: 1
     m_Value: 24.7
@@ -182,7 +182,7 @@ MonoBehaviour:
   active: 1
   intensity:
     m_OverrideState: 1
-    m_Value: 8.02
+    m_Value: 6
   tintColor:
     m_OverrideState: 0
     m_Value: {r: 1, g: 1, b: 1, a: 1}
@@ -191,7 +191,7 @@ MonoBehaviour:
     m_Value: 1
   firstFlareIntensity:
     m_OverrideState: 1
-    m_Value: 8.29
+    m_Value: 8
   secondaryFlareIntensity:
     m_OverrideState: 0
     m_Value: 1
@@ -232,7 +232,7 @@ MonoBehaviour:
     m_OverrideState: 0
     m_Value: 4
   chromaticAbberationIntensity:
-    m_OverrideState: 1
+    m_OverrideState: 0
     m_Value: 0.65
 --- !u!114 &6403908192840609707
 MonoBehaviour:
