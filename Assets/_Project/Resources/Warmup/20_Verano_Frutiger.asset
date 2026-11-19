@@ -14,10 +14,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: NostalgIA.Presentation::NostalgIA.Presentation.Levels.WarmupManifest
   sceneName: 20_Verano_Frutiger
   entries:
-  - Mesh: {fileID: 4300000, guid: 4d166bb498b2a4399862cade7458a81a, type: 2}
-    Submesh: 0
-    Material: {fileID: 2100000, guid: 2e7fa2e78657b1e429472827526c75ea, type: 2}
-    Layer: 0
   - Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
     Submesh: 0
     Material: {fileID: 2100000, guid: f974bc487257c42c09c63426bf76d8d2, type: 2}
@@ -158,10 +154,6 @@ MonoBehaviour:
     Submesh: 0
     Material: {fileID: 2100000, guid: 890bbb79e11ac44879779a46fff88fcf, type: 2}
     Layer: 3
-  - Mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
-    Submesh: 0
-    Material: {fileID: 2100000, guid: e2241c13020754ab2a025040d524d6a1, type: 2}
-    Layer: 8
   - Mesh: {fileID: 4493585093827132993, guid: 017941ca37aa09008a1c6ad326bea8e5, type: 3}
     Submesh: 0
     Material: {fileID: 2100000, guid: c8291e1354b8d3ba8953ed59a7b2dbf5, type: 2}
@@ -196,15 +188,19 @@ MonoBehaviour:
     Layer: 0
   - Mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
     Submesh: 0
-    Material: {fileID: 2100000, guid: 77c845df0c6db8a4abb91d700b45c03d, type: 2}
+    Material: {fileID: 2100000, guid: 2e0e7547d84a06fe9bd6defea09788ea, type: 2}
     Layer: 14
-  - Mesh: {fileID: -7689953114278343279, guid: e67b29967d506a0408e193df7656c30c, type: 3}
+  - Mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
     Submesh: 0
-    Material: {fileID: 2100000, guid: 0aeff8716f662ac40bef880920d285c2, type: 2}
+    Material: {fileID: 2100000, guid: 4562e633e0f06bc08bc19f4183b4efcb, type: 2}
     Layer: 0
   - Mesh: {fileID: 10206, guid: 0000000000000000e000000000000000, type: 0}
     Submesh: 0
     Material: {fileID: 2100000, guid: 0543f8e9167f341b68b9ad94f3d9e99c, type: 2}
+    Layer: 0
+  - Mesh: {fileID: 10206, guid: 0000000000000000e000000000000000, type: 0}
+    Submesh: 0
+    Material: {fileID: 2100000, guid: 77c845df0c6db8a4abb91d700b45c03d, type: 2}
     Layer: 0
   - Mesh: {fileID: 10208, guid: 0000000000000000e000000000000000, type: 0}
     Submesh: 0
