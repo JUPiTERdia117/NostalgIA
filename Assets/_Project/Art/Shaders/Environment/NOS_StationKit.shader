@@ -61,7 +61,19 @@ Shader "NOS/StationKit"
             #pragma multi_compile _ LIGHTMAP_SHADOW_MIXING
 
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
-            #include "Assets/_Project/Art/Shaders/Include/NostalgIA_Common.hlsl"
+
+            // Líneas de una rejilla de periodo 1 con ancho `width` (fracción de celda), con antialiasing.
+            // Se mide la distancia a la línea más cercana y se divide entre fwidth (cuánto cambia la
+            // coordenada de un píxel al de al lado): el borde siempre mide ~1 píxel y no hay moiré a lo lejos.
+            float NOS_GridLines(float2 coord, float width)
+            {
+                float2 derivative = max(fwidth(coord), 1e-5);              // Cuánto avanza la coordenada por píxel.
+                float2 distanceToLine = abs(frac(coord - 0.5) - 0.5);      // Distancia a la línea entera más cercana (0 a 0,5).
+                float2 lines = 1.0 - saturate((distanceToLine - width * 0.5) / derivative); // 1 sobre la línea, 0 fuera.
+                // Si una celda ocupa menos de ~2 píxeles, las líneas solo hacen ruido: se apagan poco a poco.
+                float fade = saturate(1.0 - max(derivative.x, derivative.y) * 2.0);
+                return max(lines.x, lines.y) * fade;                       // Líneas verticales y horizontales.
+            }
 
             struct Attributes
             {
