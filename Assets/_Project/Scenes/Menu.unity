@@ -2049,7 +2049,7 @@ MonoBehaviour:
   sceneName: 20_Verano_Frutiger
   loadOnClick: 1
   menu: {fileID: 1511031354}
-  font: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  font: {fileID: 11400000, guid: ae5d91afdc34f4d40a8cb071877d2cbc, type: 2}
 --- !u!114 &487449135
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2065,7 +2065,7 @@ MonoBehaviour:
   sceneName: Tutorial
   loadOnClick: 0
   menu: {fileID: 1511031354}
-  font: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  font: {fileID: 11400000, guid: ae5d91afdc34f4d40a8cb071877d2cbc, type: 2}
 --- !u!1 &603670067
 GameObject:
   m_ObjectHideFlags: 0
@@ -2125,8 +2125,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: Regresar
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 0b65c99348f068b49bef5db0bb76a6e4, type: 2}
-  m_sharedMaterial: {fileID: 21809785584020342, guid: 0b65c99348f068b49bef5db0bb76a6e4, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: ae5d91afdc34f4d40a8cb071877d2cbc, type: 2}
+  m_sharedMaterial: {fileID: 720710784763394152, guid: ae5d91afdc34f4d40a8cb071877d2cbc, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -2153,9 +2153,9 @@ MonoBehaviour:
   m_fontSize: 36
   m_fontSizeBase: 36
   m_fontWeight: 400
-  m_enableAutoSizing: 0
-  m_fontSizeMin: 18
-  m_fontSizeMax: 72
+  m_enableAutoSizing: 1
+  m_fontSizeMin: 20
+  m_fontSizeMax: 36
   m_fontStyle: 0
   m_HorizontalAlignment: 1
   m_VerticalAlignment: 256

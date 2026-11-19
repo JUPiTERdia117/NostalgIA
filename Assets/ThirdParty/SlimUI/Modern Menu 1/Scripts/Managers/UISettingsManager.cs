@@ -464,20 +464,37 @@ namespace SlimUI.ModernMenu{
 				textureveryhightextLINE.GetComponent<RectTransform>()
 			};
 
-			float[] widths = { 68f, 100f, 68f, 132f };
+			// El ancho de cada opción se mide con la fuente real (JikiTourai es ancha): así las cuatro
+			// caben en la fila sin encimarse. Si no caben, se reduce la letra de las cuatro por igual.
+			const float rowLeft = 190f;
+			const float rowSpan = 400f;
+			const float minGap = 18f;
+			float[] widths = new float[4];
+			TMP_Text[] labels = new TMP_Text[4];
 			float totalWidth = 0f;
 			for(int i = 0; i < 4; i++){
 				TMP_Text tmp = buttons[i].GetComponentInChildren<TMP_Text>(true);
+				labels[i] = tmp;
 				if(tmp != null){
-					tmp.fontSize *= 0.8f;
+					float size = tmp.enableAutoSizing ? tmp.fontSizeMax : tmp.fontSize;
+					tmp.enableAutoSizing = false;
+					tmp.fontSize = size * 0.8f;
 					tmp.textWrappingMode = TextWrappingModes.NoWrap;
+					tmp.horizontalAlignment = HorizontalAlignmentOptions.Left; // empieza donde la fila la pone
+					widths[i] = tmp.GetPreferredValues(tmp.text).x;
 				}
 				totalWidth += widths[i];
 			}
-
-			const float rowLeft = 190f;
-			const float rowSpan = 400f;
-			float gap = Mathf.Max(14f, (rowSpan - totalWidth) / 3f);
+			float room = rowSpan - minGap * 3f;
+			if(totalWidth > room && totalWidth > 0f){
+				float shrink = room / totalWidth;
+				for(int i = 0; i < 4; i++){
+					if(labels[i] != null) labels[i].fontSize *= shrink;
+					widths[i] *= shrink;
+				}
+				totalWidth = room;
+			}
+			float gap = Mathf.Max(minGap, (rowSpan - totalWidth) / 3f);
 			float cursorX = rowLeft;
 
 			for(int i = 0; i < 4; i++){

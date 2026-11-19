@@ -9,7 +9,7 @@ using NostalgIA.Core.Services;
 using NostalgIA.Input;
 
 namespace SlimUI.ModernMenu{
-	public class UIMenuManager : MonoBehaviour {
+	public class UIMenuManager : MonoBehaviour, NostalgIA.Presentation.UI.ILevelLoadingView {
 		private Animator CameraObject;
 
 		// campaign button sub menu
@@ -315,10 +315,17 @@ namespace SlimUI.ModernMenu{
 
 		// Load Bar synching animation
 		IEnumerator LoadAsynchronously(string sceneName){ // scene name is just the name of the current scene being loaded
-			// NostalgIA: los niveles se cargan con la pantalla de carga del juego, que además precarga
-			// shaders, texturas y audio y muestra «Listo» al terminar.
-			// El menú se queda visible debajo mientras la pantalla de carga aparece encima.
-			if(NostalgIA.Presentation.UI.LevelLoadingScreen.LoadLevel(sceneName)) yield break;
+			// NostalgIA: los niveles se cargan con LevelLoadingScreen, que precarga shaders, texturas y
+			// audio, pero el progreso se muestra en esta pantalla de carga del menú (este script es su
+			// ILevelLoadingView). El menú se conserva entre escenas hasta que el nivel está listo.
+			if(NostalgIA.Presentation.UI.LevelLoadingScreen.LoadLevel(sceneName, this)){
+				mainCanvas.SetActive(false);
+				loadingMenu.SetActive(true);
+				loadingBar.value = 0f;
+				loadPromptText.text = "Cargando  0 %";
+				KeepMenuDuringLoad();
+				yield break;
+			}
 			AsyncOperation operation = SceneManager.LoadSceneAsync(sceneName);
 			operation.allowSceneActivation = false;
 			mainCanvas.SetActive(false);
@@ -341,6 +348,92 @@ namespace SlimUI.ModernMenu{
 
 				yield return null;
 			}
+		}
+
+		// ------------------------------------------------------------------ NostalgIA: pantalla de carga
+		private static readonly Vector3 MenuOffsetDuringLoad = new Vector3(0f, 5000f, 0f);
+		private readonly System.Collections.Generic.List<GameObject> keptRoots = new System.Collections.Generic.List<GameObject>();
+		private readonly System.Collections.Generic.List<Canvas> hiddenCanvases = new System.Collections.Generic.List<Canvas>();
+
+		/// <summary>
+		/// Toda la escena del menú (cámara, fondo y esta pantalla de carga) sobrevive al cambio de
+		/// escena y tapa el nivel mientras se precarga; se destruye en <see cref="Close"/>.
+		/// </summary>
+		/// <remarks>
+		/// La cámara del menú se dibuja después de la del nivel y deja de ser la principal, para que la
+		/// precarga y el nivel usen la suya. El canvas de carga pasa a dibujarse encima de todo.
+		/// </remarks>
+		private void KeepMenuDuringLoad(){
+			keptRoots.Clear();
+			keptRoots.AddRange(gameObject.scene.GetRootGameObjects());
+			foreach(GameObject root in keptRoots){
+				DontDestroyOnLoad(root);
+				// Se aleja todo el menú (cámara y fondo juntos, así se ve igual) para que la cámara no
+				// alcance a ver el nivel, que se arma cerca del origen.
+				root.transform.position += MenuOffsetDuringLoad;
+				foreach(Camera cam in root.GetComponentsInChildren<Camera>(true)){
+					cam.depth = 100f;
+					if(cam.CompareTag("MainCamera")) cam.tag = "Untagged";
+				}
+			}
+			Canvas loadingCanvas = loadingMenu.GetComponentInParent<Canvas>(true);
+			if(loadingCanvas != null){
+				loadingCanvas.renderMode = RenderMode.ScreenSpaceOverlay;
+				loadingCanvas.sortingOrder = 32001; // encima de cualquier otra interfaz
+			}
+		}
+
+		/// <summary>Barra real y «Listo» al terminar.</summary>
+		public void SetProgress(float progress, bool ready){
+			loadingBar.value = progress;
+			loadPromptText.text = ready ? "Listo" : "Cargando  " + Mathf.FloorToInt(progress * 100f) + " %";
+			HideLevelInterface();
+		}
+
+		/// <summary>El nivel ya existe: se quedan su sonido, sus clics y su oyente, no los del menú.</summary>
+		public void OnLevelLoaded(){
+			foreach(GameObject root in keptRoots){
+				if(root == null) continue;
+				foreach(AudioSource source in root.GetComponentsInChildren<AudioSource>(true)) source.Stop();
+				foreach(AudioListener listener in root.GetComponentsInChildren<AudioListener>(true)) listener.enabled = false;
+				foreach(UnityEngine.EventSystems.EventSystem system in root.GetComponentsInChildren<UnityEngine.EventSystems.EventSystem>(true))
+					system.gameObject.SetActive(false);
+			}
+			HideLevelInterface();
+		}
+
+		/// <summary>
+		/// Las interfaces del nivel (HUD y demás canvas de pantalla) se dibujarían encima del fondo del
+		/// menú: se apagan mientras carga y se vuelven a encender en <see cref="Close"/>.
+		/// </summary>
+		private void HideLevelInterface(){
+			foreach(Canvas canvas in FindObjectsByType<Canvas>(FindObjectsInactive.Exclude, FindObjectsSortMode.None)){
+				if(!canvas.enabled || !canvas.isRootCanvas || canvas.renderMode != RenderMode.ScreenSpaceOverlay) continue;
+				if(keptRoots.Contains(canvas.transform.root.gameObject)) continue;
+				canvas.enabled = false;
+				hiddenCanvases.Add(canvas);
+			}
+		}
+
+		/// <summary>Como antes: «Listo» y, si waitForInput está activo, espera a que el jugador confirme.</summary>
+		public IEnumerator WaitToContinue(){
+			if(!waitForInput) yield break;
+			loadPromptText.text = "Listo · " + GetLoadPromptText();
+			// Un frame para que la tecla que llegó con «Listo» no cuente.
+			yield return null;
+			while(!ShouldContinueFromLoadingScreen()){
+				HideLevelInterface();
+				yield return null;
+			}
+		}
+
+		/// <summary>Se quita el menú y vuelve la interfaz del nivel: se ve el nivel.</summary>
+		public void Close(){
+			foreach(Canvas canvas in hiddenCanvases) if(canvas != null) canvas.enabled = true;
+			hiddenCanvases.Clear();
+			// Este objeto también está entre ellos: lo último que se hace.
+			foreach(GameObject root in keptRoots) if(root != null) Destroy(root);
+			keptRoots.Clear();
 		}
 
 		private string GetLoadPromptText(){

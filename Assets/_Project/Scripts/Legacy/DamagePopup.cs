@@ -25,12 +25,19 @@ public class DamagePopup : MonoBehaviour
     private void Setup(int damageAmount, bool isCritical)
     {
         textMesh = gameObject.AddComponent<TextMesh>();
+        // Misma fuente que el resto del juego (JikiTourai); el texto 3D usa el material de la fuente.
+        Font gameFont = Resources.Load<Font>("Fonts/JikiTourai_ES");
+        if (gameFont != null)
+        {
+            textMesh.font = gameFont;
+            textMesh.GetComponent<MeshRenderer>().sharedMaterial = gameFont.material;
+        }
         textMesh.text = $"-{damageAmount}";
         textMesh.fontSize = isCritical ? 42 : 32;
         textMesh.characterSize = 0.08f;
         textMesh.anchor = TextAnchor.MiddleCenter;
         textMesh.alignment = TextAlignment.Center;
-        textMesh.fontStyle = isCritical ? FontStyle.Bold : FontStyle.Bold;
+        textMesh.fontStyle = FontStyle.Normal;  // La fuente pixel no tiene negrita propia.
 
         textColor = isCritical ? new Color(1f, 0.15f, 0.1f) : new Color(1f, 0.85f, 0.15f);
         textMesh.color = textColor;

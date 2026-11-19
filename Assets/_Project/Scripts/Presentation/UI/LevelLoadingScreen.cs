@@ -53,10 +53,36 @@ namespace NostalgIA.Presentation.UI
     /// 100 % el título cambia a «Listo» un momento antes de mostrar el nivel.
     /// </para>
     /// <para>
+    /// <b>Desde el menú</b> se ve la pantalla de carga del propio menú (SlimUI): el menú le pasa
+    /// una <see cref="ILevelLoadingView"/> y esta clase hace la misma precarga, pero manda el
+    /// progreso a esa pantalla en vez de mostrar la suya. Al reiniciar y entre niveles se usa la
+    /// pantalla de este script.
+    /// </para>
+    /// <para>
     /// Usa tiempo real (<see cref="Time.unscaledDeltaTime"/>) porque durante la carga el tiempo del
     /// juego está detenido.
     /// </para>
     /// </remarks>
+    /// <summary>
+    /// Otra pantalla que muestra la carga en lugar de la de <see cref="LevelLoadingScreen"/>
+    /// (la usa el menú para que la entrada al Tutorial conserve su pantalla de carga).
+    /// </summary>
+    /// <remarks>Quien la implementa debe seguir viva al cambiar de escena (<c>DontDestroyOnLoad</c>).</remarks>
+    public interface ILevelLoadingView
+    {
+        /// <summary>Progreso de 0 a 1; <paramref name="ready"/> es <c>true</c> al llegar al 100 %.</summary>
+        void SetProgress(float progress, bool ready);
+
+        /// <summary>La escena del nivel ya se activó (sigue tapada mientras se precarga).</summary>
+        void OnLevelLoaded();
+
+        /// <summary>Espera, si hace falta, a que el jugador confirme para empezar.</summary>
+        IEnumerator WaitToContinue();
+
+        /// <summary>Quita la pantalla: el nivel ya se ve y se puede jugar.</summary>
+        void Close();
+    }
+
     [AddComponentMenu("")]
     [DisallowMultipleComponent]
     public sealed class LevelLoadingScreen : MonoBehaviour
@@ -88,6 +114,8 @@ namespace NostalgIA.Presentation.UI
         private bool transitionWarming;
         private bool menuLoading;
         private bool preparing;
+        /// <summary>Pantalla externa de la carga actual (nula: se usa la propia).</summary>
+        private ILevelLoadingView externalView;
 
         /// <summary><c>true</c> mientras la pantalla está cargando o preparando un nivel.</summary>
         public static bool IsBusy => instance != null && (instance.menuLoading || instance.preparing);
@@ -101,13 +129,15 @@ namespace NostalgIA.Presentation.UI
         }
 
         /// <summary>
-        /// Carga un nivel desde el menú con esta pantalla. Devuelve <c>false</c> si la escena no es
+        /// Carga un nivel desde el menú y lo precarga todo. Devuelve <c>false</c> si la escena no es
         /// un nivel del catálogo o ya hay una carga en curso (entonces la carga la hace quien llamó).
         /// </summary>
-        public static bool LoadLevel(string scene)
+        /// <param name="scene">Escena del nivel.</param>
+        /// <param name="view">Pantalla que muestra el progreso; si es nula se usa la de este script.</param>
+        public static bool LoadLevel(string scene, ILevelLoadingView view = null)
         {
             if (instance == null || IsBusy || !LevelCatalog.IsPlayable(scene)) return false;
-            instance.StartCoroutine(instance.LoadFromMenu(scene));
+            instance.StartCoroutine(instance.LoadFromMenu(scene, view));
             return true;
         }
 
@@ -164,12 +194,22 @@ namespace NostalgIA.Presentation.UI
 
         // ------------------------------------------------------------------ desde el menú o al reiniciar
         /// <summary>Menú → nivel: la carga de la escena es el primer 35 % de la barra.</summary>
-        private IEnumerator LoadFromMenu(string scene)
+        private IEnumerator LoadFromMenu(string scene, ILevelLoadingView view)
         {
             menuLoading = true;
-            Begin(scene, MenuFadeSeconds);
-            // Se espera a que la pantalla tape el menú antes de empezar la carga.
-            while (alpha < 1f) yield return null;
+            externalView = view;
+            if (view != null)
+            {
+                // La otra pantalla ya tapa el menú: aquí solo se reinicia la barra.
+                shownProgress = targetProgress = 0f;
+                UpdateBar();
+            }
+            else
+            {
+                Begin(scene, MenuFadeSeconds);
+                // Se espera a que la pantalla tape el menú antes de empezar la carga.
+                while (alpha < 1f) yield return null;
+            }
 
             AsyncOperation load = SceneManager.LoadSceneAsync(scene, LoadSceneMode.Single);
             while (load != null && !load.isDone)
@@ -178,6 +218,7 @@ namespace NostalgIA.Presentation.UI
                 yield return null;
             }
             menuLoading = false;
+            externalView?.OnLevelLoaded();
             yield return Prepare(SceneManager.GetActiveScene(), 0.35f);
         }
 
@@ -251,10 +292,21 @@ namespace NostalgIA.Presentation.UI
             Report(1f);
             yield return ShowReady();
 
+            ILevelLoadingView view = externalView;
+            if (view != null)
+            {
+                // La pantalla del menú pide confirmar antes de empezar (como antes).
+                yield return view.WaitToContinue();
+                externalView = null;
+                view.Close();
+                // Un frame más: el clic o la tecla que confirmó no debe llegar al juego.
+                yield return null;
+            }
+
             preparing = false;
             if (machine != null) machine.ChangeState(GameState.Playing);
             Time.timeScale = 1f;
-            Hide(0.5f);
+            if (view == null) Hide(0.5f);
         }
 
         /// <summary>Carga los datos de audio de las fuentes de las escenas que no lo hayan hecho.</summary>
@@ -368,7 +420,7 @@ namespace NostalgIA.Presentation.UI
                 SetVisible(alpha);
             }
 
-            if (alpha > 0f && shownProgress < targetProgress)
+            if ((alpha > 0f || externalView != null) && shownProgress < targetProgress)
             {
                 // La barra se acerca rápido al valor real para no dar saltos ni quedarse atrás.
                 shownProgress = Mathf.MoveTowards(shownProgress, targetProgress, Mathf.Max(1.5f, (targetProgress - shownProgress) * 6f) * dt);
@@ -382,6 +434,7 @@ namespace NostalgIA.Presentation.UI
             bool ready = shownProgress >= 0.999f;
             percent.text = ready ? "100 %" : Mathf.FloorToInt(shownProgress * 100f) + " %";
             title.text = ready ? "Listo" : loadingTitle;
+            externalView?.SetProgress(shownProgress, ready);
         }
 
         private void SetVisible(float value)

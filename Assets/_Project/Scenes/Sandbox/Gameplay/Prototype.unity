@@ -235,13 +235,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0e3f975a7f4bc41d6b168cb05932b95f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PoolableController
-  beingPulled: 0
-  pooller: {fileID: 0}
-  absorptionDuration: 1
-  spiralRadius: 0.5
-  spiralTurns: 2
-  scaleRestoreDuration: 0.2
-  absorptionDistance: 0.2
+  impactDamage: 1
+  forceMultiplier: 1
+  destroyOnEnemyHit: 1
+  debrisCount: 6
+  minImpactVelocity: 1.8
 --- !u!54 &37372683
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -422,13 +420,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0e3f975a7f4bc41d6b168cb05932b95f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PoolableController
-  beingPulled: 0
-  pooller: {fileID: 0}
-  absorptionDuration: 1
-  spiralRadius: 1
-  spiralTurns: 2
-  scaleRestoreDuration: 0.2
-  absorptionDistance: 0.5
+  impactDamage: 1
+  forceMultiplier: 1
+  destroyOnEnemyHit: 1
+  debrisCount: 6
+  minImpactVelocity: 1.8
 --- !u!65 &68158035
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -617,13 +613,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0e3f975a7f4bc41d6b168cb05932b95f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PoolableController
-  beingPulled: 0
-  pooller: {fileID: 0}
-  absorptionDuration: 1
-  spiralRadius: 1
-  spiralTurns: 2
-  scaleRestoreDuration: 0.2
-  absorptionDistance: 0.5
+  impactDamage: 1
+  forceMultiplier: 1
+  destroyOnEnemyHit: 1
+  debrisCount: 6
+  minImpactVelocity: 1.8
 --- !u!65 &134305201
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -750,13 +744,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0e3f975a7f4bc41d6b168cb05932b95f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PoolableController
-  beingPulled: 0
-  pooller: {fileID: 0}
-  absorptionDuration: 1
-  spiralRadius: 0.5
-  spiralTurns: 2
-  scaleRestoreDuration: 0.2
-  absorptionDistance: 0.2
+  impactDamage: 1
+  forceMultiplier: 1
+  destroyOnEnemyHit: 1
+  debrisCount: 6
+  minImpactVelocity: 1.8
 --- !u!54 &191017230
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -910,13 +902,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0e3f975a7f4bc41d6b168cb05932b95f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PoolableController
-  beingPulled: 0
-  pooller: {fileID: 0}
-  absorptionDuration: 1
-  spiralRadius: 0.5
-  spiralTurns: 2
-  scaleRestoreDuration: 0.2
-  absorptionDistance: 0.2
+  impactDamage: 1
+  forceMultiplier: 1
+  destroyOnEnemyHit: 1
+  debrisCount: 6
+  minImpactVelocity: 1.8
 --- !u!54 &192410971
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -1070,13 +1060,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0e3f975a7f4bc41d6b168cb05932b95f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PoolableController
-  beingPulled: 0
-  pooller: {fileID: 0}
-  absorptionDuration: 1
-  spiralRadius: 0.5
-  spiralTurns: 2
-  scaleRestoreDuration: 0.2
-  absorptionDistance: 0.2
+  impactDamage: 1
+  forceMultiplier: 1
+  destroyOnEnemyHit: 1
+  debrisCount: 6
+  minImpactVelocity: 1.8
 --- !u!54 &201327532
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -1298,6 +1286,7 @@ MonoBehaviour:
     m_Interactions: 
     m_SingletonActionBindings: []
     m_Flags: 0
+    m_Priority: 0
   m_PointerMoveAction:
     m_Name: 
     m_Type: 0
@@ -1307,6 +1296,7 @@ MonoBehaviour:
     m_Interactions: 
     m_SingletonActionBindings: []
     m_Flags: 0
+    m_Priority: 0
 --- !u!1 &296246233
 GameObject:
   m_ObjectHideFlags: 0
@@ -1851,13 +1841,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0e3f975a7f4bc41d6b168cb05932b95f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PoolableController
-  beingPulled: 0
-  pooller: {fileID: 0}
-  absorptionDuration: 1
-  spiralRadius: 0.5
-  spiralTurns: 2
-  scaleRestoreDuration: 0.2
-  absorptionDistance: 0.2
+  impactDamage: 1
+  forceMultiplier: 1
+  destroyOnEnemyHit: 1
+  debrisCount: 6
+  minImpactVelocity: 1.8
 --- !u!54 &318108317
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -2022,8 +2010,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: 'Stars Collected: 0/3'
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: ae5d91afdc34f4d40a8cb071877d2cbc, type: 2}
+  m_sharedMaterial: {fileID: 720710784763394152, guid: ae5d91afdc34f4d40a8cb071877d2cbc, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -2050,9 +2038,9 @@ MonoBehaviour:
   m_fontSize: 36
   m_fontSizeBase: 36
   m_fontWeight: 400
-  m_enableAutoSizing: 0
-  m_fontSizeMin: 18
-  m_fontSizeMax: 72
+  m_enableAutoSizing: 1
+  m_fontSizeMin: 20
+  m_fontSizeMax: 36
   m_fontStyle: 0
   m_HorizontalAlignment: 2
   m_VerticalAlignment: 256
@@ -2202,6 +2190,7 @@ MonoBehaviour:
     m_Interactions: 
     m_SingletonActionBindings: []
     m_Flags: 0
+    m_Priority: 0
   m_PointerMoveAction:
     m_Name: 
     m_Type: 0
@@ -2211,6 +2200,7 @@ MonoBehaviour:
     m_Interactions: 
     m_SingletonActionBindings: []
     m_Flags: 0
+    m_Priority: 0
 --- !u!43 &532020121
 Mesh:
   m_ObjectHideFlags: 0
@@ -2564,13 +2554,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0e3f975a7f4bc41d6b168cb05932b95f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PoolableController
-  beingPulled: 0
-  pooller: {fileID: 0}
-  absorptionDuration: 1
-  spiralRadius: 0.5
-  spiralTurns: 2
-  scaleRestoreDuration: 0.2
-  absorptionDistance: 0.2
+  impactDamage: 1
+  forceMultiplier: 1
+  destroyOnEnemyHit: 1
+  debrisCount: 6
+  minImpactVelocity: 1.8
 --- !u!54 &625684368
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -2801,6 +2789,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0a95c6a505dbd41989ddfb26721a0131, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::StarController
+  starIndex: -1
+  rotationSpeed: 90
+  bobHeight: 0.25
+  bobFrequency: 2
 --- !u!1 &639934120
 GameObject:
   m_ObjectHideFlags: 0
@@ -2849,13 +2841,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0e3f975a7f4bc41d6b168cb05932b95f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PoolableController
-  beingPulled: 0
-  pooller: {fileID: 0}
-  absorptionDuration: 1
-  spiralRadius: 0.5
-  spiralTurns: 2
-  scaleRestoreDuration: 0.2
-  absorptionDistance: 0.2
+  impactDamage: 1
+  forceMultiplier: 1
+  destroyOnEnemyHit: 1
+  debrisCount: 6
+  minImpactVelocity: 1.8
 --- !u!54 &639934123
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -3009,13 +2999,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0e3f975a7f4bc41d6b168cb05932b95f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PoolableController
-  beingPulled: 0
-  pooller: {fileID: 0}
-  absorptionDuration: 1
-  spiralRadius: 0.5
-  spiralTurns: 2
-  scaleRestoreDuration: 0.2
-  absorptionDistance: 0.2
+  impactDamage: 1
+  forceMultiplier: 1
+  destroyOnEnemyHit: 1
+  debrisCount: 6
+  minImpactVelocity: 1.8
 --- !u!54 &692239506
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -3169,13 +3157,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0e3f975a7f4bc41d6b168cb05932b95f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PoolableController
-  beingPulled: 0
-  pooller: {fileID: 0}
-  absorptionDuration: 1
-  spiralRadius: 0.5
-  spiralTurns: 2
-  scaleRestoreDuration: 0.2
-  absorptionDistance: 0.2
+  impactDamage: 1
+  forceMultiplier: 1
+  destroyOnEnemyHit: 1
+  debrisCount: 6
+  minImpactVelocity: 1.8
 --- !u!54 &722581150
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -4881,13 +4867,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0e3f975a7f4bc41d6b168cb05932b95f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PoolableController
-  beingPulled: 0
-  pooller: {fileID: 0}
-  absorptionDuration: 1
-  spiralRadius: 0.5
-  spiralTurns: 2
-  scaleRestoreDuration: 0.2
-  absorptionDistance: 0.2
+  impactDamage: 1
+  forceMultiplier: 1
+  destroyOnEnemyHit: 1
+  debrisCount: 6
+  minImpactVelocity: 1.8
 --- !u!54 &729177875
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -5041,13 +5025,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0e3f975a7f4bc41d6b168cb05932b95f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PoolableController
-  beingPulled: 0
-  pooller: {fileID: 0}
-  absorptionDuration: 1
-  spiralRadius: 0.5
-  spiralTurns: 2
-  scaleRestoreDuration: 0.2
-  absorptionDistance: 0.2
+  impactDamage: 1
+  forceMultiplier: 1
+  destroyOnEnemyHit: 1
+  debrisCount: 6
+  minImpactVelocity: 1.8
 --- !u!54 &742382487
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -5228,13 +5210,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0e3f975a7f4bc41d6b168cb05932b95f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PoolableController
-  beingPulled: 0
-  pooller: {fileID: 0}
-  absorptionDuration: 1
-  spiralRadius: 1
-  spiralTurns: 2
-  scaleRestoreDuration: 0.2
-  absorptionDistance: 0.5
+  impactDamage: 1
+  forceMultiplier: 1
+  destroyOnEnemyHit: 1
+  debrisCount: 6
+  minImpactVelocity: 1.8
 --- !u!65 &772021675
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -5377,6 +5357,7 @@ MonoBehaviour:
     m_Interactions: 
     m_SingletonActionBindings: []
     m_Flags: 0
+    m_Priority: 0
   m_PointerMoveAction:
     m_Name: Pointer Move
     m_Type: 0
@@ -5386,6 +5367,7 @@ MonoBehaviour:
     m_Interactions: 
     m_SingletonActionBindings: []
     m_Flags: 0
+    m_Priority: 0
 --- !u!114 &782989301
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5549,6 +5531,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8a8ddc71bd8a245a697ea47d31187afb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RespawnController
+  index: -1
+  label: "\xA1Punto de control activado!"
+  spawnHeightOffset: 0.2
+  activatedColor: {r: 0.2, g: 1, b: 0.4, a: 1}
 --- !u!1 &832387670
 GameObject:
   m_ObjectHideFlags: 0
@@ -5702,13 +5688,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0e3f975a7f4bc41d6b168cb05932b95f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PoolableController
-  beingPulled: 0
-  pooller: {fileID: 0}
-  absorptionDuration: 1
-  spiralRadius: 0.5
-  spiralTurns: 2
-  scaleRestoreDuration: 0.2
-  absorptionDistance: 0.2
+  impactDamage: 1
+  forceMultiplier: 1
+  destroyOnEnemyHit: 1
+  debrisCount: 6
+  minImpactVelocity: 1.8
 --- !u!1 &845054624
 GameObject:
   m_ObjectHideFlags: 0
@@ -5753,7 +5737,25 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 90a5a25a73e72449fb1f8de8e27008d7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameController
+  onlyIfNoOtherHud: 0
+  maxStars: 3
   scoreText: {fileID: 332203872}
+  healthText: {fileID: 0}
+  toolText: {fileID: 0}
+  checkpointNotificationText: {fileID: 0}
+  hurtOverlay: {fileID: 0}
+  deathOverlay: {fileID: 0}
+  guidePanel: {fileID: 0}
+  phaseBadgeText: {fileID: 0}
+  zoneTitleText: {fileID: 0}
+  descriptionText: {fileID: 0}
+  controlsText: {fileID: 0}
+  taskText: {fileID: 0}
+  guideAccent: {fileID: 0}
+  winPanel: {fileID: 0}
+  winSummaryText: {fileID: 0}
+  toastDuration: 2.2
+  hurtFlashDuration: 0.35
 --- !u!1 &874161021
 GameObject:
   m_ObjectHideFlags: 0
@@ -5802,13 +5804,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0e3f975a7f4bc41d6b168cb05932b95f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PoolableController
-  beingPulled: 0
-  pooller: {fileID: 0}
-  absorptionDuration: 1
-  spiralRadius: 0.5
-  spiralTurns: 2
-  scaleRestoreDuration: 0.2
-  absorptionDistance: 0.2
+  impactDamage: 1
+  forceMultiplier: 1
+  destroyOnEnemyHit: 1
+  debrisCount: 6
+  minImpactVelocity: 1.8
 --- !u!54 &874161024
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -6051,13 +6051,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0e3f975a7f4bc41d6b168cb05932b95f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PoolableController
-  beingPulled: 0
-  pooller: {fileID: 0}
-  absorptionDuration: 1
-  spiralRadius: 0.5
-  spiralTurns: 2
-  scaleRestoreDuration: 0.2
-  absorptionDistance: 0.2
+  impactDamage: 1
+  forceMultiplier: 1
+  destroyOnEnemyHit: 1
+  debrisCount: 6
+  minImpactVelocity: 1.8
 --- !u!54 &965201278
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -6238,13 +6236,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0e3f975a7f4bc41d6b168cb05932b95f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PoolableController
-  beingPulled: 0
-  pooller: {fileID: 0}
-  absorptionDuration: 1
-  spiralRadius: 1
-  spiralTurns: 2
-  scaleRestoreDuration: 0.2
-  absorptionDistance: 0.5
+  impactDamage: 1
+  forceMultiplier: 1
+  destroyOnEnemyHit: 1
+  debrisCount: 6
+  minImpactVelocity: 1.8
 --- !u!65 &1005341987
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -6448,6 +6444,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8a8ddc71bd8a245a697ea47d31187afb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RespawnController
+  index: -1
+  label: "\xA1Punto de control activado!"
+  spawnHeightOffset: 0.2
+  activatedColor: {r: 0.2, g: 1, b: 0.4, a: 1}
 --- !u!1 &1052470099
 GameObject:
   m_ObjectHideFlags: 0
@@ -6609,13 +6609,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0e3f975a7f4bc41d6b168cb05932b95f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PoolableController
-  beingPulled: 0
-  pooller: {fileID: 0}
-  absorptionDuration: 1
-  spiralRadius: 0.5
-  spiralTurns: 2
-  scaleRestoreDuration: 0.2
-  absorptionDistance: 0.2
+  impactDamage: 1
+  forceMultiplier: 1
+  destroyOnEnemyHit: 1
+  debrisCount: 6
+  minImpactVelocity: 1.8
 --- !u!54 &1066092557
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -6947,13 +6945,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0e3f975a7f4bc41d6b168cb05932b95f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PoolableController
-  beingPulled: 0
-  pooller: {fileID: 0}
-  absorptionDuration: 1
-  spiralRadius: 0.5
-  spiralTurns: 2
-  scaleRestoreDuration: 0.2
-  absorptionDistance: 0.2
+  impactDamage: 1
+  forceMultiplier: 1
+  destroyOnEnemyHit: 1
+  debrisCount: 6
+  minImpactVelocity: 1.8
 --- !u!54 &1121783368
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -7107,13 +7103,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0e3f975a7f4bc41d6b168cb05932b95f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PoolableController
-  beingPulled: 0
-  pooller: {fileID: 0}
-  absorptionDuration: 1
-  spiralRadius: 0.5
-  spiralTurns: 2
-  scaleRestoreDuration: 0.2
-  absorptionDistance: 0.2
+  impactDamage: 1
+  forceMultiplier: 1
+  destroyOnEnemyHit: 1
+  debrisCount: 6
+  minImpactVelocity: 1.8
 --- !u!54 &1124127603
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -7356,13 +7350,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0e3f975a7f4bc41d6b168cb05932b95f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PoolableController
-  beingPulled: 0
-  pooller: {fileID: 0}
-  absorptionDuration: 1
-  spiralRadius: 0.5
-  spiralTurns: 2
-  scaleRestoreDuration: 0.2
-  absorptionDistance: 0.2
+  impactDamage: 1
+  forceMultiplier: 1
+  destroyOnEnemyHit: 1
+  debrisCount: 6
+  minImpactVelocity: 1.8
 --- !u!54 &1281618303
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -7632,13 +7624,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0e3f975a7f4bc41d6b168cb05932b95f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PoolableController
-  beingPulled: 0
-  pooller: {fileID: 0}
-  absorptionDuration: 1
-  spiralRadius: 1
-  spiralTurns: 2
-  scaleRestoreDuration: 0.2
-  absorptionDistance: 0.5
+  impactDamage: 1
+  forceMultiplier: 1
+  destroyOnEnemyHit: 1
+  debrisCount: 6
+  minImpactVelocity: 1.8
 --- !u!65 &1298105385
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -7792,13 +7782,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0e3f975a7f4bc41d6b168cb05932b95f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PoolableController
-  beingPulled: 0
-  pooller: {fileID: 0}
-  absorptionDuration: 1
-  spiralRadius: 1
-  spiralTurns: 2
-  scaleRestoreDuration: 0.4
-  absorptionDistance: 1
+  impactDamage: 1
+  forceMultiplier: 1
+  destroyOnEnemyHit: 1
+  debrisCount: 6
+  minImpactVelocity: 1.8
 --- !u!65 &1306525502
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -8031,13 +8019,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0e3f975a7f4bc41d6b168cb05932b95f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PoolableController
-  beingPulled: 0
-  pooller: {fileID: 0}
-  absorptionDuration: 1
-  spiralRadius: 1
-  spiralTurns: 2
-  scaleRestoreDuration: 0.2
-  absorptionDistance: 0.5
+  impactDamage: 1
+  forceMultiplier: 1
+  destroyOnEnemyHit: 1
+  debrisCount: 6
+  minImpactVelocity: 1.8
 --- !u!65 &1453431334
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -8272,13 +8258,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0e3f975a7f4bc41d6b168cb05932b95f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PoolableController
-  beingPulled: 0
-  pooller: {fileID: 0}
-  absorptionDuration: 1
-  spiralRadius: 0.5
-  spiralTurns: 2
-  scaleRestoreDuration: 0.2
-  absorptionDistance: 0.2
+  impactDamage: 1
+  forceMultiplier: 1
+  destroyOnEnemyHit: 1
+  debrisCount: 6
+  minImpactVelocity: 1.8
 --- !u!54 &1483929537
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -8432,13 +8416,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0e3f975a7f4bc41d6b168cb05932b95f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PoolableController
-  beingPulled: 0
-  pooller: {fileID: 0}
-  absorptionDuration: 1
-  spiralRadius: 0.5
-  spiralTurns: 2
-  scaleRestoreDuration: 0.2
-  absorptionDistance: 0.2
+  impactDamage: 1
+  forceMultiplier: 1
+  destroyOnEnemyHit: 1
+  debrisCount: 6
+  minImpactVelocity: 1.8
 --- !u!54 &1554585087
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -8843,13 +8825,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0e3f975a7f4bc41d6b168cb05932b95f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PoolableController
-  beingPulled: 0
-  pooller: {fileID: 0}
-  absorptionDuration: 1
-  spiralRadius: 1
-  spiralTurns: 2
-  scaleRestoreDuration: 0.2
-  absorptionDistance: 0.5
+  impactDamage: 1
+  forceMultiplier: 1
+  destroyOnEnemyHit: 1
+  debrisCount: 6
+  minImpactVelocity: 1.8
 --- !u!65 &1640410003
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -9088,13 +9068,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0e3f975a7f4bc41d6b168cb05932b95f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PoolableController
-  beingPulled: 0
-  pooller: {fileID: 0}
-  absorptionDuration: 1
-  spiralRadius: 0.5
-  spiralTurns: 2
-  scaleRestoreDuration: 0.2
-  absorptionDistance: 0.2
+  impactDamage: 1
+  forceMultiplier: 1
+  destroyOnEnemyHit: 1
+  debrisCount: 6
+  minImpactVelocity: 1.8
 --- !u!54 &1684578046
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -9275,13 +9253,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0e3f975a7f4bc41d6b168cb05932b95f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PoolableController
-  beingPulled: 0
-  pooller: {fileID: 0}
-  absorptionDuration: 1
-  spiralRadius: 1
-  spiralTurns: 2
-  scaleRestoreDuration: 0.2
-  absorptionDistance: 0.5
+  impactDamage: 1
+  forceMultiplier: 1
+  destroyOnEnemyHit: 1
+  debrisCount: 6
+  minImpactVelocity: 1.8
 --- !u!65 &1698750230
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -9408,13 +9384,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0e3f975a7f4bc41d6b168cb05932b95f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PoolableController
-  beingPulled: 0
-  pooller: {fileID: 0}
-  absorptionDuration: 1
-  spiralRadius: 0.5
-  spiralTurns: 2
-  scaleRestoreDuration: 0.2
-  absorptionDistance: 0.2
+  impactDamage: 1
+  forceMultiplier: 1
+  destroyOnEnemyHit: 1
+  debrisCount: 6
+  minImpactVelocity: 1.8
 --- !u!54 &1726378390
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -9595,13 +9569,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0e3f975a7f4bc41d6b168cb05932b95f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PoolableController
-  beingPulled: 0
-  pooller: {fileID: 0}
-  absorptionDuration: 1
-  spiralRadius: 1
-  spiralTurns: 2
-  scaleRestoreDuration: 0.2
-  absorptionDistance: 0.5
+  impactDamage: 1
+  forceMultiplier: 1
+  destroyOnEnemyHit: 1
+  debrisCount: 6
+  minImpactVelocity: 1.8
 --- !u!65 &1743667843
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -9840,13 +9812,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0e3f975a7f4bc41d6b168cb05932b95f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PoolableController
-  beingPulled: 0
-  pooller: {fileID: 0}
-  absorptionDuration: 1
-  spiralRadius: 0.5
-  spiralTurns: 2
-  scaleRestoreDuration: 0.2
-  absorptionDistance: 0.2
+  impactDamage: 1
+  forceMultiplier: 1
+  destroyOnEnemyHit: 1
+  debrisCount: 6
+  minImpactVelocity: 1.8
 --- !u!54 &1928629833
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -10000,13 +9970,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0e3f975a7f4bc41d6b168cb05932b95f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PoolableController
-  beingPulled: 0
-  pooller: {fileID: 0}
-  absorptionDuration: 1
-  spiralRadius: 0.5
-  spiralTurns: 2
-  scaleRestoreDuration: 0.2
-  absorptionDistance: 0.2
+  impactDamage: 1
+  forceMultiplier: 1
+  destroyOnEnemyHit: 1
+  debrisCount: 6
+  minImpactVelocity: 1.8
 --- !u!54 &1931151641
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -10160,13 +10128,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0e3f975a7f4bc41d6b168cb05932b95f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PoolableController
-  beingPulled: 0
-  pooller: {fileID: 0}
-  absorptionDuration: 1
-  spiralRadius: 0.5
-  spiralTurns: 2
-  scaleRestoreDuration: 0.2
-  absorptionDistance: 0.2
+  impactDamage: 1
+  forceMultiplier: 1
+  destroyOnEnemyHit: 1
+  debrisCount: 6
+  minImpactVelocity: 1.8
 --- !u!54 &1973385593
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -10320,13 +10286,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0e3f975a7f4bc41d6b168cb05932b95f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PoolableController
-  beingPulled: 0
-  pooller: {fileID: 0}
-  absorptionDuration: 1
-  spiralRadius: 0.5
-  spiralTurns: 2
-  scaleRestoreDuration: 0.2
-  absorptionDistance: 0.2
+  impactDamage: 1
+  forceMultiplier: 1
+  destroyOnEnemyHit: 1
+  debrisCount: 6
+  minImpactVelocity: 1.8
 --- !u!54 &2117586868
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -10480,13 +10444,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0e3f975a7f4bc41d6b168cb05932b95f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PoolableController
-  beingPulled: 0
-  pooller: {fileID: 0}
-  absorptionDuration: 1
-  spiralRadius: 0.5
-  spiralTurns: 2
-  scaleRestoreDuration: 0.2
-  absorptionDistance: 0.2
+  impactDamage: 1
+  forceMultiplier: 1
+  destroyOnEnemyHit: 1
+  debrisCount: 6
+  minImpactVelocity: 1.8
 --- !u!54 &2121343880
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -10640,13 +10602,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0e3f975a7f4bc41d6b168cb05932b95f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PoolableController
-  beingPulled: 0
-  pooller: {fileID: 0}
-  absorptionDuration: 1
-  spiralRadius: 0.5
-  spiralTurns: 2
-  scaleRestoreDuration: 0.2
-  absorptionDistance: 0.2
+  impactDamage: 1
+  forceMultiplier: 1
+  destroyOnEnemyHit: 1
+  debrisCount: 6
+  minImpactVelocity: 1.8
 --- !u!54 &2139181584
 Rigidbody:
   m_ObjectHideFlags: 0

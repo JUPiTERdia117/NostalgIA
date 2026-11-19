@@ -78,6 +78,10 @@ namespace NostalgIA.Presentation.UI
             if (font != null) label.font = font;
             label.text = text;
             label.fontSize = fontSize;
+            // Si el texto no cabe en su caja se reduce (hasta el 55 %) en vez de salirse o encimarse.
+            label.enableAutoSizing = true;
+            label.fontSizeMax = fontSize;
+            label.fontSizeMin = Mathf.Max(10f, Mathf.Round(fontSize * 0.55f));
             label.alignment = alignment;
             label.color = TextColor;
             label.raycastTarget = false;

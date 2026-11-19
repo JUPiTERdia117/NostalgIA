@@ -76,6 +76,13 @@ public class EnemyHealthBar : MonoBehaviour
         textObj.transform.SetParent(transform, false);
         textObj.transform.localPosition = new Vector3(0, barSize.y * 1.3f, -0.01f);
         hpTextMesh = textObj.AddComponent<TextMesh>();
+        // Misma fuente que el resto del juego (JikiTourai); el texto 3D usa el material de la fuente.
+        Font gameFont = Resources.Load<Font>("Fonts/JikiTourai_ES");
+        if (gameFont != null)
+        {
+            hpTextMesh.font = gameFont;
+            hpTextMesh.GetComponent<MeshRenderer>().sharedMaterial = gameFont.material;
+        }
         hpTextMesh.fontSize = 24;
         hpTextMesh.characterSize = 0.05f;
         hpTextMesh.anchor = TextAnchor.MiddleCenter;
