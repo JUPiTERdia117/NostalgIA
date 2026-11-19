@@ -112,16 +112,12 @@ namespace NostalgIA.Gameplay.Bootstrap
             inputReader.PausePressed += OnPausePressed;
             SceneManager.sceneLoaded += OnSceneLoaded;
             SceneManager.sceneUnloaded += OnSceneUnloaded;
-            EventBus<GameStateChanged>.Subscribe(OnGameStateChanged);
-            EventBus<NextLevelSkipRequested>.Subscribe(OnNextLevelSkipRequested);
         }
 
         /// <summary>Libera servicios al cerrar la sesión de juego.</summary>
         private void OnDestroy()
         {
             if (Instance != this) return;
-            EventBus<GameStateChanged>.Unsubscribe(OnGameStateChanged);
-            EventBus<NextLevelSkipRequested>.Unsubscribe(OnNextLevelSkipRequested);
             SceneManager.sceneLoaded -= OnSceneLoaded;
             SceneManager.sceneUnloaded -= OnSceneUnloaded;
             if (inputReader != null)
@@ -163,69 +159,6 @@ namespace NostalgIA.Gameplay.Bootstrap
 
         /// <summary>Alterna la pausa.</summary>
         private void OnPausePressed() => stateMachine.TogglePause();
-
-        private void OnGameStateChanged(in GameStateChanged evt)
-        {
-            if (evt.Current != GameState.Paused) return;
-            PublishNextLevelStatus(false);
-        }
-
-        private void OnNextLevelSkipRequested(in NextLevelSkipRequested evt)
-        {
-            LevelGate gate = FindActiveSceneGate();
-            if (gate != null && gate.HasValidDestination)
-            {
-                string targetName = gate.DestinationSceneName;
-                if (stateMachine != null && stateMachine.State == GameState.Paused)
-                {
-                    stateMachine.TogglePause();
-                }
-                if (gate.TriggerImmediateSkip())
-                {
-                    EventBus<HudMessageRequested>.Raise(
-                        new HudMessageRequested($"» [Test] Saltando al siguiente nivel ({targetName})..."));
-                    return;
-                }
-            }
-
-            PublishNextLevelStatus(true);
-            EventBus<HudMessageRequested>.Raise(
-                new HudMessageRequested("» [Test] No hay siguiente nivel después de esta escena."));
-        }
-
-        private void PublishNextLevelStatus(bool triggeredByClick)
-        {
-            LevelGate gate = FindActiveSceneGate();
-            if (gate != null && gate.HasValidDestination)
-            {
-                string target = gate.DestinationSceneName;
-                EventBus<NextLevelStatusReported>.Raise(
-                    new NextLevelStatusReported(true, target, $"Siguiente nivel (Test)  ›  {target}"));
-            }
-            else
-            {
-                string msg = triggeredByClick
-                    ? "No hay siguiente nivel después de esta escena"
-                    : "Siguiente nivel (Test)  ›  No hay siguiente nivel";
-                EventBus<NextLevelStatusReported>.Raise(
-                    new NextLevelStatusReported(false, string.Empty, msg));
-            }
-        }
-
-        private static LevelGate FindActiveSceneGate()
-        {
-            Scene active = SceneManager.GetActiveScene();
-            LevelGate[] gates = FindObjectsByType<LevelGate>(FindObjectsSortMode.None);
-            LevelGate fallback = null;
-            for (int i = 0; i < gates.Length; i++)
-            {
-                LevelGate g = gates[i];
-                if (g == null || !g.isActiveAndEnabled) continue;
-                if (g.gameObject.scene == active && g.HasValidDestination) return g;
-                if (fallback == null && g.HasValidDestination) fallback = g;
-            }
-            return fallback;
-        }
 
         /// <summary>El sistema operativo libera el cursor al perder el foco; se reaplica al volver.</summary>
         private void OnApplicationFocus(bool hasFocus)

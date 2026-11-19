@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 8123632025158736646}
   - component: {fileID: 2929321425633138236}
   - component: {fileID: 7522224365719643093}
-  - component: {fileID: -2643063712497664203}
+  - component: {fileID: 8900340379444536526}
   m_Layer: 0
   m_Name: WinRar
   m_TagString: Enemy
@@ -172,30 +172,26 @@ MonoBehaviour:
   lungeArcHeight: 1.6
   lungeOvershoot: 1.5
   recoveryTime: 0.5
+  loseRangeMultiplier: 1.5
+  alertTurnSpeed: 8
   biteClip: {fileID: 8300000, guid: 5fdd713c21a14ffda9740a64e6f22ca7, type: 3}
   biteVolume: 0.9
---- !u!95 &-2643063712497664203
-Animator:
-  serializedVersion: 7
+--- !u!114 &8900340379444536526
+MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8695522652960482533}
   m_Enabled: 1
-  m_Avatar: {fileID: 9000000, guid: 017941ca37aa09008a1c6ad326bea8e5, type: 3}
-  m_Controller: {fileID: 9100000, guid: 2f8d7b8c1d472d508aad998e26dcfb5e, type: 2}
-  m_CullingMode: 0
-  m_UpdateMode: 0
-  m_ApplyRootMotion: 0
-  m_LinearVelocityBlending: 0
-  m_StabilizeFeet: 0
-  m_AnimatePhysics: 0
-  m_WarningMessage: 
-  m_HasTransformHierarchy: 1
-  m_AllowConstantClipSamplingOptimization: 1
-  m_KeepAnimatorStateOnDisable: 0
-  m_WriteDefaultValuesOnDisable: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7b59c892d6f6643ba8a83a52fd5684f2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: NostalgIA.Gameplay::NostalgIA.Gameplay.Enemies.EnemyAnimation
+  animator: {fileID: 7145544028039077823}
+  crossFade: 0.12
+  deathState: Death
+  deathHold: 0.1
 --- !u!1001 &3621043387931451950
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -248,6 +244,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: winrarModel
       objectReference: {fileID: 0}
+    - target: {fileID: 5866666021909216657, guid: 017941ca37aa09008a1c6ad326bea8e5, type: 3}
+      propertyPath: m_Controller
+      value: 
+      objectReference: {fileID: 9100000, guid: 2f8d7b8c1d472d508aad998e26dcfb5e, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -256,5 +256,10 @@ PrefabInstance:
 --- !u!4 &3875979405596755397 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 017941ca37aa09008a1c6ad326bea8e5, type: 3}
+  m_PrefabInstance: {fileID: 3621043387931451950}
+  m_PrefabAsset: {fileID: 0}
+--- !u!95 &7145544028039077823 stripped
+Animator:
+  m_CorrespondingSourceObject: {fileID: 5866666021909216657, guid: 017941ca37aa09008a1c6ad326bea8e5, type: 3}
   m_PrefabInstance: {fileID: 3621043387931451950}
   m_PrefabAsset: {fileID: 0}

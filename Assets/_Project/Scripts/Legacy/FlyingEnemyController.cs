@@ -1,4 +1,5 @@
 using NostalgIA.Core.Events;
+using NostalgIA.Gameplay.Enemies;
 using NostalgIA.Gameplay.Player;
 using NostalgIA.Presentation.Audio;
 using System.Collections;
@@ -8,6 +9,12 @@ using UnityEngine;
 /// Enemigo volador inspirado en las calaveras flotantes de Doom.
 /// Flota en el aire, mantiene distancia con el jugador y le dispara proyectiles.
 /// </summary>
+/// <remarks>
+/// Animaciones del Spam Mail (si el modelo tiene <see cref="EnemyAnimation"/>):
+/// <b>Flying</b> en bucle siempre (capa base, mueve las alas) y <b>Shoot</b> al disparar en la capa
+/// «Disparo», que solo afecta la lengüeta del sobre; por eso las alas no dejan de moverse.
+/// Con animaciones, la vibración por escala al cargar el disparo se desactiva.
+/// </remarks>
 [RequireComponent(typeof(EnemyHealth))]
 public class FlyingEnemyController : MonoBehaviour
 {
@@ -46,12 +53,17 @@ public class FlyingEnemyController : MonoBehaviour
     private bool isCharging;
     private Vector3 originalScale;
     private Vector3 spawnPosition;
+    private EnemyAnimation anim;
+
+    /// <summary>Capa del Animator donde está el disparo (encima del vuelo).</summary>
+    private const int ShootLayer = 1;
 
     private void Awake()
     {
         health = GetComponent<EnemyHealth>();
         originalScale = transform.localScale;
         spawnPosition = transform.position;
+        anim = GetComponent<EnemyAnimation>();
         SetupAudioSource();
         FindPlayer();
     }
@@ -74,6 +86,7 @@ public class FlyingEnemyController : MonoBehaviour
     private void Start()
     {
         if (player == null) FindPlayer();
+        if (anim != null) anim.Play("Flying");   // Vuela en todo momento.
         nextFireTime = Time.time + Random.Range(1.5f, fireRate);
     }
 
@@ -170,14 +183,19 @@ public class FlyingEnemyController : MonoBehaviour
     private IEnumerator ChargeAndShootRoutine()
     {
         isCharging = true;
+        bool animated = anim != null && anim.IsAnimated;
 
-        // Animación de carga: vibración y aumento de tamaño
+        // La lengüeta se abre mientras carga y el proyectil sale al terminar la carga.
+        if (animated) anim.Play("Shoot", ShootLayer, true);
+
+        // Animación de carga: vibración y aumento de tamaño (solo sin animaciones)
         float elapsed = 0f;
         while (elapsed < chargeTime)
         {
+            if (health != null && health.IsDead) yield break;
             elapsed += Time.deltaTime;
             float t = elapsed / chargeTime;
-            transform.localScale = Vector3.Lerp(originalScale, originalScale * 1.25f, t) + Random.insideUnitSphere * 0.03f;
+            if (!animated) transform.localScale = Vector3.Lerp(originalScale, originalScale * 1.25f, t) + Random.insideUnitSphere * 0.03f;
             yield return null;
         }
 

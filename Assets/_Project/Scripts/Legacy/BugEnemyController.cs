@@ -1,4 +1,5 @@
 using NostalgIA.Core.Events;
+using NostalgIA.Gameplay.Enemies;
 using NostalgIA.Gameplay.Player;
 using NostalgIA.Presentation.Audio;
 using System.Collections;
@@ -10,6 +11,16 @@ using UnityEngine.AI;
 /// Persigue al jugador y, al acercarse, realiza un salto/embestida (lunge) letal hacia adelante
 /// que elimina al jugador de un solo golpe.
 /// </summary>
+/// <remarks>
+/// Animaciones (si el modelo tiene <see cref="EnemyAnimation"/>):
+/// <list type="bullet">
+/// <item><b>Idle</b> mientras no detecta al jugador.</item>
+/// <item>Al detectarlo se voltea hacia él y ruge (<b>Rawr</b>) una vez, quieto, para avisar que está activo.</item>
+/// <item>Después lo persigue con <b>Bite</b> en bucle; al atacar, <b>Bite</b> vuelve a empezar.</item>
+/// <item>Si el jugador se aleja mucho o muere, vuelve a <b>Idle</b> y rugirá otra vez al verlo.</item>
+/// </list>
+/// Con animaciones, el aplastado y estirado por escala del prototipo se desactiva.
+/// </remarks>
 [RequireComponent(typeof(EnemyHealth))]
 public class BugEnemyController : MonoBehaviour
 {
@@ -39,15 +50,11 @@ public class BugEnemyController : MonoBehaviour
     [Tooltip("Pausa de recuperación en el suelo tras aterrizar, dando oportunidad al jugador de contraatacar.")]
     [SerializeField] private float recoveryTime = 0.5f;
 
-    [Header("Animator")]
-    [Tooltip("Animator for the enemy model. If empty, an Animator on this object or a child is used.")]
-    [SerializeField] private Animator animator;
-    [Tooltip("Optional Animator bool parameter set while the enemy is moving.")]
-    [SerializeField] private string movingParameter = "IsMoving";
-    [Tooltip("Optional Animator trigger parameter fired when the enemy starts its lunge attack.")]
-    [SerializeField] private string attackTrigger = "Attack";
-    [Tooltip("Optional Animator bool parameter set when the enemy dies.")]
-    [SerializeField] private string deadParameter = "IsDead";
+    [Header("Alerta")]
+    [Tooltip("Factor de la distancia de detección a partir del cual pierde al jugador y vuelve a reposo.")]
+    [SerializeField, Min(1f)] private float loseRangeMultiplier = 1.5f;
+    [Tooltip("Velocidad con la que se voltea hacia el jugador mientras ruge.")]
+    [SerializeField] private float alertTurnSpeed = 8f;
 
     [Header("Audio")]
     [Tooltip("Sonido cuando el WinRar muerde (Anon - Mimi Chomp).")]
@@ -58,30 +65,20 @@ public class BugEnemyController : MonoBehaviour
     private NavMeshAgent navMeshAgent;
     private EnemyHealth health;
     private AudioSource audioSource;
+    private float lastBiteSoundTime = -99f;
     private bool isAttacking;
     private bool isLunging;
     private float lastAttackTime = -99f;
-    private float lastBiteSoundTime = -99f;
     private Vector3 originalScale;
-    private int movingParameterHash;
-    private int attackTriggerHash;
-    private int deadParameterHash;
-    private bool hasMovingParameter;
-    private bool hasAttackTrigger;
-    private bool hasDeadParameter;
+    private EnemyAnimation anim;
+    private bool isAlerted;   // Ya rugió y está persiguiendo.
+    private bool isRoaring;   // Está en la animación de rugido.
 
     private void Awake()
     {
         health = GetComponent<EnemyHealth>();
         navMeshAgent = GetComponent<NavMeshAgent>();
-        if (animator == null)
-        {
-            animator = GetComponent<Animator>();
-            if (animator == null)
-                animator = GetComponentInChildren<Animator>();
-        }
-
-        CacheAnimatorParameters();
+        anim = GetComponent<EnemyAnimation>();
         originalScale = transform.localScale;
         SetupAudioSource();
 
@@ -138,82 +135,101 @@ public class BugEnemyController : MonoBehaviour
 
     private void Update()
     {
-        if (health != null && health.IsDead)
-        {
-            SetMovingAnimation(false);
-            if (hasDeadParameter)
-                animator.SetBool(deadParameterHash, true);
-            return;
-        }
+        if (health != null && health.IsDead) return;   // La muerte la anima EnemyHealth.
 
         if (player == null)
         {
             FindPlayer();
             if (player == null)
             {
-                SetMovingAnimation(false);
+                Rest();
                 return;
             }
         }
 
         if (player.IsDead)
         {
-            if (navMeshAgent != null && navMeshAgent.isActiveAndEnabled && navMeshAgent.isOnNavMesh)
-            {
-                navMeshAgent.isStopped = true;
-            }
-            SetMovingAnimation(false);
+            isAlerted = false;
+            Rest();
             return;
         }
 
         float distanceToPlayer = Vector3.Distance(transform.position, player.transform.position);
 
-        if (distanceToPlayer > detectionRange)
+        // En reposo: espera hasta ver al jugador; al verlo, ruge una vez.
+        if (!isAlerted)
         {
-            if (navMeshAgent != null && navMeshAgent.isActiveAndEnabled && navMeshAgent.isOnNavMesh)
-            {
-                navMeshAgent.isStopped = true;
-            }
-            SetMovingAnimation(false);
+            if (isRoaring) return;
+            if (distanceToPlayer <= detectionRange) StartCoroutine(AlertRoutine());
+            else Rest();
+            return;
+        }
+
+        // Alerta: si el jugador se aleja demasiado, lo pierde y vuelve a reposo.
+        if (!isAttacking && distanceToPlayer > detectionRange * loseRangeMultiplier)
+        {
+            isAlerted = false;
+            Rest();
             return;
         }
 
         if (!isAttacking && distanceToPlayer <= attackRange && Time.time - lastAttackTime >= attackCooldown)
         {
-            SetMovingAnimation(false);
             StartCoroutine(AttackRoutine());
         }
         else if (!isAttacking)
         {
             FollowPlayer(distanceToPlayer);
-            SetMovingAnimation(distanceToPlayer > stoppingDistance);
+            if (anim != null) anim.Play("Bite");   // Persigue mordiendo en bucle.
         }
     }
 
-    private void CacheAnimatorParameters()
+    /// <summary>Se detiene y reproduce la animación de reposo.</summary>
+    private void Rest()
     {
-        if (animator == null || animator.runtimeAnimatorController == null)
-            return;
+        StopAgent();
+        if (anim != null) anim.Play("Idle");
+    }
 
-        movingParameterHash = Animator.StringToHash(movingParameter);
-        attackTriggerHash = Animator.StringToHash(attackTrigger);
-        deadParameterHash = Animator.StringToHash(deadParameter);
-
-        foreach (AnimatorControllerParameter parameter in animator.parameters)
+    private void StopAgent()
+    {
+        if (navMeshAgent != null && navMeshAgent.isActiveAndEnabled && navMeshAgent.isOnNavMesh)
         {
-            if (parameter.name == movingParameter && parameter.type == AnimatorControllerParameterType.Bool)
-                hasMovingParameter = true;
-            else if (parameter.name == attackTrigger && parameter.type == AnimatorControllerParameterType.Trigger)
-                hasAttackTrigger = true;
-            else if (parameter.name == deadParameter && parameter.type == AnimatorControllerParameterType.Bool)
-                hasDeadParameter = true;
+            navMeshAgent.isStopped = true;
         }
     }
 
-    private void SetMovingAnimation(bool isMoving)
+    /// <summary>
+    /// Detecta al jugador: se voltea hacia él y ruge una vez antes de empezar a perseguirlo.
+    /// Sin animaciones, el rugido es solo una pausa corta.
+    /// </summary>
+    private IEnumerator AlertRoutine()
     {
-        if (hasMovingParameter)
-            animator.SetBool(movingParameterHash, isMoving);
+        isRoaring = true;
+        StopAgent();
+        if (anim != null) anim.Play("Rawr", 0, true);
+
+        float duration = anim != null && anim.Length("Rawr") > 0f ? anim.Length("Rawr") : 0.4f;
+        float elapsed = 0f;
+        while (elapsed < duration)
+        {
+            if (health != null && health.IsDead) yield break;
+            elapsed += Time.deltaTime;
+            if (player != null) TurnTowards(player.transform.position, alertTurnSpeed);
+            yield return null;
+        }
+
+        isRoaring = false;
+        isAlerted = true;
+    }
+
+    /// <summary>Gira en el plano horizontal hacia un punto.</summary>
+    private void TurnTowards(Vector3 point, float speed)
+    {
+        Vector3 direction = point - transform.position;
+        direction.y = 0f;
+        if (direction.sqrMagnitude < 0.001f) return;
+        transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(direction.normalized), speed * Time.deltaTime);
     }
 
     private void FindPlayer()
@@ -259,8 +275,9 @@ public class BugEnemyController : MonoBehaviour
     private IEnumerator AttackRoutine()
     {
         isAttacking = true;
-        if (hasAttackTrigger)
-            animator.SetTrigger(attackTriggerHash);
+        // El ataque también es una mordida: la animación vuelve a empezar al lanzarse.
+        if (anim != null) anim.Play("Bite", 0, true);
+        bool squash = anim == null || !anim.IsAnimated;   // Sin animaciones, se usa la deformación por escala.
 
         if (navMeshAgent != null && navMeshAgent.isActiveAndEnabled && navMeshAgent.isOnNavMesh)
         {
@@ -282,7 +299,7 @@ public class BugEnemyController : MonoBehaviour
             elapsed += Time.deltaTime;
             float t = elapsed / windupTime;
             // Se agacha / comprime para tomar impulso
-            transform.localScale = Vector3.Lerp(originalScale, new Vector3(originalScale.x * 1.35f, originalScale.y * 0.55f, originalScale.z * 1.35f), t);
+            if (squash) transform.localScale = Vector3.Lerp(originalScale, new Vector3(originalScale.x * 1.35f, originalScale.y * 0.55f, originalScale.z * 1.35f), t);
             yield return null;
         }
 
@@ -308,7 +325,7 @@ public class BugEnemyController : MonoBehaviour
         float leapDuration = Mathf.Max(0.25f, totalDist / Mathf.Max(1f, lungeSpeed));
 
         // Estiramiento dinámico durante el vuelo
-        transform.localScale = new Vector3(originalScale.x * 0.85f, originalScale.y * 1.25f, originalScale.z * 1.4f);
+        if (squash) transform.localScale = new Vector3(originalScale.x * 0.85f, originalScale.y * 1.25f, originalScale.z * 1.4f);
 
         float leapTime = 0f;
         bool hitLethal = false;
@@ -362,6 +379,7 @@ public class BugEnemyController : MonoBehaviour
     private void DealLethalDamage(PlayerHealth target)
     {
         if (target == null || target.IsDead) return;
+        if (anim != null) anim.Play("Bite", 0, true);   // Al alcanzar al jugador, la mordida se ve completa.
         PlayBiteSound();
         int damage = oneHitKill ? 99 : attackDamage;
         target.TakeDamage(damage);
